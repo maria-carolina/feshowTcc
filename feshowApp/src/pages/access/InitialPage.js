@@ -1,16 +1,32 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import styles from '../../styles';
 
 const InitialPage = () => {
-    openSignUp = () => {}
-    openSignInPage = () => {}
+    const navigation = useNavigation();
+    const openSignUp = () => {}
+
+    const openSignInPage = () => {
+        navigation.navigate('accountInfo');
+    }
     return (
-        <View>
+        <View style = {styles.container}>
             <Text>
                 O logo aqui
             </Text>
-            <TouchableOpacity><Text>Cadastrar-se</Text></TouchableOpacity>
-            <TouchableOpacity><Text>Entrar</Text></TouchableOpacity>
+            <TouchableOpacity 
+                onPress = {openSignInPage}
+                style = {styles.button}
+
+            >
+                <Text style = {styles.buttonLabel}>Cadastrar-se</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                style = {styles.button}
+            >
+                <Text style = {styles.buttonLabel}>Entrar</Text>
+            </TouchableOpacity>
         </View>
     )
 }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import styles from '../../../styles';
 
 
 class PaymentPick extends Component {
@@ -10,7 +11,7 @@ class PaymentPick extends Component {
 
     render(){
         return(
-            <View>
+            <View style = {styles.container}>
                 <Text>Tem cache fixo?</Text>
                 <Text>Checkbox aqui</Text>
                 <TextInput placeholder='digite o valor' />
