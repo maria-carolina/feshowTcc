@@ -9,15 +9,29 @@ const genres = ['pop', 'jazz', 'soul', 'rock', 'funk', 'samba', 'hip-hop'];
 class GenrePick extends Component {
     constructor(props){
         super(props)
-        this.state = {selected: ''}
+        this.state = {selected: []}
     }
 
     componentDidMount(){}
 
     loadGenres = () => {}
-    select = () => {}
+    select = (value) => {
+        let selected = this.state.selected;
+        if(selected.includes(value)){
+            selected.splice(selected.indexOf(value), 1);
+        }else{
+            selected.push(value);
+        }
+        this.setState({
+            selected: selected
+        })
+    }
+
     advance = () => {
-        this.props.navigation.navigate('equipmentPick', {...this.props.route.params});
+        let user = this.props.route.params.user;
+        user.profile.genres = this.state.selected;
+        console.log(user);
+        this.props.navigation.navigate('equipmentPick', {user: user});
     }
 
     render(){
@@ -27,11 +41,13 @@ class GenrePick extends Component {
                 <FlatList
                     style = {styles.list}
                     data = {genres}
-                    renderItem = {({item}) => (
+                    renderItem = {({item, index}) => (
                         <ListItem
                             item = {item}
-                            select = {() => this.select(item)}
-                            selected = {this.state.selected} 
+                            index = {index}
+                            select = {() => this.select(index)}
+                            selected = {this.state.selected}
+                            singlePick = {false} 
                         />
                     )}
                     keyExtractor = {(item, index) => index.toString()}

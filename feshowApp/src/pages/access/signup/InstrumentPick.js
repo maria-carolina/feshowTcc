@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, TextInput, FlatList} from 'react-native';
-import ListItem from './ListItem';
+import ListItem from './ListItemWithQuantity';
 import styles from '../../../styles';
 
 
@@ -15,9 +15,24 @@ class InstrumentPick extends Component {
     componentDidMount(){}
 
     loadInstrument = () => {}
-    select = () => {}
+    select = (value) => {
+        let selected = this.state.selected;
+        if(selected.some(item => item.id === value)){
+            let filtered = selected.filter(item => item.id != value)
+            selected = filtered;
+        }else{
+            selected.push({id: value, quantity: 1});
+        }
+        console.log(selected);
+        this.setState({
+            selected: selected
+        })
+    }
     advance = () => {
-        this.props.navigation.navigate('paymentPick', {...this.props.route.params});
+        let user = this.props.route.params.user;
+        user.profile.instruments = this.state.selected;
+        console.log(user);
+        this.props.navigation.navigate('paymentPick', {user: user});
     }
 
     render(){
@@ -27,11 +42,13 @@ class InstrumentPick extends Component {
                 <FlatList 
                     style = {styles.list}
                     data = {instruments}
-                    renderItem = {({item}) => (
+                    renderItem = {({item, index}) => (
                         <ListItem
                             item = {item}
-                            select = {() => this.select(item)}
+                            index = {index}
+                            select = {() => this.select(index)}
                             selected = {this.state.selected} 
+                            singlePick = {false}
                         />
                     )}
                     keyExtractor = {(item, index) => index.toString()}

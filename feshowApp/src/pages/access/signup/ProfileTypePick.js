@@ -13,15 +13,17 @@ class ProfileTypePick extends Component{
         this.state = { selected: ''}
     }
 
-    select = (item) => {
+
+    select = (index) => {
         this.setState({
-            selected: item
+            selected: index
         })
     }
 
     advance = () => {
-        this.props.navigation.navigate('basicInfo', 
-        {type: this.state.selected})
+        let user = this.props.route.params.user;
+        user.type = this.state.selected;
+        this.props.navigation.navigate('basicInfo', {user: user})
     }
 
     render(){
@@ -31,11 +33,13 @@ class ProfileTypePick extends Component{
                 <FlatList 
                     style={styles.list}
                     data = {TYPES}
-                    renderItem = {({item}) => (
+                    renderItem = {({item, index}) => (
                         <ListItem 
                             item = {item}
-                            select = {() => this.select(item)}
+                            index = {index}
+                            select = {() => this.select(index)}
                             selected = {this.state.selected}
+                            singlePick = {true}
                         />
                     )
                     }

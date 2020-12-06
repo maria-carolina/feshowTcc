@@ -15,7 +15,7 @@ const Styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
-        margin: 10,
+        margin: 25,
     },
 
     title: {
@@ -39,7 +39,7 @@ const Styles = StyleSheet.create({
         borderBottomColor: 'grey',
         padding: 1,
         width: '70%',
-        margin: 15,
+        marginTop: 30,
         fontSize: 20,
         fontFamily: 'arial',
         fontWeight: '100',
@@ -70,10 +70,29 @@ const Styles = StyleSheet.create({
     picker: {
         height: 50,
         backgroundColor: '#6A356F',
-        margin: 20,
+        margin: 10,
         width: '70%', 
         color: 'white',
         
+    },
+
+    error: {
+        fontSize: 14,
+        color: 'red',
+        marginTop: 0,
+        fontStyle: 'italic'
+    },
+
+    justifiedText: {
+        textAlign: 'center',
+        fontFamily: 'Roboto',
+        fontStyle: 'italic',
+        width: '70%',
+        fontSize: 16
+    },
+
+    row: {
+        flexDirection: 'row'
     }
 
 })

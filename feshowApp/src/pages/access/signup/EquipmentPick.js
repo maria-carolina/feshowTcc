@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
-import ListItem from './ListItem';
+import ListItem from './ListItemWithQuantity';
 import styles from '../../../styles';
 
 
@@ -15,11 +15,23 @@ class EquipmentPick extends Component {
     componentDidMount(){}
 
     loadEquipment = () => {}
-    select = () => {}
+    select = (value) => {
+        let selected = this.state.selected;
+        if(selected.some(item => item.id === value)){
+            let filtered = selected.filter(item => item.id != value)
+            selected = filtered;
+        }else{
+            selected.push({id: value, quantity: 1});
+        }
+        console.log(selected);
+        this.setState({
+            selected: selected
+        })
+    }
     advance = () => {
-        let nextPage = this.props.route.params.type === 'Artista' ? 
-        'instrumentPick' : 'openingHoursPick'
-        this.props.navigation.navigate(nextPage, {...this.props.route.params});
+        let user = this.props.route.params.user;
+        user.profile.equipment = this.state.selected;
+        this.props.navigation.navigate('instrumentPick', {user: user});
     }
 
     render(){
@@ -29,11 +41,13 @@ class EquipmentPick extends Component {
                 <FlatList 
                     style = {styles.list}
                     data = {equipment}
-                    renderItem = {({item}) => (
+                    renderItem = {({item, index}) => (
                         <ListItem
                             item = {item}
-                            select = {() => this.select(item)}
+                            index = {index}
+                            select = {() => this.select(index)}
                             selected = {this.state.selected} 
+                            singlePick = {false}
                         />
                     )}
                     keyExtractor = {(item, index) => index.toString()}

@@ -10,6 +10,7 @@ import EquipmentPick from '../pages/access/signup/EquipmentPick';
 import GenrePick from '../pages/access/signup/GenrePick';
 import InstrumentPick from '../pages/access/signup/InstrumentPick';
 import LocalizationPick from '../pages/access/signup/LocalizationPick';
+import Address from '../pages/access/signup/Address';
 import PaymentPick from '../pages/access/signup/PaymentPick';
 import ProfileTypePick from '../pages/access/signup/ProfileTypePick';
 import OpeningHoursPick from '../pages/access/signup/OpeningHoursPick'
@@ -20,7 +21,7 @@ const Stack = createStackNavigator();
 const AccessRoute = () => {
     return(
         <Stack.Navigator 
-            initialRouteName = 'initialPage'
+            initialRouteName = 'openingHoursPick'
             headerMode = 'none'
         >
             <Stack.Screen
@@ -52,6 +53,11 @@ const AccessRoute = () => {
             <Stack.Screen
                 component = {LocalizationPick}
                 name = 'localizationPick'
+            />
+
+            <Stack.Screen
+                component = {Address}
+                name = 'address'
             />
 
             <Stack.Screen

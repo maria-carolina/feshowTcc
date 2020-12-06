@@ -17,7 +17,6 @@ class LocalizationPick extends Component{
 
     loadUFs = async () => {
         let result = await api.get('http://servicodados.ibge.gov.br/api/v1/localidades/estados');
-        console.log(result.data);
         for(uf in result.data){
             delete uf.regiao
             delete uf.sigla
@@ -47,9 +46,12 @@ class LocalizationPick extends Component{
     }
 
     getCurrentLocalization = () => {}
+
     advance = () => {
-        
-        let nextPage = this.props.route.params.type === 'Produtor' ? 'initialPage' : 'genrePick';
+        let user = this.props.route.params.user;
+        let nextPage = user.type === 2 ? 'initialPage' : 'genrePick';
+        user.profile.city = this.state.choosenCityName;
+        console.log(user)
         this.props.navigation.navigate(nextPage, {...this.props.route.params});
     }
 
@@ -63,7 +65,6 @@ class LocalizationPick extends Component{
                     key = {item.id}
                 />
         ));
-
 
         let cities = [<Picker.Item label = {'Cidade'} value = {0} key = {0}/>].concat(
             this.state.cities.map((item) => 
@@ -80,7 +81,6 @@ class LocalizationPick extends Component{
 
                 <Picker
                     selectedValue={this.state.selectedUf}
-                    
                     style={styles.picker}
                     onValueChange={(value) => this.loadCities(value)}
                 >
@@ -93,7 +93,7 @@ class LocalizationPick extends Component{
                     onValueChange={(value, index) => 
                         this.setState({
                             selectedCity: value,
-                            choosenCityName: this.state.cities[index]
+                            choosenCityName: this.state.cities[index - 1].nome
                         })}
                 >
                     {cities}
