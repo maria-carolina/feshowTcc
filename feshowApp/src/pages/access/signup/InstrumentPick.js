@@ -15,6 +15,7 @@ class InstrumentPick extends Component {
     componentDidMount(){}
 
     loadInstrument = () => {}
+
     select = (value) => {
         let selected = this.state.selected;
         if(selected.some(item => item.id === value)){
@@ -28,6 +29,23 @@ class InstrumentPick extends Component {
             selected: selected
         })
     }
+
+    quantityHandleChange = (num, index) => {
+        let selected = this.state.selected.map((item) => {
+            if(item.id === index){
+                console.log('passa')
+                return {id: index, quantity: num}
+            }
+            return item;
+        })
+
+        this.setState({
+            selected: selected
+        })
+
+    }
+
+
     advance = () => {
         let user = this.props.route.params.user;
         user.profile.instruments = this.state.selected;
@@ -48,7 +66,8 @@ class InstrumentPick extends Component {
                             index = {index}
                             select = {() => this.select(index)}
                             selected = {this.state.selected} 
-                            singlePick = {false}
+                            quantityHandleChange = {this.quantityHandleChange}
+                            
                         />
                     )}
                     keyExtractor = {(item, index) => index.toString()}

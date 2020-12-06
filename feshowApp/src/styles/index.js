@@ -50,6 +50,7 @@ const Styles = StyleSheet.create({
         width: '70%',
         height: '40%',
         flexGrow: 0,
+        
     },
 
     listItem: {

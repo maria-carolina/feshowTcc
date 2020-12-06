@@ -1,30 +1,139 @@
-import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import React, { Component, useState } from 'react';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import styles from '../../../styles';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
-const days = ['','domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
+const days = ['','domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+
+
+const DayPicker = (props) => {
+    return(
+        <View style = {styles.row}>
+                <Picker
+                    selectedValue = {props.selected.initialDay}
+                    style = {{...styles.picker, width: '45%'}}
+                    onValueChange = {(value) => props.handleChange(value, true)}
+                >
+                    {days.map((day, index) => (
+                        <Picker.Item  
+                            label = {day} 
+                            value = {day} 
+                            key = {index}
+                        />
+                    ))}
+                </Picker>
+
+                <Text>às</Text>
+
+                <Picker
+                    selectedValue = {props.selected.finalDay}
+                    enabled = {!!props.selected.initialDay}
+                    style = {{...styles.picker, width: '45%'}}
+                    onValueChange = {(value) => props.handleChange(value, false)}
+                >
+                    {days.map((day, index) => (
+                        <Picker.Item  
+                            label = {day} 
+                            value = {day} 
+                            key = {index}
+                        />
+                    ))}
+                </Picker>
+
+        </View>
+    )
+}
+
+
+const TimePicker = (props) => {
+    const [visible, setVisible] = useState(false)
+    const [firstInput, setFirstInput] = useState(false)
+
+    const setTime = (event, date) => {
+        setVisible(false)
+        let selected = props.selected;
+        let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+
+        if(firstInput){
+            selected.initialHour = time;
+        }else{
+            selected.finalHour = time;
+        }
+
+        console.log(selected);
+        props.handleChange(selected);  
+    }
+
+    return(
+        <View style = {styles.row}>
+
+            <TouchableOpacity
+                style = {{...styles.picker, width: '45%'}} 
+                onPress = {() => {
+                    setVisible(true)
+                    setFirstInput(true)
+                }}
+            >
+                <Text>{props.selected.initialHour || ''}</Text>
+            </TouchableOpacity>
+
+            <Text> às </Text>
+            
+            <TouchableOpacity 
+                style = {{...styles.picker, width: '45%'}} 
+                disabled = {!props.selected.initialHour}
+                onPress = {() => {
+                    setVisible(true)
+                    setFirstInput(false)
+                }}
+            >
+                <Text>{props.selected.finalHour || ''}</Text>
+            </TouchableOpacity>
+  
+            {visible && <DateTimePicker
+                testID = "dateTimePicker"
+                value = {new Date()}
+                mode = {'time'}
+                is24Hour = {true}
+                display = "default"
+                onChange = {setTime}
+            />}
+        </View>
+    )
+}
 
 class OpeningHoursPick extends Component {
     constructor(props){
         super(props)
         this.state = {selected: {}, timePickerVisible: false}
+    } 
+
+    
+    advance = () => {
+        let user = this.props.route.params.user;
+        user.profile.openinghours = this.state.selected;
+        console.log(user);
+        this.props.navigation.navigate('genrePick', {user: user})
     }
 
-    componentDidMount(){}
-
-    loadGenres = () => {}
-    select = () => {}
-    advance = () => {}
-
-    setTime = (event, date) => {
+    dayPickerHandleChange = (value, initial) => {
         let selected = this.state.selected;
-        selected.initialHour = `${date.getHours()}:${date.getMinutes()}`;
+        if(initial){
+            selected.initialDay = value
+        }else{
+            selected.finalDay = value
+        }
+
         this.setState({
-            selected: selected,
-            timePickerVisible: false
+            selected: selected
+        })
+    }
+
+    timePickerHandleChange = (selected) => {
+        this.setState({
+            selected: selected
         })
     }
 
@@ -38,75 +147,33 @@ class OpeningHoursPick extends Component {
     render(){
         return(
             <View style = {styles.container}>
-                <Text style = {{...styles.title, fontSize: 20}}>Qual período o espaço funciona?</Text>
-                <Picker
-                    selectedValue={this.state.selected.initialDay}
-                    style={styles.picker}
-                    onValueChange={(value) => {
-                        let selected = this.state.selected;
-                        selected.initialDay = value
-                        this.setState({
-                            selected: selected
-                        })
-                    }}
-                    
-                >
-                    {days.map((day, index) => (
-                        <Picker.Item  
-                            label = {day} 
-                            value = {day} 
-                            key = {index}
-                        />
-                    ))}
-                </Picker>
+                <Text 
+                    style = {{...styles.title, fontSize: 20}}
+                >Qual período o espaço funciona?</Text>
 
-                <Picker
-                    selectedValue={this.state.selected.finalDay}
-                    style={styles.picker}
-                    onValueChange={(value) => {
-                        let selected = this.state.selected;
-                        selected.finalDay = value
-                        this.setState({
-                            selected: selected
-                        })
-                    }}
-                    
-                >
-                    {days.map((day, index) => (
-                        <Picker.Item  
-                            label = {day} 
-                            value = {day} 
-                            key = {index}
-                        />
-                    ))}
-                </Picker>
+                <DayPicker
+                    selected = {this.state.selected}
+                    handleChange = {this.dayPickerHandleChange} 
+                />
+                
 
-                <Text style = {{...styles.title, fontSize: 20}}>Qual horário o espaço funciona?</Text>
-                <TouchableOpacity
-                    style = {styles.picker} 
-                    onPress = {this.showTimePicker}
-                >
-                    <Text>{this.state.selected.initialHour || ''}</Text>
-                </TouchableOpacity>
+                <Text 
+                    style = {{...styles.title, fontSize: 20}}
+                >Qual horário o espaço funciona?</Text>
+
+
+                <TimePicker
+                    selected = {this.state.selected}
+                    handleChange = {this.timePickerHandleChange}
+                />
+
                 <TouchableOpacity 
-                    style = {styles.picker} 
-                    onPress = {this.showTimePicker}
+                    style = {styles.button}
+                    onPress = {this.advance}
                 >
-                    <Text>{this.state.selected.finalHour || ''}</Text>
-                </TouchableOpacity>
-
-                {this.state.timePickerVisible && <DateTimePicker
-                    testID="dateTimePicker"
-                    value={new Date()}
-                    mode={'time'}
-                    is24Hour={true}
-                    display="default"
-                    onChange={this.setTime}
-                />}
-
-                <TouchableOpacity style = {styles.button}>
                     <Text style = {styles.buttonLabel}>Avançar</Text>
                 </TouchableOpacity>
+                
             </View>
         )
     }

@@ -21,7 +21,7 @@ const Form = (props) => {
     return(
         <Formik
             enableReinitialize = {true}
-            initialValues = {props.preloadedAddress != ''?
+            initialValues = {props.preloadedAddress != '' ?
                 {
                     cep: props.preloadedAddress.cep,
                     streetAddress: props.preloadedAddress.logradouro,

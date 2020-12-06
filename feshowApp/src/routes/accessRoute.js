@@ -21,7 +21,7 @@ const Stack = createStackNavigator();
 const AccessRoute = () => {
     return(
         <Stack.Navigator 
-            initialRouteName = 'openingHoursPick'
+            initialRouteName = 'initialPage'
             headerMode = 'none'
         >
             <Stack.Screen
