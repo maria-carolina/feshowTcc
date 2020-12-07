@@ -13,7 +13,8 @@ import LocalizationPick from '../pages/access/signup/LocalizationPick';
 import Address from '../pages/access/signup/Address';
 import PaymentPick from '../pages/access/signup/PaymentPick';
 import ProfileTypePick from '../pages/access/signup/ProfileTypePick';
-import OpeningHoursPick from '../pages/access/signup/OpeningHoursPick'
+import OpeningHoursPick from '../pages/access/signup/OpeningHoursPick';
+import ImagePick from '../pages/access/signup/ImagePicker';
 
 
 const Stack = createStackNavigator();
@@ -21,7 +22,7 @@ const Stack = createStackNavigator();
 const AccessRoute = () => {
     return(
         <Stack.Navigator 
-            initialRouteName = 'initialPage'
+            initialRouteName = 'localizationPick'
             headerMode = 'none'
         >
             <Stack.Screen
@@ -84,6 +85,12 @@ const AccessRoute = () => {
                 component = {PaymentPick}
                 name = 'paymentPick'
             />
+
+            <Stack.Screen
+                component = {ImagePick}
+                name = 'imagePick'
+            />
+
 
         </Stack.Navigator>
     )

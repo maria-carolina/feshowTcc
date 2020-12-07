@@ -7,9 +7,9 @@ import * as yup from 'yup';
 
 
 const FormSchema = yup.object().shape({
-    cep: yup.string().required(),
+    zipcode: yup.string().required(),
     number: yup.string().required(),
-    streetAddress: yup.string().required(),
+    street: yup.string().required(),
     district: yup.string().required(),
     city: yup.string().required(),
     uf: yup.string().required()
@@ -23,15 +23,15 @@ const Form = (props) => {
             enableReinitialize = {true}
             initialValues = {props.preloadedAddress != '' ?
                 {
-                    cep: props.preloadedAddress.cep,
-                    streetAddress: props.preloadedAddress.logradouro,
+                    zipcode: props.preloadedAddress.cep,
+                    street: props.preloadedAddress.logradouro,
                     district: props.preloadedAddress.bairro,
                     city: props.preloadedAddress.localidade,
                     uf: props.preloadedAddress.uf
                 }:
                 {
-                    cep: '',
-                    streetAddress: '',
+                    zipcode: '',
+                    street: '',
                     number: '',
                     district: '',
                     city: '',
@@ -54,8 +54,8 @@ const Form = (props) => {
                             placeholder = 'CEP'
                             style = {{...styles.textInput, width: '50%', marginRight: '5%'}}
                             keyboardType = 'numeric'
-                            value = {values.cep}
-                            onChangeText = {handleChange('cep')}
+                            value = {values.zipcode}
+                            onChangeText = {handleChange('zipcode')}
                             onEndEditing = {e => props.loadAddress(e.nativeEvent.text)}
                         />
                         
@@ -71,8 +71,8 @@ const Form = (props) => {
                     <TextInput
                         placeholder = 'Logradouro'
                         style = {styles.textInput}
-                        value = {values.streetAddress}
-                        onChangeText = {handleChange('streetAddress')}
+                        value = {values.street}
+                        onChangeText = {handleChange('street')}
                     />
 
                     <TextInput

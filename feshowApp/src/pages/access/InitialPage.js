@@ -8,6 +8,7 @@ const InitialPage = () => {
     const openSignUp = () => {}
 
     const openSignInPage = () => {
+        
         navigation.navigate('accountInfo');
     }
     return (

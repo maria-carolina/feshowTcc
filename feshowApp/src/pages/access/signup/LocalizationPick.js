@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, Alert} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import styles from '../../../styles';
 import api from '../../../services/api'
+import Geolocation from 'react-native-geolocation-service';
+import Geocoder from 'react-native-geocoding';
 
 
 class LocalizationPick extends Component{
@@ -16,15 +18,14 @@ class LocalizationPick extends Component{
     }
 
     loadUFs = async () => {
-        let result = await api.get('http://servicodados.ibge.gov.br/api/v1/localidades/estados');
-        for(uf in result.data){
-            delete uf.regiao
-            delete uf.sigla
-        }
+        try{
+            var result = await api.get('http://servicodados.ibge.gov.br/api/v1/localidades/estados');
+        }catch(e){return;}
 
         this.setState({
             ufs: result.data
         })
+        
     }
 
     loadCities = async (uf) => {
@@ -45,14 +46,20 @@ class LocalizationPick extends Component{
         
     }
 
-    getCurrentLocalization = () => {}
+    getCurrentLocalization = () => {
+        ///A ser implementado
+    }
 
     advance = () => {
-        let user = this.props.route.params.user;
-        let nextPage = user.type === 2 ? 'initialPage' : 'genrePick';
-        user.profile.city = this.state.choosenCityName;
-        console.log(user)
-        this.props.navigation.navigate(nextPage, {...this.props.route.params});
+        if(this.state.choosenCityName != ''){
+            let user = this.props.route.params.user;
+            let nextPage = user.type === 2 ? 'imagePick' : 'genrePick';
+            user.profile.city = this.state.choosenCityName;
+            console.log(user)
+            this.props.navigation.navigate(nextPage, {user: user});
+        }else{
+            Alert.alert('','Escolha sua cidade.');
+        }
     }
 
     render(){
@@ -100,6 +107,7 @@ class LocalizationPick extends Component{
                 </Picker>
 
                 <TouchableOpacity
+                    onPress = {this.getCurrentLocalization}
                     style = {styles.button}
                 >
                     <Text 

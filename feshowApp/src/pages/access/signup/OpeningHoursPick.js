@@ -19,7 +19,7 @@ const DayPicker = (props) => {
                     {days.map((day, index) => (
                         <Picker.Item  
                             label = {day} 
-                            value = {day} 
+                            value = {index} 
                             key = {index}
                         />
                     ))}
@@ -36,7 +36,7 @@ const DayPicker = (props) => {
                     {days.map((day, index) => (
                         <Picker.Item  
                             label = {day} 
-                            value = {day} 
+                            value = {index} 
                             key = {index}
                         />
                     ))}

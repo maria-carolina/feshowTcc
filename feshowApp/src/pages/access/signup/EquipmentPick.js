@@ -34,7 +34,6 @@ class EquipmentPick extends Component {
 
         let selected = this.state.selected.map((item) => {
             if(item.id === index){
-                console.log('passa')
                 return {id: index, quantity: num}
             }
             return item;
@@ -48,7 +47,7 @@ class EquipmentPick extends Component {
 
     advance = () => {
         let user = this.props.route.params.user;
-        let nextPage = user.type === 0 ? 'instrumentPick' : 'initialPage'
+        let nextPage = user.type === 0 ? 'instrumentPick' : 'imagePick'
         user.profile.equipment = this.state.selected;
         console.log(user);
         this.props.navigation.navigate(nextPage, {user: user});

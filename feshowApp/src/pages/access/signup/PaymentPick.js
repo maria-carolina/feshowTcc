@@ -12,6 +12,7 @@ class PaymentPick extends Component {
     save = (payment) => {
         let user =  this.props.route.params.user;
         user.profile.cache = payment;
+        this.props.navigation.navigate('imagePick', {user: user});
 
         console.log(user);
     }
