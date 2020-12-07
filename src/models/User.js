@@ -3,40 +3,27 @@ const bcrypt = require('bcryptjs');
 
 class User extends Model {
     static init(sequelize) {
-        super.init({
-            name: {
+        super.init({   
+            username: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'Este Campo não pode ser vazio'
-                    }
-                }
             },
-            email:{
+            email: {
                 type: DataTypes.STRING,
-                validate: {
-                    notEmpty: {
-                        msg: 'Este campo não pode ser vazio'
-                    },
-                    isEmail: {
-                        msg: 'Preencha com um e-mail válido'
-                    }
-                }
+                allowNull: false,
+            },
+            image: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             password: {
                 type: DataTypes.STRING,
-                validate: {
-                    notEmpty: {
-                        msg: 'Este campo não pode ser vazio'
-                    },
-                    len: {
-                        args: [6, 10],
-                        msg: 'Este campo deve ter entre 6 e 10 caracteres'
-                    }
-                }   
+                allowNull: false,
             },
-            type: DataTypes.INTEGER
+            type: {
+                 type: DataTypes.STRING,
+                allowNull: false,
+            }
         },{
             hooks: {
                 beforeCreate:(async (user) => {
@@ -49,7 +36,7 @@ class User extends Model {
         })
     }
     static associate(models){
-        //
+       //
     }
 
 }
