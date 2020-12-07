@@ -18,7 +18,7 @@ USE `feshow` ;
 -- Table `feshow`.`users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`users` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(20) NOT NULL,
   `email` VARCHAR(30) NOT NULL,
   `password` VARCHAR(10) NOT NULL,
@@ -32,7 +32,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`venues`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`venues` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(60) NOT NULL,
   `description` VARCHAR(255) NULL,
   `opening_time` TIME NULL,
@@ -56,7 +56,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`addresses`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`addresses` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `zipcode` VARCHAR(9) NOT NULL,
   `street` VARCHAR(50) NOT NULL,
   `district` VARCHAR(50) NOT NULL,
@@ -78,7 +78,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`artists`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`artists` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(60) NOT NULL,
   `members` INT NOT NULL,
   `description` VARCHAR(255) NULL,
@@ -100,7 +100,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`equipments`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`equipments` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -135,7 +135,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`events`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`events` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `organizer_id` INT(11) NOT NULL,
   `venue_id` INT(11) NOT NULL,
   `description` VARCHAR(255) NOT NULL,
@@ -194,7 +194,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`genres`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`genres` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -228,7 +228,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`instruments`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`instruments` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -310,7 +310,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`notifications`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`notifications` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `text` VARCHAR(45) NOT NULL,
   `status` TINYINT(1) NOT NULL,
   `createdAt` DATETIME NOT NULL,
@@ -331,7 +331,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`producers`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`producers` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(60) NOT NULL,
   `description` VARCHAR(255) NULL,
   `chat_permission` TINYINT(1) NOT NULL DEFAULT 0,
@@ -352,7 +352,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`solicitations`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`solicitations` (
-  `id` INT(11) NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `venue_id` INT(11) NOT NULL,
   `user_id` INT(11) NOT NULL,
   `date` DATE NOT NULL,
@@ -378,7 +378,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`chat`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`chat` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `sender` INT(11) NOT NULL,
   `receiver` INT(11) NOT NULL,
   `message` VARCHAR(255) NOT NULL,
@@ -405,7 +405,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`notices`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`notices` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `text` VARCHAR(255) NOT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
@@ -439,7 +439,7 @@ ENGINE = InnoDB;
 -- Table `feshow`.`posts`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`posts` (
-  `id` INT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `event_id` INT(11) NOT NULL,
   `user_id` INT(11) NOT NULL,
   `post` VARCHAR(255) NOT NULL,

@@ -16,4 +16,6 @@ routes.get('/', (req, res) => {
     return res.json({hello:"world"})
 });
 
+routes.post('/store', UserController.store);
+
 module.exports = routes;

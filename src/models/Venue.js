@@ -14,48 +14,23 @@ class Venue extends Model {
             },
             description: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo descrição não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             opening_time: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo de horário de abertura não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             closing_time: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo de horário de fechamento não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             first_day: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo de primeiro dia de abertura não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             last_day: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo de último dia de abertura não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             capacity: {
                 type: DataTypes.STRING,
@@ -73,6 +48,7 @@ class Venue extends Model {
     }
     static associate(models) {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' })
+        this.belongsToMany(models.Genre, { foreignKey: 'venue_id', through: 'genre_venues', as: 'genres' });
     }
 
 }

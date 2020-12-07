@@ -5,6 +5,7 @@ module.exports = {
     password: '',
     database: 'feshow',
     define: {
-        undescore: true
+        undescore: true,
+        timestamps: false
     }
 }

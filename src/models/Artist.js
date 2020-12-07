@@ -25,7 +25,7 @@ class Artist extends Model {
                 allowNull: true
             },
             city: {
-                type: DataTypes.FLOAT,
+                type: DataTypes.STRING,
                 allowNull: true
             }
         },{
@@ -34,7 +34,9 @@ class Artist extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' })
+        this.belongsToMany(models.Genre, { foreignKey: 'artist_id', through: 'artist_genres', as: 'genres' });
+
     }
 
 }

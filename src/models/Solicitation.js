@@ -55,8 +55,11 @@ class Solicitation extends Model {
             createdAt: {
                 type: DataTypes.DATE,
                 allowNull: false
+            },
+            updatedAt: {
+                type: DataTypes.DATE,
+                allowNull: false
             }
-
         }, {
             sequelize,
             timestamps: true,

@@ -1,6 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 
-class Genres extends Model {
+class Genre extends Model {
     static init(sequelize) {
         super.init({
             name: {
@@ -13,9 +13,10 @@ class Genres extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsToMany(models.Artist, { foreignKey: 'genre_id', through: 'artist_genres', as: 'generosArtistas' });
+        this.belongsToMany(models.Venue, { foreignKey: 'genre_id', through: 'genre_venues', as: 'generosEspaco' });
     }
 
 }
 
-module.exports = Genres;
+module.exports = Genre;
