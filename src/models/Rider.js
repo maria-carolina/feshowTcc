@@ -6,6 +6,7 @@ class Rider extends Model {
             artist_id: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                primaryKey: true,
             },
             name: {
                 type: DataTypes.STRING,
@@ -17,7 +18,7 @@ class Rider extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsTo(models.Artist, { foreignKey: 'artist_id', as: 'artist' })
     }
 
 }

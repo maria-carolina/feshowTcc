@@ -7,15 +7,14 @@ class User extends Model {
             username: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                unique: true
             },
             email: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                unique: {
-                    args: true,
-                    msg: 'Email address already in use!'
-                }
+            },
+            image: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             password: {
                 type: DataTypes.STRING,

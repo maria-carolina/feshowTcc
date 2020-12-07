@@ -52,7 +52,7 @@ class Address extends Model {
                     }
                 }
             },
-            state: {
+            uf: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `feshow`.`users` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(20) NOT NULL,
   `email` VARCHAR(30) NOT NULL,
+  `image` VARCHAR(50) NULL,
   `password` VARCHAR(10) NOT NULL,
   `type` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`))
@@ -62,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `feshow`.`addresses` (
   `district` VARCHAR(50) NOT NULL,
   `number` VARCHAR(5) NOT NULL,
   `city` VARCHAR(50) NOT NULL,
+  `uf` CHAR(2) NOT NULL,
   `venue_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_addresses_venues1_idx` (`venue_id` ASC),
