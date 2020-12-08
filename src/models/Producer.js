@@ -14,24 +14,22 @@ class Producer extends Model {
             },
             description: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo descrição não pode ser vazio'
-                    }
-                }
+                allowNull: true,
             },
             chat_permission: {
-                    type: DataTypes.INTEGER,
-                    allowNull: false,
-                }
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            },
+            city: {
+                type: DataTypes.STRING,
+            }
         }, {
             sequelize,
             tableName: 'producers'
         })
     }
     static associate(models) {
-        //
+        this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
     }
 
 }

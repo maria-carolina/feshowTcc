@@ -17,8 +17,6 @@ const VenueController = require('./controllers/VenueController');
 const OrganizationRequestController  = require('./controllers/OrganizationRequestController');
 
 routes.post('/store', UserController.store);
-routes.post('/storeImage', multer(multerImage).single('file'), UserController.storeImage);
-routes.post('/storeRider', multer(multerRider).single('file'), UserController.storeRider);
 
 routes.get('/getEquipments', UserController.getEquipments);
 routes.get('/getInstruments', UserController.getInstruments);
@@ -26,10 +24,7 @@ routes.get('/getGenres', UserController.getGenres);
 
 routes.use(authMiddleware);
 
-routes.get('/', (req, res) => {
-    console.log(req.userId);
-    return res.json({deu:"certo"})
-});
-
+routes.post('/storeImage', multer(multerImage).single('file'), UserController.storeImage);
+routes.post('/storeRider', multer(multerRider).single('file'), UserController.storeRider);
 
 module.exports = routes;
