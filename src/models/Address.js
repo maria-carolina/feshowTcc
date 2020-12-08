@@ -6,6 +6,7 @@ class Address extends Model {
             venue_id: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                primaryKey: true
             },
             zipcode: {
                 type: DataTypes.STRING,
@@ -67,7 +68,7 @@ class Address extends Model {
         })
     }
     static associate(models) {
-        //
+        this.belongsTo(models.Venue, { foreignKey: 'venue_id', as: 'addressVenue' })
     }
 
 }

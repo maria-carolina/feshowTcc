@@ -16,24 +16,24 @@ class Venue extends Model {
                 type: DataTypes.STRING,
                 allowNull: true
             },
-            opening_time: {
-                type: DataTypes.STRING,
+            initialHour: {
+                type: DataTypes.TIME,
                 allowNull: true
             },
-            closing_time: {
-                type: DataTypes.STRING,
+            finalHour: {
+                type: DataTypes.TIME,
                 allowNull: true
             },
-            first_day: {
-                type: DataTypes.STRING,
+            initialDay: {
+                type: DataTypes.INTEGER,
                 allowNull: true
             },
-            last_day: {
-                type: DataTypes.STRING,
+            finalDay: {
+                type: DataTypes.INTEGER,
                 allowNull: true
             },
             capacity: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
                 allowNull: false,
                 validate: {
                     notEmpty: {

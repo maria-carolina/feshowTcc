@@ -6,12 +6,14 @@ class ArtistEquipment extends Model {
             artist_id: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                primaryKey: true
             },
             equipment_id: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                primaryKey: true
             },
-            number: {
+            quantity: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
             },
@@ -21,7 +23,8 @@ class ArtistEquipment extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsToMany(models.Equipment, { foreignKey: 'artist_id', through: 'artist_equipments', as: 'equipments' });
+        this.belongsToMany(models.Artist, { foreignKey: 'equipment_id', through: 'artist_equipments', as: 'equipmentArtist' });
     }
 
 }
