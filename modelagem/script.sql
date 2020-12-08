@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS `feshow`.`venues` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(60) NOT NULL,
   `description` VARCHAR(255) NULL,
-  `opening_time` TIME NULL,
-  `closing_time` TIME NOT NULL,
-  `first_day` CHAR(3) NOT NULL,
-  `last_day` CHAR(3) NOT NULL,
+  `initialHour` TIME NULL,
+  `finalHour` TIME NULL,
+  `initialDay` TINYINT(1) NULL,
+  `finalDay` TINYINT(1) NULL,
   `capacity` INT NOT NULL,
   `user_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
@@ -57,16 +57,14 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`addresses`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`addresses` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `venue_id` INT(11) NOT NULL,
   `zipcode` VARCHAR(9) NOT NULL,
   `street` VARCHAR(50) NOT NULL,
   `district` VARCHAR(50) NOT NULL,
   `number` VARCHAR(5) NOT NULL,
   `city` VARCHAR(50) NOT NULL,
   `uf` CHAR(2) NOT NULL,
-  `venue_id` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_addresses_venues1_idx` (`venue_id` ASC),
+  PRIMARY KEY (`venue_id`),
   CONSTRAINT `fk_addresses_venues1`
     FOREIGN KEY (`venue_id`)
     REFERENCES `feshow`.`venues` (`id`)
@@ -115,7 +113,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `feshow`.`artist_equipments` (
   `artist_id` INT(11) NOT NULL,
   `equipment_id` INT(11) NOT NULL,
-  `number` INT NOT NULL,
+  `quantity` INT NOT NULL,
   PRIMARY KEY (`artist_id`, `equipment_id`),
   INDEX `fk_artists_has_equipments_equipments1_idx` (`equipment_id` ASC),
   INDEX `fk_artists_has_equipments_artists1_idx` (`artist_id` ASC),
@@ -241,14 +239,14 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `feshow`.`artist_instruments`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`artist_instruments` (
-  `artists_id` INT(11) NOT NULL,
+  `artist_id` INT(11) NOT NULL,
   `instrument_id` INT(11) NOT NULL,
-  `number` INT NOT NULL,
-  PRIMARY KEY (`artists_id`, `instrument_id`),
+  `quantity` INT NOT NULL,
+  PRIMARY KEY (`artist_id`, `instrument_id`),
   INDEX `fk_artists_has_instruments_instruments1_idx` (`instrument_id` ASC),
-  INDEX `fk_artists_has_instruments_artists1_idx` (`artists_id` ASC),
+  INDEX `fk_artists_has_instruments_artists1_idx` (`artist_id` ASC),
   CONSTRAINT `fk_artists_has_instruments_artists1`
-    FOREIGN KEY (`artists_id`)
+    FOREIGN KEY (`artist_id`)
     REFERENCES `feshow`.`artists` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
@@ -267,7 +265,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `feshow`.`equipment_venues` (
   `venue_id` INT(11) NOT NULL,
   `equipment_id` INT(11) NOT NULL,
-  `number` INT NOT NULL,
+  `quantity` INT NOT NULL,
   PRIMARY KEY (`venue_id`, `equipment_id`),
   INDEX `fk_venues_has_equipments_equipments1_idx` (`equipment_id` ASC),
   INDEX `fk_venues_has_equipments_venues1_idx` (`venue_id` ASC),

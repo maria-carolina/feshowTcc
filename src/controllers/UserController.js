@@ -9,6 +9,10 @@ const Rider = require('../models/Rider');
 const Genre = require('../models/Genre');
 const Instrument = require('../models/Instrument');
 const Equipment = require('../models/Equipment');
+const ArtistEquipment = require('../models/ArtistEquipment');
+const ArtistInstrument = require('../models/ArtistInstrument');
+const EquipmentVenue = require('../models/EquipmentVenue');
+const Address = require('../models/Address');
 
 function generateToken(params = {}) {
     return jwt.sign(params, authConfig.secret, {
@@ -21,45 +25,71 @@ module.exports = {
     async store(req, res) {
         const {
             username, email, password, type,
+            genre, equipment, instrument,
             profile: {
-                name, cache, city, members,
-            },
-            genre,
+                name, cache, city, members, capacity,
+                address: { city: cityVenue, district, number, street, uf, zipcode },
+                openinghours:{ finalDay, finalHour, initialDay, initialHour }
+            }
         } = req.body;
 
-        try {
-            const user = await User.create({
-                username, email, password, type
+        //try {
+        const user = await User.create({
+            username, email, password, type
+        });
+
+        user.password = undefined; //nao retornar senha 
+
+        if (type == 0) {
+            const artist = await Artist.create({
+                name, cache, city, members, user_id: user.id
             });
 
-            user.password = undefined; //nao retornar senha 
-
-            if (type == 0) {
-                const artist = await Artist.create({
-                    name, cache, city, members, user_id: user.id
+            const equipments = equipment.map(
+                data => {
+                    return {
+                        artist_id: artist.id,
+                        equipment_id: data.id,
+                        quantity: data.quantity
+                    }
                 });
-    
-                artist.setGenres(genre);
-            }
-    
-            /*else if(type == 1){ 
-                const venue = await Venue.create({
-                    name, cache, city, members, user_id: user.id
+
+            const instruments = instrument.map(
+                data => {
+                    return {
+                        artist_id: artist.id,
+                        instrument_id: data.id,
+                        quantity: data.quantity
+                    }
                 });
-    
-                venue.setGenres(genre);
-            } else {
-    
-            }*/
 
-            return res.send({
-                user,
-                token: generateToken({ id: user.id })
-            });
-
-        } catch (err) {
-            return res.send({ error: 'Erro ao cadastrar usuário' })
+            await ArtistEquipment.bulkCreate(equipments);
+            await ArtistInstrument.bulkCreate(instruments);
+            artist.setGenres(genre);
         }
+
+        else if (type == 1) {
+            const venue = await Venue.create({
+                name, capacity, finalDay, finalHour, initialDay, initialHour, user_id: user.id
+            });
+
+            await Address.create({
+                city: cityVenue, district, number, street, uf, zipcode, venue_id: venue.id
+            })
+            venue.setGenres(genre);
+
+        } else {
+            //
+        }
+
+        return res.send({
+            user,
+            token: generateToken({ id: user.id })
+        });
+
+        //  } catch (err) {
+        //       return res.send({ error: 'Erro ao cadastrar usuário' })
+        // }
 
     },
 
