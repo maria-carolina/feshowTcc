@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
 import ListItem from './ListItemWithQuantity';
 import styles from '../../../styles';
+import api from '../../../services/api'
 
 
 const equipment = ['Microfone', 'Mic Stand', 'Amplificador', 'Monitor']
@@ -9,12 +10,24 @@ const equipment = ['Microfone', 'Mic Stand', 'Amplificador', 'Monitor']
 class EquipmentPick extends Component {
     constructor(props){
         super(props)
-        this.state = {selected: []}
+        this.state = {equipment: [],selected: []}
     }
 
-    componentDidMount(){}
+    componentDidMount(){
+        this.loadEquipment();
+    }
 
-    loadEquipment = () => {}
+    loadEquipment = async () => {
+        try{
+            var result = await api.get('http://192.168.1.37:3001/getEquipments');
+        }catch(e){
+            throw e;
+        }
+
+        this.setState({
+            equipment: result.data
+        })
+    }
 
     select = (value) => {
         let selected = this.state.selected;
@@ -59,12 +72,11 @@ class EquipmentPick extends Component {
                 <Text style = {styles.title}>Seleciona o equipamento ai</Text>
                 <FlatList 
                     style = {styles.list}
-                    data = {equipment}
-                    renderItem = {({item, index}) => (
+                    data = {this.state.equipment}
+                    renderItem = {({item}) => (
                         <ListItem
                             item = {item}
-                            index = {index}
-                            select = {() => this.select(index)}
+                            select = {() => this.select(item.id)}
                             selected = {this.state.selected} 
                             quantityHandleChange = {this.quantityHandleChange}
                         />

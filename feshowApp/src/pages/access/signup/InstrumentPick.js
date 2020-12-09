@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, TextInput, FlatList} from 'react-native';
 import ListItem from './ListItemWithQuantity';
 import styles from '../../../styles';
+import api from '../../../services/api'
+
 
 
 const instruments = ['guitarra', 'baixo', 'bateria', 'teclado']
@@ -9,12 +11,24 @@ const instruments = ['guitarra', 'baixo', 'bateria', 'teclado']
 class InstrumentPick extends Component {
     constructor(props){
         super(props)
-        this.state = {selected: []}
+        this.state = {instruments: [], selected: []}
     }
 
-    componentDidMount(){}
+    componentDidMount(){
+        this.loadInstrument();
+    }
 
-    loadInstrument = () => {}
+    loadInstrument = async () => {
+        try{
+            var result = await api.get('http://192.168.1.37:3001/getInstruments');
+        }catch(e){
+            throw e;
+        }
+
+        this.setState({
+            instruments: result.data
+        })
+    }
 
     select = (value) => {
         let selected = this.state.selected;
@@ -59,12 +73,11 @@ class InstrumentPick extends Component {
                 <Text style = {styles.title}>Seleciona os instrumentos ai</Text>
                 <FlatList 
                     style = {styles.list}
-                    data = {instruments}
-                    renderItem = {({item, index}) => (
+                    data = {this.state.instruments}
+                    renderItem = {({item}) => (
                         <ListItem
                             item = {item}
-                            index = {index}
-                            select = {() => this.select(index)}
+                            select = {() => this.select(item.id)}
                             selected = {this.state.selected} 
                             quantityHandleChange = {this.quantityHandleChange}
                             

@@ -22,7 +22,7 @@ const Stack = createStackNavigator();
 const AccessRoute = () => {
     return(
         <Stack.Navigator 
-            initialRouteName = 'localizationPick'
+            initialRouteName = 'initialPage'
             headerMode = 'none'
         >
             <Stack.Screen

@@ -1,9 +1,8 @@
 import React, { Component, useState } from 'react';
 import {View, Text, TouchableOpacity, Image} from 'react-native';
 import styles from '../../../styles';
-import { useParams } from 'react-router-dom';
 import ImagePicker from 'react-native-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import api from '../../../services/api'
 
 
 const ImagePick = (props) => {
@@ -12,9 +11,25 @@ const ImagePick = (props) => {
     const user = props.route.params.user; 
     console.log(user);
 
-    const uploadImage = () => {
-        user.profile.image = avatar;
-        console.log(user);
+    const advance = async () => {
+        user.profile.image = avatar; 
+        var formData = new FormData();
+        formData.append('file', avatar);
+        try{
+            var response = await api.post('http://localhost:3001/store', user);
+            await api.post('http://localhost:3001/storeImage', formData, 
+            {headers: 
+                {
+                    Authorization: `Bearer ${response.data.token}`, 
+                    'Content-type': 'multipart/form-data', 
+                    'Accept': 'application/json'
+                }
+            })
+        }catch(e){
+            throw e;
+        }
+
+        console.log(response.data);
     }
 
     return(
@@ -42,7 +57,7 @@ const ImagePick = (props) => {
                     
                     const source = {uri: response.uri}
                     const avatar = {...source, 
-                        fileName: response.fileName,
+                        name: response.fileName,
                         type: response.type}
 
                     console.log(avatar);
@@ -54,7 +69,7 @@ const ImagePick = (props) => {
             </TouchableOpacity>
 
             <TouchableOpacity
-                onPress = {uploadImage}
+                onPress = {advance}
                 style = {styles.button}
             >
                 <Text style = {styles.buttonLabel}>Avançar</Text>

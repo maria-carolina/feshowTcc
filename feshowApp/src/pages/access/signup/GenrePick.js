@@ -2,19 +2,32 @@ import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
 import ListItem from './ListItem';
 import styles from '../../../styles';
+import api from '../../../services/api'
 
 
-const genres = ['pop', 'jazz', 'soul', 'rock', 'funk', 'samba', 'hip-hop'];
 
 class GenrePick extends Component {
     constructor(props){
         super(props)
-        this.state = {selected: []}
+        this.state = {genres: [], selected: []}
     }
 
-    componentDidMount(){}
+    componentDidMount(){
+        this.loadGenres();
+    }
 
-    loadGenres = () => {}
+    loadGenres = async () => {
+        try{
+            var result = await api.get('http://192.168.1.37:3001/getGenres');
+        }catch(e){
+            throw e;
+        }
+
+        this.setState({
+            genres: result.data
+        })
+    }
+
     select = (value) => {
         let selected = this.state.selected;
         if(selected.includes(value)){
@@ -40,12 +53,11 @@ class GenrePick extends Component {
                 <Text style = {styles.title}>Seleciona o genero ai</Text>
                 <FlatList
                     style = {styles.list}
-                    data = {genres}
-                    renderItem = {({item, index}) => (
+                    data = {this.state.genres}
+                    renderItem = {({item}) => (
                         <ListItem
                             item = {item}
-                            index = {index}
-                            select = {() => this.select(index)}
+                            select = {() => this.select(item.id)}
                             selected = {this.state.selected}
                             singlePick = {false} 
                         />

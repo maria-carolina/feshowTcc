@@ -9,13 +9,13 @@ const Item = (props) => {
     
     return(
         <TouchableOpacity
-            onPress = {props.select}
+            onPress = {props.select} 
             style={styles.listItem}
         >
-            {(props.selected.some(item => item.id === props.index) &&
+            {(props.selected.some(item => item.id === props.item.id) &&
                 <View style = {{...styles.row, position: 'relative', height: 50}}>
                     <Text style = {{...styles.itemText, fontWeight: 'bold'}}
-                    >{props.item}</Text>   
+                    >{props.item.name}</Text>   
 
                     <InputSpinner 
                         min = {1}
@@ -27,12 +27,12 @@ const Item = (props) => {
                         buttonStyle = {{width: 30}}
                         color = {'#61356F'}
                         onChange = {num => {
-                            props.quantityHandleChange(num, props.index)
+                            props.quantityHandleChange(num, props.item.id)
                             setValue(num);
                         }}
                     />
                 </View>
-            ) || <Text style = {styles.itemText}>{props.item}</Text>}         
+            ) || <Text style = {styles.itemText}>{props.item.name}</Text>}         
         </TouchableOpacity>
     )
 }

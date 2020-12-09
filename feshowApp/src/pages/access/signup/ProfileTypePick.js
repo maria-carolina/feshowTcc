@@ -4,7 +4,11 @@ import ListItem from './ListItem';
 import styles from '../../../styles';
 
 
-const TYPES = ['Artista', 'Espaço', 'Produtor'];
+const TYPES = [
+    {id: 0, name: 'Artista'}, 
+    {id: 1, name: 'Espaço'}, 
+    {id: 2, name: 'Produtor'}
+];
 
 
 class ProfileTypePick extends Component{
@@ -33,11 +37,10 @@ class ProfileTypePick extends Component{
                 <FlatList 
                     style={styles.list}
                     data = {TYPES}
-                    renderItem = {({item, index}) => (
+                    renderItem = {({item}) => (
                         <ListItem 
                             item = {item}
-                            index = {index}
-                            select = {() => this.select(index)}
+                            select = {() => this.select(item.id)}
                             selected = {this.state.selected}
                             singlePick = {true}
                         />

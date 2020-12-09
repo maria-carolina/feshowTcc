@@ -5,6 +5,8 @@ const multerImage = require('./config/multerImage');
 const multerRider = require('./config/multerRider');
 const authMiddleware = require('./middlewares/auth');
 
+
+
 //controllers
 const UserController = require('./controllers/UserController');
 const FeedController = require('./controllers/FeedController');
@@ -20,7 +22,7 @@ routes.post('/store', UserController.store);
 
 routes.get('/getEquipments', UserController.getEquipments);
 routes.get('/getInstruments', UserController.getInstruments);
-routes.get('/getGenres', UserController.getGenres);
+routes.get('/getGenres', UserController.getGenres); 
 
 routes.use(authMiddleware);
 

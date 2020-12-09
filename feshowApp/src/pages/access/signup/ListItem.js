@@ -5,13 +5,13 @@ import styles from '../../../styles';
 
 const Item = (props) => {
     let text = props.singlePick ? 
-        <Text style = {props.selected === props.index ? 
+        <Text style = {props.selected === props.item.id ? 
             {...styles.itemText, fontWeight: 'bold'} : styles.itemText}
-        >{props.item}</Text> :
+        >{props.item.name}</Text> :
         <Text
-            style = {props.selected.includes(props.index) ? 
+            style = {props.selected.includes(props.item.id) ? 
                 {...styles.itemText, fontWeight: 'bold'} : styles.itemText}
-        >{props.item}</Text>
+        >{props.item.name}</Text>
 
     return(
         <TouchableOpacity

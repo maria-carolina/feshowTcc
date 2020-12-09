@@ -115,6 +115,7 @@ module.exports = {
     },
 
     async storeImage(req, res) {
+
         const { filename: key } = req.file;
 
         const user = await User.update({

@@ -42,12 +42,16 @@ class LocalizationPick extends Component{
             cities: cities,
             selectedUf: uf
         })
-        
-        
     }
 
     getCurrentLocalization = () => {
-        ///A ser implementado
+        Geocoder.init("AIzaSyAC-0wLJGXXTZaj6QfJtvas1-qXQZ0GRPI"); 
+        Geocoder.from(41.89, 12.49)
+        .then(json => {
+        		var addressComponent = json.results[0].address_components[0];
+            console.log(addressComponent);
+        })
+        .catch(error => console.warn(error.origin));    
     }
 
     advance = () => {
