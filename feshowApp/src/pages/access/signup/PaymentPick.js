@@ -6,7 +6,7 @@ import styles from '../../../styles';
 class PaymentPick extends Component {
     constructor(props){
         super(props)
-        this.state = {payment: false}
+        this.state = {payment: ''}
     }
 
     save = (payment) => {
@@ -18,11 +18,12 @@ class PaymentPick extends Component {
     }
 
     render(){
+        let buttonLabel = this.state.payment != '' ? 'Avançar' : 'Pular';
         return(
             <View style = {styles.container}>
                 <Text style = {styles.title}>Tem cachê fixo?</Text>
-                <Text style = {styles.justifiedText}>Esse valor é apenas informativo. Esse aplicativo não realiza pagamentos.
-                    Caso não tenha um cache fixo apenas clique em avançar.
+                <Text style = {styles.justifiedText}>
+                    Esse valor é apenas informativo. Esse aplicativo não realiza pagamentos.
                 </Text>
                 <TextInput 
                     placeholder = 'digite o valor' 
@@ -36,7 +37,7 @@ class PaymentPick extends Component {
                     style = {styles.button}
                     onPress = {() => this.save(this.state.payment)}
                 >
-                    <Text style = {styles.buttonLabel}>Avançar</Text>
+                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
                 </TouchableOpacity>
             </View>
         )

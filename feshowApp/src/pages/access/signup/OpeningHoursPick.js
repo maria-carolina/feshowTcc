@@ -5,7 +5,7 @@ import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 
-const days = ['','domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+const days = ['','Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
 
 
 const DayPicker = (props) => {
@@ -13,7 +13,7 @@ const DayPicker = (props) => {
         <View style = {styles.row}>
                 <Picker
                     selectedValue = {props.selected.initialDay}
-                    style = {{...styles.picker, width: '45%'}}
+                    style = {{...styles.picker, width: '40%'}}
                     onValueChange = {(value) => props.handleChange(value, true)}
                 >
                     {days.map((day, index) => (
@@ -25,12 +25,12 @@ const DayPicker = (props) => {
                     ))}
                 </Picker>
 
-                <Text>às</Text>
+                <Text style = {{alignSelf: 'center', color: 'white'}}>à</Text>
 
                 <Picker
                     selectedValue = {props.selected.finalDay}
                     enabled = {!!props.selected.initialDay}
-                    style = {{...styles.picker, width: '45%'}}
+                    style = {{...styles.picker, width: '40%'}}
                     onValueChange = {(value) => props.handleChange(value, false)}
                 >
                     {days.map((day, index) => (
@@ -53,43 +53,44 @@ const TimePicker = (props) => {
 
     const setTime = (event, date) => {
         setVisible(false)
-        let selected = props.selected;
-        let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+        if(date){
+            let selected = props.selected;
+            let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
 
-        if(firstInput){
-            selected.initialHour = time;
-        }else{
-            selected.finalHour = time;
-        }
+            if(firstInput){
+                selected.initialHour = time;
+            }else{
+                selected.finalHour = time;
+            }
 
-        console.log(selected);
-        props.handleChange(selected);  
+            props.handleChange(selected);
+        }  
     }
 
     return(
         <View style = {styles.row}>
 
             <TouchableOpacity
-                style = {{...styles.picker, width: '45%'}} 
+                style = {{...styles.picker, width: '40%'}} 
                 onPress = {() => {
                     setVisible(true)
                     setFirstInput(true)
                 }}
             >
-                <Text>{props.selected.initialHour || ''}</Text>
+                <Text style={{color: 'white', fontSize: 16}}>{props.selected.initialHour || ''}</Text>
             </TouchableOpacity>
 
-            <Text> às </Text>
+            <Text style={{alignSelf: 'center', color: 'white'}}> às </Text>
             
             <TouchableOpacity 
-                style = {{...styles.picker, width: '45%'}} 
+                style = {{...styles.picker, width: '40%'}} 
                 disabled = {!props.selected.initialHour}
                 onPress = {() => {
                     setVisible(true)
                     setFirstInput(false)
                 }}
             >
-                <Text>{props.selected.finalHour || ''}</Text>
+                <Text style={{color: 'white', fontSize: 16}}>{props.selected.finalHour || ''}</Text>
             </TouchableOpacity>
   
             {visible && <DateTimePicker
@@ -99,6 +100,7 @@ const TimePicker = (props) => {
                 is24Hour = {true}
                 display = "default"
                 onChange = {setTime}
+                onCa
             />}
         </View>
     )
@@ -145,6 +147,7 @@ class OpeningHoursPick extends Component {
     }
 
     render(){
+        let buttonLabel = Object.keys(this.state.selected).length > 0 ? 'Avançar':'Pular';
         return(
             <View style = {styles.container}>
                 <Text 
@@ -171,7 +174,7 @@ class OpeningHoursPick extends Component {
                     style = {styles.button}
                     onPress = {this.advance}
                 >
-                    <Text style = {styles.buttonLabel}>Avançar</Text>
+                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
                 </TouchableOpacity>
                 
             </View>

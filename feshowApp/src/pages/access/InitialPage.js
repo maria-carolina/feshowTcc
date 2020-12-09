@@ -2,6 +2,8 @@ import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import styles from '../../styles';
+import FontAwesome from 'react-native-vector-icons/MaterialCommunityIcons';
+
 
 const InitialPage = () => {
     const navigation = useNavigation();
@@ -13,9 +15,7 @@ const InitialPage = () => {
     }
     return (
         <View style = {styles.container}>
-            <Text>
-                O logo aqui
-            </Text>
+            <FontAwesome name = {'amplifier'} size = {200} color = {'#3A0E54'}/>
             <TouchableOpacity 
                 onPress = {openSignInPage}
                 style = {styles.button}

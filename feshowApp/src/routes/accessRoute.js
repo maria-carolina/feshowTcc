@@ -22,7 +22,7 @@ const Stack = createStackNavigator();
 const AccessRoute = () => {
     return(
         <Stack.Navigator 
-            initialRouteName = 'initialPage'
+            initialRouteName = 'imagePick'
             headerMode = 'none'
         >
             <Stack.Screen

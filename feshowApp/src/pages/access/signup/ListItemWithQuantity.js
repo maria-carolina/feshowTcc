@@ -13,7 +13,7 @@ const Item = (props) => {
             style={styles.listItem}
         >
             {(props.selected.some(item => item.id === props.item.id) &&
-                <View style = {{...styles.row, position: 'relative', height: 50}}>
+                <View style = {{...styles.row, height: 50}}>
                     <Text style = {{...styles.itemText, fontWeight: 'bold'}}
                     >{props.item.name}</Text>   
 

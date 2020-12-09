@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, TextInput, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import styles from '../../../styles';
-import api from '../../../services/api'
-import Geolocation from 'react-native-geolocation-service';
-import Geocoder from 'react-native-geocoding';
+import {apiIbge as api} from '../../../services/api'
 
 
 class LocalizationPick extends Component{
     constructor(props){
         super(props)
-        this.state = {ufs: [], cities: [], selectedUf:'-', selectedCity: '', choosenCityName: ''}
+        this.state = {
+            ufs: [], 
+            cities: [], 
+            selectedUf:'-', 
+            selectedCity: '', 
+            choosenCityName: ''
+        }
     }
 
     componentDidMount(){
@@ -19,7 +23,7 @@ class LocalizationPick extends Component{
 
     loadUFs = async () => {
         try{
-            var result = await api.get('http://servicodados.ibge.gov.br/api/v1/localidades/estados');
+            var result = await api.get();
         }catch(e){return;}
 
         this.setState({
@@ -32,7 +36,7 @@ class LocalizationPick extends Component{
         console.log(uf)
         let cities;
         if(uf!=0){
-            let result = await api.get(`http://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+            let result = await api.get(`/${uf}/municipios`);
             cities = result.data;
         }else{
             cities = [''];
@@ -44,15 +48,7 @@ class LocalizationPick extends Component{
         })
     }
 
-    getCurrentLocalization = () => {
-        Geocoder.init("AIzaSyAC-0wLJGXXTZaj6QfJtvas1-qXQZ0GRPI"); 
-        Geocoder.from(41.89, 12.49)
-        .then(json => {
-        		var addressComponent = json.results[0].address_components[0];
-            console.log(addressComponent);
-        })
-        .catch(error => console.warn(error.origin));    
-    }
+    getCurrentLocalization = () => {}
 
     advance = () => {
         if(this.state.choosenCityName != ''){

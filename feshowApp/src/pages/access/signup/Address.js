@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
 import styles from '../../../styles';
-import api from '../../../services/api';
+import {apiCep as api} from '../../../services/api';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 

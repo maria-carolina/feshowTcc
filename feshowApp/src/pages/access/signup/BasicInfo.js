@@ -41,7 +41,7 @@ const Form = (props) => {
             {({values, handleChange, handleSubmit, errors}) => (
                 <View style = {styles.container}>
 
-                    <Text style = {styles.title}>Registre-se</Text>
+                    <Text style = {styles.title}>Informações básicas</Text>
                     <TextInput 
                         placeholder = {firstLabel}
                         style = {{...styles.textInput, fontSize: 15}}
@@ -54,7 +54,7 @@ const Form = (props) => {
                     {props.type != 2 &&
                         <TextInput 
                             placeholder = {secondLabel}
-                            style = {{...styles.textInput, fontSize: 15}}
+                            style = {{...styles.textInput, fontSize: 14}}
                             value = {values.numberProp}
                             onChangeText = {handleChange('numberProp')}
                             keyboardType = 'numeric'

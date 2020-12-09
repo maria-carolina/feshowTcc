@@ -5,8 +5,6 @@ import styles from '../../../styles';
 import api from '../../../services/api'
 
 
-const equipment = ['Microfone', 'Mic Stand', 'Amplificador', 'Monitor']
-
 class EquipmentPick extends Component {
     constructor(props){
         super(props)
@@ -19,7 +17,7 @@ class EquipmentPick extends Component {
 
     loadEquipment = async () => {
         try{
-            var result = await api.get('http://192.168.1.37:3001/getEquipments');
+            var result = await api.get('/getEquipments');
         }catch(e){
             throw e;
         }
@@ -44,7 +42,6 @@ class EquipmentPick extends Component {
     }
 
     quantityHandleChange = (num, index) => {
-
         let selected = this.state.selected.map((item) => {
             if(item.id === index){
                 return {id: index, quantity: num}
@@ -67,9 +64,16 @@ class EquipmentPick extends Component {
     }
 
     render(){
+        let title = this.props.route.params.user.type === 1 ? 
+        'o espaço tem disponível':'você precisa para tocar';
+        let buttonLabel = this.state.selected.length > 0 ? 'Avançar':'Pular';
+
         return(
             <View style = {styles.container}>
-                <Text style = {styles.title}>Seleciona o equipamento ai</Text>
+                <Text style = {styles.title}>{`Escolha o equipamento que ${title}`}</Text>
+                <Text style = {styles.justifiedText}>
+                    Essa informação servirá apenas para auxiliar na organização de eventos, não será exibida publicamente.
+                </Text>
                 <FlatList 
                     style = {styles.list}
                     data = {this.state.equipment}
@@ -87,7 +91,7 @@ class EquipmentPick extends Component {
                     onPress = {() => this.advance()}
                     style = {styles.button}
                 >
-                    <Text style = {styles.buttonLabel}>Avançar</Text>
+                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
                 </TouchableOpacity>
             </View>
         )

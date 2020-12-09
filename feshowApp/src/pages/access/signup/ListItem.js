@@ -1,24 +1,40 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import styles from '../../../styles';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
 const Item = (props) => {
-    let text = props.singlePick ? 
-        <Text style = {props.selected === props.item.id ? 
-            {...styles.itemText, fontWeight: 'bold'} : styles.itemText}
-        >{props.item.name}</Text> :
-        <Text
-            style = {props.selected.includes(props.item.id) ? 
-                {...styles.itemText, fontWeight: 'bold'} : styles.itemText}
-        >{props.item.name}</Text>
+    let text;
+    if(props.selected === props.item.id || 
+        (!props.singlePick && props.selected.includes(props.item.id))){
+        text = (
+            <View style = {styles.row}>
+                <Text style = {{...styles.itemText, fontWeight: 'bold'}}>
+                    {props.item.name}
+                </Text>
+                <FontAwesome 
+                    name = {'check'} 
+                    size = {30} 
+                    color = {'#FFF'}
+                    style = {{position: 'absolute', right: 0}}
+                />
+            </View>
+        )
+    }else{
+        text = <Text style = {styles.itemText}>
+                    {props.item.name}
+                </Text>
+    } 
+        
 
     return(
         <TouchableOpacity
             onPress = {props.select}
-            style={styles.listItem}
+            style = {styles.listItem}
         >
             {text}
+            
         </TouchableOpacity>
     )
 }

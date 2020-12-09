@@ -20,7 +20,7 @@ class InstrumentPick extends Component {
 
     loadInstrument = async () => {
         try{
-            var result = await api.get('http://192.168.1.37:3001/getInstruments');
+            var result = await api.get('/getInstruments');
         }catch(e){
             throw e;
         }
@@ -68,9 +68,10 @@ class InstrumentPick extends Component {
     }
 
     render(){
+        let buttonLabel = this.state.selected.length > 0 ? 'Avançar':'Pular';
         return(
             <View style = {styles.container} >
-                <Text style = {styles.title}>Seleciona os instrumentos ai</Text>
+                <Text style = {styles.title}>Seleciona os instrumentos utilizados no seu show</Text>
                 <FlatList 
                     style = {styles.list}
                     data = {this.state.instruments}
@@ -89,7 +90,7 @@ class InstrumentPick extends Component {
                     onPress = {() => this.advance()}
                     style = {styles.button}
                 >
-                    <Text style = {styles.buttonLabel}>Avançar</Text>
+                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
                 </TouchableOpacity>
             </View>
         )

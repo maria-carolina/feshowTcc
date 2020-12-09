@@ -4,9 +4,9 @@ import styles from '../../../styles';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
-
+0
 const FormSchema = yup.object().shape({
-    username: yup.string().required('Campo obrigatório')
+    username: yup.string().trim('O username não pode conter espaços').required('Campo obrigatório')
     .min(5, 'Pelo menos 5 caracteres'),
     email: yup.string().required('Campo obrigatório').email('Digite um email'),
     password: yup.string().required('Campo obrigatório')
@@ -41,16 +41,18 @@ const Form = (props) => {
                         <Text style = {styles.title}>Registre-se</Text>
 
                         <TextInput 
-                            placeholder = 'digite o username'
+                            placeholder = 'Escolha um username...'
                             style = {styles.textInput}
                             value = {values.username}
-                            onChangeText = {handleChange('username')}
+                            onChangeText = {text => 
+                                handleChange('username')(text.replace(/\s/g, ''))
+                            }
                         />
                         {errors.username && 
                         <Text style = {styles.error}>{errors.username}</Text>}
 
                         <TextInput 
-                            placeholder = 'digite o email'
+                            placeholder = 'Digite seu e-mail...'
                             style = {styles.textInput}
                             value = {values.email}
                             onChangeText = {handleChange('email')}
@@ -59,17 +61,19 @@ const Form = (props) => {
                         <Text style = {styles.error}>{errors.email}</Text>}
 
                         <TextInput 
-                            placeholder = 'digite a senha'
+                            placeholder = 'Escolha uma senha...'
                             secureTextEntry = {true}
                             style = {styles.textInput} 
                             value = {values.password}
-                            onChangeText = {handleChange('password')}
+                            onChangeText = {text => 
+                                handleChange('password')(text.replace(/\s/g, ''))
+                            }
                         />
                         {errors.password 
                         && <Text style = {styles.error}>{errors.password}</Text> }
 
                         <TextInput 
-                            placeholder = 'repita a senha'
+                            placeholder = 'Repita a senha...'
                             secureTextEntry = {true}
                             style = {styles.textInput} 
                             value = {values.passwordRepetition}

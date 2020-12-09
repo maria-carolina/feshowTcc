@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import { PositionError } from 'react-native-geolocation-service';
 
 const Styles = StyleSheet.create({
     container: {
@@ -19,7 +20,8 @@ const Styles = StyleSheet.create({
     },
 
     title: {
-        fontSize: 24,
+        fontSize: 20,
+        textAlign: 'center',
         color: 'white',
         fontWeight: 'bold',
         fontFamily: 'roboto',
@@ -29,18 +31,17 @@ const Styles = StyleSheet.create({
     buttonLabel: {
         fontSize: 20,
         color: 'white',
-        fontWeight: 'bold',
-        fontFamily: 'roboto'
+        fontWeight: 'bold'
 
     },
 
     textInput: {
-        borderBottomWidth: .5,
-        borderBottomColor: 'grey',
-        padding: 1,
+        backgroundColor: '#6A3F6F',
+        borderRadius: 5,
+        padding: 5,
         width: '70%',
         marginTop: 30,
-        fontSize: 20,
+        fontSize: 16,
         fontFamily: 'arial',
         fontWeight: '100',
         color: 'white'
@@ -70,10 +71,12 @@ const Styles = StyleSheet.create({
 
     picker: {
         height: 50,
-        backgroundColor: '#6A356F',
+        backgroundColor: '#6A3F6F',
         margin: 10,
         width: '70%', 
         color: 'white',
+        alignItems: 'center',
+        justifyContent: 'center'
         
     },
 
@@ -93,8 +96,10 @@ const Styles = StyleSheet.create({
     },
 
     row: {
-        flexDirection: 'row'
-    }
+        flexDirection: 'row',
+        position: 'relative'
+    },
+    
 
 })
 

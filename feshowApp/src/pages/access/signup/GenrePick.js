@@ -18,7 +18,7 @@ class GenrePick extends Component {
 
     loadGenres = async () => {
         try{
-            var result = await api.get('http://192.168.1.37:3001/getGenres');
+            var result = await api.get('/getGenres');
         }catch(e){
             throw e;
         }
@@ -48,9 +48,10 @@ class GenrePick extends Component {
     }
 
     render(){
+        let buttonLabel = this.state.selected.length > 0 ? 'Avançar':'Pular';
         return(
             <View style = {styles.container}>
-                <Text style = {styles.title}>Seleciona o genero ai</Text>
+                <Text style = {styles.title}>Escolha os gêneros que tenham a ver com seu trabalho</Text>
                 <FlatList
                     style = {styles.list}
                     data = {this.state.genres}
@@ -68,7 +69,7 @@ class GenrePick extends Component {
                     onPress = {() => this.advance()}
                     style = {styles.button}
                 >
-                    <Text style = {styles.buttonLabel}>Avançar</Text>
+                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
                 </TouchableOpacity>
             </View>
         )
