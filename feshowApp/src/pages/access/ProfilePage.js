@@ -1,5 +1,19 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import styles from '../../styles';
+import Auth from '../../contexts/auth';
+
+const LogoutForTest = () => {
+    const { signOut } = useContext(Auth)
+    return(
+        <TouchableOpacity 
+            style = {styles.button}
+            onPress = {() => signOut()}
+        >
+            <Text style = {styles.buttonLabel}> Sair </Text>
+        </TouchableOpacity>
+    )
+}
 
 
 const artistInvitationModal = () => {
@@ -16,6 +30,8 @@ class ProfilePage extends Component{
         this.state = {type: ''}
     }
 
+    
+
     componentDidMount(){}
     loadProfileData = () => {}
 
@@ -29,7 +45,14 @@ class ProfilePage extends Component{
 
     inviteArtist = () => {}
     
-    render(){}
+    render(){
+        return(
+            <View style = {styles.container}>
+                <Text style = {styles.title}> OLÁ</Text>
+                <LogoutForTest />
+            </View>
+        )
+    }
 }
 
 export default ProfilePage;
