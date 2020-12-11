@@ -175,7 +175,7 @@ module.exports = {
 
     async login(req, res) {
         const { username, password } = req.body;
-
+        console.log('back-end:' + username)
         const user = await User.findOne({
             where: {
                 [Op.or]: [{ username }, { email: username }]
