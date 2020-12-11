@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 class User extends Model {
     static init(sequelize) {
-        super.init({   
+        super.init({
             username: {
                 type: DataTypes.STRING,
                 allowNull: false,
@@ -11,6 +11,16 @@ class User extends Model {
             email: {
                 type: DataTypes.STRING,
                 allowNull: false,
+                validate: {
+                    isUnique(value) {
+                        return User.findOne({ where: { email: value } })
+                            .then((email) => {
+                                if (email) {
+                                    console.log("E-mail já cadastrado ")
+                                }
+                            })
+                    }
+                }
             },
             image: {
                 type: DataTypes.STRING,
@@ -21,22 +31,22 @@ class User extends Model {
                 allowNull: false,
             },
             type: {
-                 type: DataTypes.STRING,
+                type: DataTypes.STRING,
                 allowNull: false,
             }
-        },{
+        }, {
             hooks: {
-                beforeCreate:(async (user) => {
+                beforeCreate: (async (user) => {
                     const hash = await bcrypt.hash(user.password, 10)
                     user.password = hash;
-                  })
-              },
+                })
+            },
             sequelize,
             tableName: 'users'
         })
     }
-    static associate(models){
-       //
+    static associate(models) {
+        //
     }
 
 }

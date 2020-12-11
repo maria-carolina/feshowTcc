@@ -22,9 +22,11 @@ CREATE TABLE IF NOT EXISTS `feshow`.`users` (
   `username` VARCHAR(20) NOT NULL,
   `email` VARCHAR(30) NOT NULL,
   `image` VARCHAR(50) NULL,
-  `password` VARCHAR(10) NOT NULL,
+  `password` VARCHAR(100) NOT NULL,
   `type` TINYINT(1) NOT NULL,
-  PRIMARY KEY (`id`))
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `username_UNIQUE` (`username` ASC),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC))
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 

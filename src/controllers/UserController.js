@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const authConfig = require('../config/auth.json');
 const User = require('../models/User');
 const Artist = require('../models/Artist');
@@ -37,32 +38,42 @@ module.exports = {
             const { profile: {
                 name, cache, city, members, genres, equipment, instruments
             } } = req.body;
-            
+
             const artist = await Artist.create({
                 name, cache, city, members, user_id: user.id
             });
 
-            const equipments = equipment.map(
-                data => {
-                    return {
-                        artist_id: artist.id,
-                        equipment_id: data.id,
-                        quantity: data.quantity
-                    }
-                });
+            if (equipment !== undefined) {
+                const equipments = equipment.map(
+                    data => {
+                        return {
+                            artist_id: artist.id,
+                            equipment_id: data.id,
+                            quantity: data.quantity
+                        }
+                    });
 
-            const instrument = instruments.map(
-                data => {
-                    return {
-                        artist_id: artist.id,
-                        instrument_id: data.id,
-                        quantity: data.quantity
-                    }
-                });
+                await ArtistEquipment.bulkCreate(equipments);
 
-            await ArtistEquipment.bulkCreate(equipments);
-            await ArtistInstrument.bulkCreate(instrument);
-            artist.setGenres(genres);
+            }
+
+            if (instruments !== undefined) {
+                const instrument = instruments.map(
+                    data => {
+                        return {
+                            artist_id: artist.id,
+                            instrument_id: data.id,
+                            quantity: data.quantity
+                        }
+                    });
+
+                await ArtistInstrument.bulkCreate(instrument);
+
+            }
+
+            if (genres !== undefined) {
+                artist.setGenres(genres);
+            }
         }
 
         else if (type == 1) {
@@ -72,7 +83,7 @@ module.exports = {
                     name, capacity, genres, equipment,
                     address: { city: cityVenue, district, number, street, uf, zipcode },
                     openinghours: { finalDay, finalHour, initialDay, initialHour }
-                } 
+                }
             } = req.body;
 
             const venue = await Venue.create({
@@ -83,21 +94,27 @@ module.exports = {
                 city: cityVenue, district, number, street, uf, zipcode, venue_id: venue.id
             });
 
-            const equipments = equipment.map(
-                data => {
-                    return {
-                        venue_id: venue.id,
-                        equipment_id: data.id,
-                        quantity: data.quantity
-                    }
-                });
+            if (equipment !== undefined) {
+                const equipments = equipment.map(
+                    data => {
+                        return {
+                            venue_id: venue.id,
+                            equipment_id: data.id,
+                            quantity: data.quantity
+                        }
+                    });
 
-            venue.setGenres(genres);
-            await EquipmentVenue.bulkCreate(equipments);
+                await EquipmentVenue.bulkCreate(equipments);
+            }
+
+            if (genres !== undefined) {
+                venue.setGenres(genres);
+            }
+
 
         } else {
             const {
-                profile: { name, city} 
+                profile: { name, city }
             } = req.body;
 
             await Producer.create({ name, chat_permission: 0, city, user_id: user.id });
@@ -131,7 +148,7 @@ module.exports = {
     async storeRider(req, res) {
         const { filename: key } = req.file;
 
-        const artist = await Artist.findAll({ where: { user_id: req.userId }})
+        const artist = await Artist.findAll({ where: { user_id: req.userId } })
         await Rider.create({
             name: key,
             artist_id: artist.id
@@ -154,6 +171,31 @@ module.exports = {
     async getGenres(req, res) {
         const genres = await Genre.findAll();
         return res.json(genres);
+    },
+
+    async login(req, res) {
+        const { username, password } = req.body;
+
+        const user = await User.findOne({
+            where: {
+                [Op.or]: [{ username }, { email: username }]
+            }
+        });
+
+        if (!user) {
+            return res.send({ error: 'Usuário não encontrado no sistema' })
+        }
+
+        if (!await bcrypt.compare(password, user.password)) {
+            return res.send({ error: 'Senha incorreta' })
+        }
+
+        user.password = undefined; //nao retornar senha 
+
+        return res.send({
+            user,
+            token: generateToken({ id: user.id })
+        });
     }
 
 };
