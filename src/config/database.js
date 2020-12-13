@@ -1,8 +1,8 @@
 module.exports = {
     dialect: 'mysql',
     host: 'localhost',
-    username: 'diego',
-    password: '23ty12',
+    username: 'root',
+    password: '',
     database: 'feshow',
     define: {
         undescore: true,
