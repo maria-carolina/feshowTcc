@@ -25,6 +25,7 @@ routes.get('/getGenres', UserController.getGenres);
 
 routes.post('/login', UserController.login);
 routes.post('/recoverPassword', UserController.recoverPassword)
+routes.put('/updatePassword', UserController.updatePassword)
 
 routes.use(authMiddleware);
 

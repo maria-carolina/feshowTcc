@@ -291,6 +291,29 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao encontrar usuário' })
         }
+    },
+
+    async updatePassword(req, res) {
+        try {
+            const { email, password } = req.body;
+
+            const hash = await bcrypt.hash(password, 10);
+
+            const user = await User.update({
+                password: hash
+            }, {
+                where: { email }
+            });
+
+            if (!user) {
+                return res.send({ error: 'Usuário não encontrado no sistema' })
+            }
+
+            return res.send({ user })
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao alterar senha' })
+        }
     }
 
 };
