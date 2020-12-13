@@ -201,10 +201,10 @@ module.exports = {
 
     async recoverPassword(req, res) {
         try {
-            const { username, code } = req.body;
+            const { email } = req.body;
 
             const account = await User.findOne({
-                where: { username }
+                where: { email }
             });
 
             if (!account) {
@@ -228,32 +228,37 @@ module.exports = {
             console.log(user.name);
             return;*/
 
+            //gerar código 6 dígitos 
+            let max = 100000, min = 999999, code;
+
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            code = Math.floor(Math.random() * (max - min)) + min;
+
+
             const html = `
-        <head>
-            <style>
-            .p {
-            font-family: "Lucida Console", "Courier New", monospace;
-            }
-            .button {
-            background-color: purple; /* Green */
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            }
-            </style>
+            <head>
+                <style>
+                    .button {
+                        background-color: purple; /* Green */
+                        border: none;
+                        color: white;
+                        padding: 15px 32px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                        margin: 4px 2px;
+                        cursor: pointer;
+                    }
+                </style>
         </head>
         <body>
             <h4 style="color:purple">Redefinir senha</h4>
             <p>
-                Olá, ${code}, <br><br>
+                Olá, <br><br>
                 Recebemos um pedido para redefinir sua senha. <br>
-                Para redefinir sua senha é preciso que informe o código abaixo no aplicativo do Feshow. <br>
+                Para isso é preciso que informe o código abaixo no aplicativo do Feshow. <br>
                 <center> <button class="button"> ${code} </button></center>
                 <br>
                 <h6 style="color:purple">Equipe Feshow</h6>
@@ -278,7 +283,7 @@ module.exports = {
                 html: html
             }).then(meassage => {
                 console.log(meassage);
-                return
+                return res.send({ code })
             }).catch(err => {
                 console.log(err)
                 return res.send({ error: 'Erro ao enviar e-mail' });
