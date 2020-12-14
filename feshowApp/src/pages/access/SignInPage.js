@@ -4,6 +4,7 @@ import styles from '../../styles';
 import Auth from '../../contexts/auth';
 import { Formik } from 'formik';
 import FontAwesome from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 
 
 const Form = (props) => {
@@ -55,6 +56,12 @@ const Form = (props) => {
                     >
                         <Text style = {styles.buttonLabel}>Entrar</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress = {props.openRecovery}
+                    >
+                        <Text>Esqueci minha senha</Text>
+                    </TouchableOpacity>
                 </View>
             )}
         </Formik>
@@ -65,19 +72,26 @@ const SignInPage = () => {
     const [passwordVisible, setPasswordVisible] = useState(false)
     const [error, setError] = useState(null);
     const { signIn } = useContext(Auth);
+    const navigation = useNavigation();
 
-    const handleSignIn = (values) => {
-        let result = signIn(values);
+    const handleSignIn = async (values) => {
+        let result = await signIn(values);
 
-        if(!result.error){
+        if(result === undefined){
             setError(null);
-        }else {
+        }else{
             setError(result.error);
         }
     }
+
+    const openRecovery = () => {
+        navigation.navigate('emailInsert');
+    }
+
     return(
         <Form 
             signIn = {handleSignIn}
+            openRecovery = {openRecovery}
             passwordVisible = {passwordVisible}
             setPasswordVisible = {() => setPasswordVisible(!passwordVisible)}
             error = {error}

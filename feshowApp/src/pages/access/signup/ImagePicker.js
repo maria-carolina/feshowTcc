@@ -10,7 +10,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const ImagePick = (props) => {
     const [avatar, setAvatar] = useState(null);
     const [source, setSource] = useState(null);
-    //const user = props.route.params.user; 
+    const user = props.route.params.user; 
 
     const advance = async () => {
         try{

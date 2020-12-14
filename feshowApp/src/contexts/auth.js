@@ -10,30 +10,35 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        var mounted = true;
         async function loadStorageData(){
+        
             const storageUser = await AsyncStorage.getItem('auth_user');
             const storageToken = await AsyncStorage.getItem('auth_token');
 
-            if(storageUser && storageToken){
-                setUser(JSON.parse(storageUser));
+            if(mounted){
+                if(storageUser && storageToken){
+                    setUser(JSON.parse(storageUser));
+                }
+                setLoading(false);
             }
-        
-            setLoading(false);
         }
 
         loadStorageData();
-
+        return () => {mounted = false}
     }, [])
 
 
     signIn = async (data) => {
         let result = await Auth.signIn(data);
-        if (!result.error){
-            setUser(result.user);
-            await AsyncStorage.setItem('auth_user', JSON.stringify(result.user));
-            await AsyncStorage.setItem('auth_token', result.token);
+        console.log(result)
+        if (!result.user){
+            return result;
         }
-        return result;
+        
+        await AsyncStorage.setItem('auth_user', JSON.stringify(result.user));
+        await AsyncStorage.setItem('auth_token', result.token);
+        setUser(result.user);
     }
 
     signOut = async () => {

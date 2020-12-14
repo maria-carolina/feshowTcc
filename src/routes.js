@@ -24,10 +24,10 @@ routes.get('/getInstruments', UserController.getInstruments);
 routes.get('/getGenres', UserController.getGenres); 
 
 routes.post('/login', UserController.login);
-routes.post('/recoverPassword', UserController.recoverPassword)
+routes.post('/recoverPassword', UserController.recoverPassword) 
 routes.put('/updatePassword', UserController.updatePassword)
 
-routes.use(authMiddleware);
+//routes.use(authMiddleware);
 
 routes.post('/storeImage', multer(multerImage).single('file'), UserController.storeImage);
 routes.post('/storeRider', multer(multerRider).single('file'), UserController.storeRider);

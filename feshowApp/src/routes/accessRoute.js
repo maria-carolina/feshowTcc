@@ -4,6 +4,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import InitialPage from '../pages/access/InitialPage'
 import SignInPage from '../pages/access/SignInPage'
 
+import EmailInsert from '../pages/access/passwordRecovery/EmailInsert';
+import CodeInsert from '../pages/access/passwordRecovery/CodeInsert';
+import PasswordRedefinition from '../pages/access/passwordRecovery/PasswordRedefinition';
+
+
 import AccountInfo from '../pages/access/signup/AccountInfo';
 import BasicInfo from '../pages/access/signup/BasicInfo';
 import EquipmentPick from '../pages/access/signup/EquipmentPick';
@@ -34,6 +39,22 @@ const AccessRoute = () => {
                 component = {SignInPage}
                 name = 'signInPage'
             />
+
+            <Stack.Screen
+                component = {EmailInsert}
+                name = 'emailInsert'
+            />
+
+            <Stack.Screen
+                component = {CodeInsert}
+                name = 'codeInsert'
+            />
+
+            <Stack.Screen
+                component = {PasswordRedefinition}
+                name = 'passwordRedefinition'
+            />
+
 
             <Stack.Screen
                 component = {AccountInfo}

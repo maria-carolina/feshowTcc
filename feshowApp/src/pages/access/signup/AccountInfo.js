@@ -7,10 +7,10 @@ import * as yup from 'yup';
 0
 const FormSchema = yup.object().shape({
     username: yup.string().trim('O username não pode conter espaços').required('Campo obrigatório')
-    .min(5, 'Pelo menos 5 caracteres'),
+    .min(5, 'O nome deve conter menos 5 caracteres'),
     email: yup.string().required('Campo obrigatório').email('Digite um email'),
     password: yup.string().required('Campo obrigatório')
-    .min(6, 'Pelo menos 6 caracteres'),
+    .min(6, 'A senha deve conter pelo menos 6 caracteres'),
     passwordRepetition: yup.string().required('Campo obrigatório')
     .oneOf([yup.ref('password'), null], 'Digite a mesma senha...')
 })
