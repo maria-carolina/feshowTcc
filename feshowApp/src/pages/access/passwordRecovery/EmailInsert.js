@@ -21,9 +21,10 @@ const EmailInsert = () => {
 
     return (
         <View style = {styles.container}>
+            <Text style = {styles.title}>Sem problemas!</Text>
             {error && <Text style = {styles.error}>{error}</Text>}
             <TextInput
-                placeholder = 'Insira seu e-mail...'
+                placeholder = 'Informe seu e-mail...'
                 style = {styles.textInput}
                 onChangeText = {text => setEmailInput(text)} 
             />

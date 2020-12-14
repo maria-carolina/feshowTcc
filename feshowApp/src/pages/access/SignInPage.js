@@ -77,11 +77,9 @@ const SignInPage = () => {
     const handleSignIn = async (values) => {
         let result = await signIn(values);
 
-        if(result === undefined){
-            setError(null);
-        }else{
+        if(result){
             setError(result.error);
-        }
+        }  
     }
 
     const openRecovery = () => {

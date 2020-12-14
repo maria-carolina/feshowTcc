@@ -23,6 +23,7 @@ const PasswordRedefinition = (props) => {
 
     return (
         <View style = {styles.container}>
+            <Text style = {styles.title}> Redefina sua senha </Text>
             {error && <Text style = {styles.error}>{error}</Text>}
             <TextInput
                 placeholder = 'Insira a nova senha...'

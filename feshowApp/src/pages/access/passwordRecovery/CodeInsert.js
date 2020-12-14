@@ -18,6 +18,8 @@ const CodeInsert = (props) => {
     
     return (
         <View style = {styles.container}>
+            <Text style = {styles.title}>Enviamos um código para seu e-mail</Text>
+            <Text style = {styles.justifiedText}>Isso pode demorar um pouco...</Text>
             {error && <Text style = {styles.error}>Código incorreto</Text>}
             <TextInput
                 style = {styles.textInput} 
