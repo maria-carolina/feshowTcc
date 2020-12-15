@@ -314,6 +314,30 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao alterar senha' })
         }
-    }
+    }, 
+    
+    async verifyEmail(req, res) {
+        const { email } = req.body;
 
+        const user = await User.findOne({ where: { email }});
+
+        if (user) {
+            return res.send({ error: 'Este e-mail já existe no sistema' })
+        }
+
+        return res.status(200).send('ok');
+
+    },
+
+    async verifyUsername(req, res) {
+        const { username } = req.body;
+
+        const user = await User.findOne({ where: { username }});
+
+        if (user) {
+            return res.send({ error: 'Este username já existe no sistema' })
+        }
+
+        return res.status(200).send('ok');
+    }
 };

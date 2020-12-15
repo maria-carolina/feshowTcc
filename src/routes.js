@@ -18,6 +18,8 @@ const VenueController = require('./controllers/VenueController');
 const OrganizationRequestController  = require('./controllers/OrganizationRequestController');
 
 routes.post('/store', UserController.store);
+routes.post('/verifyEmail', UserController.verifyEmail);
+routes.post('/verifyUsername', UserController.verifyUsername);
 
 routes.get('/getEquipments', UserController.getEquipments);
 routes.get('/getInstruments', UserController.getInstruments);
