@@ -1,12 +1,11 @@
 import {StyleSheet} from 'react-native';
-import { PositionError } from 'react-native-geolocation-service';
 
 const Styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#6A3A6F',
+        backgroundColor: '#F2F2F2',
     },
 
     button: {
@@ -22,7 +21,7 @@ const Styles = StyleSheet.create({
     title: {
         fontSize: 20,
         textAlign: 'center',
-        color: 'white',
+        color: '#3F2058',
         fontWeight: 'bold',
         fontFamily: 'roboto',
         marginBottom: 20
@@ -36,7 +35,7 @@ const Styles = StyleSheet.create({
     },
 
     textInput: {
-        backgroundColor: '#6A3F6F',
+        backgroundColor: '#D8D8D8',
         borderRadius: 5,
         padding: 5,
         width: '70%',
@@ -44,7 +43,7 @@ const Styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'arial',
         fontWeight: '100',
-        color: 'white'
+        color: 'black'
     },
     
     list: {
@@ -65,23 +64,23 @@ const Styles = StyleSheet.create({
     itemText: {
         fontSize: 20,
         fontFamily: 'roboto',
-        color: 'white',
+        color: '#3F2058',
         fontWeight: '100'
     },
 
     picker: {
         height: 50,
-        backgroundColor: '#6A3F6F',
+        backgroundColor: '#D8D8D8',
         margin: 10,
         width: '70%', 
-        color: 'white',
+        color: '#000',
         alignItems: 'center',
         justifyContent: 'center'
         
     },
 
     error: {
-        fontSize: 14,
+        fontSize: 12,
         color: 'red',
         marginTop: 0,
         fontStyle: 'italic'
@@ -90,9 +89,10 @@ const Styles = StyleSheet.create({
     justifiedText: {
         textAlign: 'center',
         fontFamily: 'Roboto',
-        fontStyle: 'italic',
+        color: '#3F2058',
         width: '70%',
-        fontSize: 16
+        fontSize: 14,
+        marginBottom: 15
     },
 
     row: {

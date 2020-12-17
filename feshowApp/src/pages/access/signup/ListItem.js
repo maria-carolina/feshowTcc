@@ -16,7 +16,7 @@ const Item = (props) => {
                 <FontAwesome 
                     name = {'check'} 
                     size = {30} 
-                    color = {'#FFF'}
+                    color = {'#3F2058'}
                     style = {{position: 'absolute', right: 0}}
                 />
             </View>

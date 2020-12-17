@@ -11,36 +11,36 @@ const days = ['','Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Qu
 const DayPicker = (props) => {
     return(
         <View style = {styles.row}>
-                <Picker
-                    selectedValue = {props.selected.initialDay}
-                    style = {{...styles.picker, width: '40%'}}
-                    onValueChange = {(value) => props.handleChange(value, true)}
-                >
-                    {days.map((day, index) => (
-                        <Picker.Item  
-                            label = {day} 
-                            value = {index} 
-                            key = {index}
-                        />
-                    ))}
-                </Picker>
+            <Picker
+                selectedValue = {props.selected.initialDay}
+                style = {{...styles.picker, width: '40%'}}
+                onValueChange = {(value) => props.handleChange(value, true)}
+            >
+                {days.map((day, index) => (
+                    <Picker.Item  
+                        label = {day} 
+                        value = {index} 
+                        key = {index}
+                    />
+                ))}
+            </Picker>
 
-                <Text style = {{alignSelf: 'center', color: 'white'}}>à</Text>
+            <Text style = {{alignSelf: 'center', color: '#3F2058'}}>à</Text>
 
-                <Picker
-                    selectedValue = {props.selected.finalDay}
-                    enabled = {!!props.selected.initialDay}
-                    style = {{...styles.picker, width: '40%'}}
-                    onValueChange = {(value) => props.handleChange(value, false)}
-                >
-                    {days.map((day, index) => (
-                        <Picker.Item  
-                            label = {day} 
-                            value = {index} 
-                            key = {index}
-                        />
-                    ))}
-                </Picker>
+            <Picker
+                selectedValue = {props.selected.finalDay}
+                enabled = {props.selected.initialDay != ''}
+                style = {{...styles.picker, width: '40%'}}
+                onValueChange = {(value) => props.handleChange(value, false)}
+            >
+                {days.map((day, index) => (
+                    <Picker.Item  
+                        label = {day} 
+                        value = {index} 
+                        key = {index}
+                    />
+                ))}
+            </Picker>
 
         </View>
     )
@@ -54,16 +54,7 @@ const TimePicker = (props) => {
     const setTime = (event, date) => {
         setVisible(false)
         if(date){
-            let selected = props.selected;
-            let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
-
-            if(firstInput){
-                selected.initialHour = time;
-            }else{
-                selected.finalHour = time;
-            }
-
-            props.handleChange(selected);
+            props.handleChange(date, firstInput);
         }  
     }
 
@@ -71,26 +62,26 @@ const TimePicker = (props) => {
         <View style = {styles.row}>
 
             <TouchableOpacity
-                style = {{...styles.picker, width: '40%'}} 
+                style = {{...styles.picker, width: '38%'}} 
                 onPress = {() => {
                     setVisible(true)
                     setFirstInput(true)
                 }}
             >
-                <Text style={{color: 'white', fontSize: 16}}>{props.selected.initialHour || ''}</Text>
+                <Text style={{color: '#000', fontSize: 16}}>{props.selected.initialHour}</Text>
             </TouchableOpacity>
 
-            <Text style={{alignSelf: 'center', color: 'white'}}> às </Text>
+            <Text style={{alignSelf: 'center', color: '#3F2058'}}> às </Text>
             
             <TouchableOpacity 
-                style = {{...styles.picker, width: '40%'}} 
-                disabled = {!props.selected.initialHour}
+                style = {{...styles.picker, width: '38%'}} 
+                disabled = {props.selected.initialHour === ''}
                 onPress = {() => {
                     setVisible(true)
                     setFirstInput(false)
                 }}
             >
-                <Text style={{color: 'white', fontSize: 16}}>{props.selected.finalHour || ''}</Text>
+                <Text style={{color: '#000', fontSize: 16}}>{props.selected.finalHour}</Text>
             </TouchableOpacity>
   
             {visible && <DateTimePicker
@@ -109,31 +100,56 @@ const TimePicker = (props) => {
 class OpeningHoursPick extends Component {
     constructor(props){
         super(props)
-        this.state = {selected: {}, timePickerVisible: false}
+        this.state = {
+            selected: {
+                initialDay: '', 
+                finalDay: '', 
+                initialHour: '', 
+                finalHour: ''
+             }, 
+            timePickerVisible: false
+        }
     } 
 
     
     advance = () => {
-        let user = this.props.route.params.user;
-        user.profile.openinghours = this.state.selected;
-        console.log(user);
-        this.props.navigation.navigate('genrePick', {user: user})
+        if(this.state.selected.initialDay != '' && this.state.selected.finalDay === ''){
+            Alert.alert('', 'Escolha até que dia o espaço funciona ou deixe os ambos campos vazios se for o caso.');
+        }else{
+            let user = this.props.route.params.user;
+            user.profile.openinghours = this.state.selected;
+            this.props.navigation.navigate('genrePick', {user: user})
+        }
     }
 
-    dayPickerHandleChange = (value, initial) => {
+    dayPickerHandleChange = (value, firstInput) => {
         let selected = this.state.selected;
-        if(initial){
-            selected.initialDay = value
+        console.log(value);
+
+        if(value == 0) value = '';
+
+        if(firstInput){
+            selected.initialDay = value;
         }else{
-            selected.finalDay = value
+            selected.finalDay = value;
         }
+        
 
         this.setState({
             selected: selected
         })
     }
 
-    timePickerHandleChange = (selected) => {
+    timePickerHandleChange = (date, firstInput) => {
+        let selected = this.state.selected;
+        let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()}`;
+
+        if(firstInput){
+            selected.initialHour = time;
+        }else{
+            selected.finalHour = time;
+        }
+
         this.setState({
             selected: selected
         })

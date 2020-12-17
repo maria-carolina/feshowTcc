@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
 import styles from '../../../styles';
+import api from '../../../services/api'
+import FontAwesome from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
@@ -26,8 +28,8 @@ const Form = (props) => {
                 passwordRepetition: ''
             }}
 
-            onSubmit = {(values) => {
-                props.advance(values);
+            onSubmit = {(values) => {      
+                props.advance(values);                
             }}
             
             validationSchema = {FormSchema}
@@ -39,6 +41,9 @@ const Form = (props) => {
                     <View style = {styles.container}>
 
                         <Text style = {styles.title}>Registre-se</Text>
+
+                        {props.verifiedError && 
+                        <Text style = {styles.error}>{props.verifiedError}</Text>}
 
                         <TextInput 
                             placeholder = 'Escolha um username...'
@@ -60,25 +65,48 @@ const Form = (props) => {
                         {errors.email && 
                         <Text style = {styles.error}>{errors.email}</Text>}
 
-                        <TextInput 
-                            placeholder = 'Escolha uma senha...'
-                            secureTextEntry = {true}
-                            style = {styles.textInput} 
-                            value = {values.password}
-                            onChangeText = {text => 
-                                handleChange('password')(text.replace(/\s/g, ''))
-                            }
-                        />
+
+                        <View style = {{...styles.row, width: '70%'}}>
+                            <TextInput 
+                                placeholder = 'Escolha uma senha...'
+                                style = {{...styles.textInput, width: '100%'}}
+                                secureTextEntry = {!props.passwordVisible[0]}
+                                value = {values.password}
+                                onChangeText = {text => 
+                                    handleChange('password')(text.replace(/\s/g, ''))
+                                }
+                            />
+                            <FontAwesome 
+                                name = {'eye'} 
+                                size = {30}
+                                style = {{position: 'absolute', right: 10, marginTop: 32}}
+                                color = {props.passwordVisible[0] ? '#FFF': '#000'}
+                                onPress = {() => props.changePasswordVisibility(0)}
+                            />
+                        </View>
+
                         {errors.password 
                         && <Text style = {styles.error}>{errors.password}</Text> }
 
-                        <TextInput 
-                            placeholder = 'Repita a senha...'
-                            secureTextEntry = {true}
-                            style = {styles.textInput} 
-                            value = {values.passwordRepetition}
-                            onChangeText = {handleChange('passwordRepetition')}
-                        />
+                        <View style = {{...styles.row, width: '70%'}}>
+                            <TextInput 
+                                placeholder = 'Repita a senha...'
+                                style = {{...styles.textInput, width: '100%'}}
+                                secureTextEntry = {!props.passwordVisible[1]}
+                                value = {values.passwordRepetition}
+                                onChangeText = {text => 
+                                    handleChange('passwordRepetition')(text.replace(/\s/g, ''))
+                                }
+                            />
+                            <FontAwesome 
+                                name = {'eye'} 
+                                size = {30}
+                                style = {{position: 'absolute', right: 10, marginTop: 32}}
+                                color = {props.passwordVisible[1] ? '#FFF': '#000'}
+                                onPress = {() => props.changePasswordVisibility(1)}
+                            />
+                        </View>
+
                         {errors.passwordRepetition && 
                         <Text style = {styles.error}>{errors.passwordRepetition}</Text> }
 
@@ -100,18 +128,47 @@ const Form = (props) => {
 class AccountInfo extends Component {
     constructor(props){
         super(props)
-        this.state = {payment: false}
+        this.state = {verifiedError: null, passwordVisible: [false, false]}
     }
 
-    advance = (values) => {
-        delete values.passwordRepetition;
-        this.props.navigation.navigate('profileTypePick', {user: values});
+    advance = async (values) => {
+        try{
+           let response = await api.post('/verifyUsername', {username: values.username});
+
+           if(response.data.error == undefined){
+               response = await api.post('/verifyEmail', {email: values.email});
+               if(response.data.error == undefined){
+                    delete values.passwordRepetition;
+                    this.props.navigation.navigate('profileTypePick', {user: values});
+               }
+           }
+
+           if(response.data.error != undefined){
+               this.setState({
+                   verifiedError: response.data.error
+               })
+           }
+        }catch(e){
+            console.log(e)
+        }
+        
+    }
+
+    changePasswordVisibility = (field) =>{
+        let passwordVisible = this.state.passwordVisible;
+        passwordVisible[field] = !passwordVisible[field];
+        this.setState({
+            passwordVisible: passwordVisible
+        })
     }
 
     render(){
         return(
             <Form 
                 advance = {(values) => this.advance(values)}
+                verifiedError = {this.state.verifiedError}
+                passwordVisible = {this.state.passwordVisible}
+                changePasswordVisibility = {(field) => this.changePasswordVisibility(field)}
             />
         )
     }

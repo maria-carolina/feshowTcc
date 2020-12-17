@@ -55,7 +55,7 @@ const ImagePick = (props) => {
                     borderWidth: .5,
                     borderRadius: 100,
                     borderColor: '#6A1F6F',
-                    backgroundColor: '#6A3F6F',
+                    backgroundColor: '#D8D8D8',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}
