@@ -1,8 +1,8 @@
 const express = require('express');
 const userRoutes = express.Router();
 const multer = require('multer');
-const multerImage = require('../config/multerImage');
-const multerRider = require('../config/multerRider');
+const multerImage = require('../config/multer/multerImage');
+const multerRider = require('../config/multer/multerRider');
 const authMiddleware = require('../middlewares/auth');
 
 

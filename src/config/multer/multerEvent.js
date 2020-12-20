@@ -3,10 +3,10 @@ const path = require('path');
 const crypto = require('crypto');
 
 module.exports = {
-    dest: path.resolve(__dirname, '..', '..', 'uploads', 'riders'),
+    dest: path.resolve(__dirname, '..', '..', '..', 'uploads', 'events'),
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null,  path.resolve(__dirname, '..', '..', 'uploads', 'riders'));
+            cb(null,  path.resolve(__dirname, '..', '..', '..', 'uploads', 'events'));
         },
         filename: (req, file, cb) => {
             crypto.randomBytes(6, (err, hash) => {
@@ -20,17 +20,20 @@ module.exports = {
         }
     }),
     limits: {
-        fileSize: 5 * 1024 * 1024
+        fileSize: 4 * 1024 * 1024
     },
     fileFilter: (req, file, cb) => {
-        const filetypes = /pdf/;
-        const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(path.extname(file.originalname)); 
-        if(mimetype && extname){
-            return cb(null, true);
+        const allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/jpge',
+            'image/gif'
+        ];
+
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true)
+        } else {
+            cb(new Error('Formato de arquivo inválido'))
         }
-        return cb('Formato de arquivo inválido');
     }
 }
-
-// fileSize até 5mb
