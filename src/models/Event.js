@@ -3,6 +3,15 @@ const { Model, DataTypes } = require('sequelize');
 class Event extends Model {
     static init(sequelize) {
         super.init({
+            name: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                validate: {
+                    notEmpty: {
+                        msg: 'O campo nome não pode ser vazio'
+                    }
+                }
+            },
             description: {
                 type: DataTypes.STRING,
                 allowNull: false,
@@ -11,6 +20,10 @@ class Event extends Model {
                         msg: 'O campo descrição não pode ser vazio'
                     }
                 }
+            },
+            image: {
+                type: DataTypes.STRING,
+                allowNull: true
             },
             start_date: {
                 type: DataTypes.DATE,
@@ -67,7 +80,8 @@ class Event extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsTo(models.User, { foreignKey: 'organizer_id', as: 'organizer' });
+        this.belongsTo(models.Venue, { foreignKey: 'venue_id', as: 'venue' });
     }
 
 }

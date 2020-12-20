@@ -140,6 +140,8 @@ CREATE TABLE IF NOT EXISTS `feshow`.`events` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `organizer_id` INT(11) NOT NULL,
   `venue_id` INT(11) NOT NULL,
+  `name` VARCHAR(60) NOT NULL,
+  `image` VARCHAR(100) NULL,
   `description` VARCHAR(255) NOT NULL,
   `start_date` DATE NOT NULL,
   `end_date` DATE NOT NULL,
@@ -466,3 +468,27 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+-- begin attached script 'script'
+INSERT INTO `genres` (`name`) VALUES
+ ('Mpb'),
+ ('Pop'),
+ ('Rap'),
+ ('Rock'),
+ ('Sertanejo'),
+ ('Samba');
+ 
+ INSERT INTO `equipments` (`name`) VALUES
+ ('Microfone'),
+ ('Amplificador'),
+ ('Mic Stand');
+ 
+ INSERT INTO `instruments` (`name`) VALUES
+ ('Bateria'),
+ ('Guitarra'),
+ ('Baixo'),
+ ('Saxofone'),
+ ('Teclado');
+ 
+ 
+ 
+-- end attached script 'script'
