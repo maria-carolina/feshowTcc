@@ -1,4 +1,6 @@
 const Event = require('../models/Event');
+const ArtistEvent = require('../models/ArtistEvent');
+const Post = require('../models/Post');
 const fs = require('fs');
 const path = require('path');
 
@@ -52,15 +54,15 @@ module.exports = {
 
             if (event.image !== "") { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
-               
-                fs.unlink(file, function (err){
+
+                fs.unlink(file, function (err) {
                     if (err) throw err;
                     console.log('Arquivo deletado!');
                 })
             }
-            
 
-           await Event.update({
+
+            await Event.update({
                 image: key
             }, {
                 where: { id }
@@ -73,7 +75,7 @@ module.exports = {
         }
     },
 
-    async removeImage(req, res){
+    async removeImage(req, res) {
         try {
             const { id } = req.params;
 
@@ -81,14 +83,14 @@ module.exports = {
 
             if (event.image !== "") { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
-               
-                fs.unlink(file, function (err){
+
+                fs.unlink(file, function (err) {
                     if (err) throw err;
                     console.log('Arquivo deletado!');
                 })
             }
-            
-           await Event.update({
+
+            await Event.update({
                 image: ""
             }, {
                 where: { id }
@@ -99,5 +101,45 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao remover imagem' })
         }
+    },
+
+    async show(req, res) {
+
+        const { id } = req.params;
+
+        const event = await Event.findByPk(id);
+
+        if (!event) {
+            return res.send({ error: 'Erro ao gravar evento no sistema' });
+        }
+
+        return res.send(event);
+
+    },
+
+    async showLineup(req, res) {
+
+        const { id } = req.params;
+
+        const lineup = await ArtistEvent.findAll({
+            attributes: ['event_id', 'start_time'],
+            where: { event_id: id },
+            include: {
+                association: 'artists',
+                attributes: ['id', 'name']
+            }
+        });
+
+        return res.send(lineup);
+
+    },
+
+    async showPostagens(req, res) {
+
+        const { id } = req.params;
+
+        const posts = await Post.findAll({ where: { event_id: id}})
+
+        return res.send(posts);
     }
 };
