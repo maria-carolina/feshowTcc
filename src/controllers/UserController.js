@@ -2,7 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 const authConfig = require('../config/auth.json');
+
+//models
 const User = require('../models/User');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
@@ -136,7 +140,18 @@ module.exports = {
 
         const { filename: key } = req.file;
 
-        const user = await User.update({
+        const user = await User.findByPk(req.userId);
+
+        if (user.image !== null || user.image !== "") { //remover caso seja update de imagem
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', user.image);
+
+            fs.unlink(file, function (err) {
+                if (err) throw err;
+                console.log('Arquivo deletado!');
+            })
+        }
+
+        await User.update({
             image: key
         }, {
             where: { id: req.userId }
