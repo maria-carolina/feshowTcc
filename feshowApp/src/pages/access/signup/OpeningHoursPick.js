@@ -91,7 +91,6 @@ const TimePicker = (props) => {
                 is24Hour = {true}
                 display = "default"
                 onChange = {setTime}
-                onCa
             />}
         </View>
     )
@@ -142,7 +141,7 @@ class OpeningHoursPick extends Component {
 
     timePickerHandleChange = (date, firstInput) => {
         let selected = this.state.selected;
-        let time = `${date.getHours()}:${date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()}`;
+        let time = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
         if(firstInput){
             selected.initialHour = time;

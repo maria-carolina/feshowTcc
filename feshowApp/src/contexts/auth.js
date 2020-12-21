@@ -7,6 +7,8 @@ const AuthContext = createContext({ signed: false });
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
+    const [token, setToken] = useState(null);
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -17,6 +19,7 @@ export const AuthProvider = ({ children }) => {
 
             if(storagedUser && storagedToken){
                 setUser(JSON.parse(storagedUser));
+                setToken(storagedToken);
                 setLoading(false);
             }else if (!storagedUser && !storagedToken){
                 setLoading(false);
@@ -37,6 +40,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         setUser(result.user);
+        setToken(result.token);
         await AsyncStorage.setItem('auth_user', JSON.stringify(result.user));
         await AsyncStorage.setItem('auth_token', result.token);
         
@@ -52,9 +56,10 @@ export const AuthProvider = ({ children }) => {
             value = {{
                 signed: !!user,
                 user,
+                token,
                 signIn,
                 signOut,
-                loading
+                loading,
             }}
         >
             {children}

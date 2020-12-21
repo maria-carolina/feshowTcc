@@ -21,7 +21,7 @@ const Root = () => {
         )
     }
 
-    return signed ? <AppRoute /> : <AppRoute />
+    return   <AppRoute />
 }
 
 export default Root;

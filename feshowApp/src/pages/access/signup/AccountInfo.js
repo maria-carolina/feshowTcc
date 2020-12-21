@@ -8,7 +8,7 @@ import * as yup from 'yup';
 
 0
 const FormSchema = yup.object().shape({
-    username: yup.string().trim('O username não pode conter espaços').required('Campo obrigatório')
+    username: yup.string().required('Campo obrigatório')
     .min(5, 'O nome deve conter menos 5 caracteres'),
     email: yup.string().required('Campo obrigatório').email('Digite um email'),
     password: yup.string().required('Campo obrigatório')
@@ -79,7 +79,7 @@ const Form = (props) => {
                             <FontAwesome 
                                 name = {'eye'} 
                                 size = {30}
-                                style = {{position: 'absolute', right: 10, marginTop: 32}}
+                                style = {{position: 'absolute', right: 10, bottom: 5}}
                                 color = {props.passwordVisible[0] ? '#FFF': '#000'}
                                 onPress = {() => props.changePasswordVisibility(0)}
                             />
@@ -101,7 +101,7 @@ const Form = (props) => {
                             <FontAwesome 
                                 name = {'eye'} 
                                 size = {30}
-                                style = {{position: 'absolute', right: 10, marginTop: 32}}
+                                style = {{position: 'absolute', right: 10,  bottom: 5}}
                                 color = {props.passwordVisible[1] ? '#FFF': '#000'}
                                 onPress = {() => props.changePasswordVisibility(1)}
                             />

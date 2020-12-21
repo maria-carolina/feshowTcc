@@ -1,11 +1,17 @@
 import {StyleSheet} from 'react-native';
 
 const Styles = StyleSheet.create({
+    center: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#F2F2F2',
+        
     },
 
     button: {
@@ -41,9 +47,6 @@ const Styles = StyleSheet.create({
         width: '70%',
         marginTop: 30,
         fontSize: 16,
-        fontFamily: 'arial',
-        fontWeight: '100',
-        color: 'black'
     },
     
     list: {
@@ -97,10 +100,23 @@ const Styles = StyleSheet.create({
 
     row: {
         flexDirection: 'row',
-        position: 'relative'
+        position: 'relative',
+        alignItems: 'center',
     },
-    
+
+    rowInput: {
+        width: '42%',
+        position: 'relative',
+        height: 40,
+        marginTop: 20,
+        backgroundColor: '#D8D8D8',
+        borderRadius: 5,
+        padding: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
 
 })
 
-export default Styles
+export default Styles;

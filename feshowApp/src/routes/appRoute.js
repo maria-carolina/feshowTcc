@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer'
+import NewEventPage from '../pages/event/NewEventPage';
 import ProfilePage from '../pages/access/ProfilePage';
 import styles from '../styles'
 
@@ -171,7 +172,7 @@ const NavStack = (props) => {
             />
             <Stack.Screen 
                 name = 'newEventPage'
-                component = {InitialPage} //provisório
+                component = {NewEventPage} 
             />
              <Stack.Screen 
                 name = 'drawerTestPage'
