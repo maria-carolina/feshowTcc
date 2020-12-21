@@ -11,6 +11,7 @@ eventRoutes.get('/event/delete/:id', EventController.delete)
 eventRoutes.get('/event/removeImage/:id', EventController.removeImage);
 eventRoutes.get('/event/show/:id', EventController.show);
 eventRoutes.get('/event/showLineup/:id', EventController.showLineup);
-eventRoutes.get('/event/showPostagens/:id', EventController.showPostagens);
+eventRoutes.get('/event/showPosts/:id', EventController.showPosts);
+eventRoutes.get('/event/showEquipments/:id', EventController.showEquipments);
 
 module.exports = eventRoutes;
