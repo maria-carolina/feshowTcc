@@ -5,11 +5,13 @@ class ArtistEvent extends Model {
         super.init({
             event_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },
             artist_id: {
                 type: DataTypes.INTEGER,
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },
             start_time: {
                 type: DataTypes.TIME,
@@ -34,7 +36,7 @@ class ArtistEvent extends Model {
         })
     }
     static associate(models){
-        //
+        this.belongsTo(models.Artist, { foreignKey: 'artist_id', as: 'artists' })
     }
 
 }
