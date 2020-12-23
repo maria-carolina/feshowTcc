@@ -34,7 +34,7 @@ module.exports = {
                 end_time
             } = req.body;
 
-            let endDate;
+            let endDate, descript;
 
             if (end_date !== undefined || end_date !== "") {
                 endDate = end_date;
@@ -42,11 +42,17 @@ module.exports = {
                 endDate = start_date;
             }
 
+            if (description !== undefined || description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
             const event = await Event.create({
                 organizer_id: req.userId,
                 venue_id,
                 name,
-                description,
+                description: descript,
                 start_date,
                 end_date: endDate,
                 start_time,
@@ -111,7 +117,7 @@ module.exports = {
                 end_time
             } = req.body;
 
-            let endDate;
+            let endDate, descript;
 
             if (end_date !== undefined || end_date !== "") {
                 endDate = end_date;
@@ -119,11 +125,17 @@ module.exports = {
                 endDate = start_date;
             }
 
+            if (description !== undefined || description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
             const event = await Event.update({
                 organizer_id: req.userId,
                 venue_id,
                 name,
-                description,
+                description: descript,
                 start_date,
                 end_date: endDate,
                 start_time,
@@ -176,7 +188,12 @@ module.exports = {
 
         const { id } = req.params;
 
-        const event = await Event.findByPk(id);
+        const event = await Event.findByPk(id,{
+            include: {
+                association: 'venue',
+                attributes: ['id', 'name']
+            }
+        });
 
         if (!event) {
             return res.send({ error: 'Erro ao gravar evento no sistema' });

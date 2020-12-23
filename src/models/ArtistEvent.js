@@ -13,6 +13,10 @@ class ArtistEvent extends Model {
                 allowNull: false,
                 primaryKey: true
             },
+            date: {
+                type: DataTypes.DATE,
+                allowNull: false
+            },
             start_time: {
                 type: DataTypes.TIME,
                 allowNull: false
