@@ -116,6 +116,15 @@ const Styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
+    rowTab: {
+        alignItems: 'center',
+        padding: 18,
+        height: 50,
+    },
+
+    purpleText: {
+        color: '#3F2058'
+    }
 
 })
 

@@ -210,14 +210,14 @@ class NewEventPage extends Component{
     static contextType = AuthContext;
 
     save = async (values) => {
-        if((values.end_time < values.start_time) && values.end_date == '' ){
+        if((values.end_time < values.start_time) && 
+        (values.end_date == '' || values.end_date === values.start_date)){
             Alert.alert('Horário inválida', 
             'Em casos de eventos com um dia só,'+
             'o horário final deve ser posterior ao inicial');
         }else if((values.end_date < values.start_date) && values.end_date != ''){
             Alert.alert('Data inválida', 'A data final deve ser posterior a inicial');
         }else{
-
             let splitted = values.start_date.split('/');
             values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
 
@@ -229,7 +229,6 @@ class NewEventPage extends Component{
             values.venue_id = 1;
 
             try{
-                console.log(values)
                 let result = await api.post('/event/store', values, {
                     headers: {
                         Authorization: `Bearer ${this.context.token}`
