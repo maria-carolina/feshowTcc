@@ -142,7 +142,7 @@ module.exports = {
 
         const user = await User.findByPk(req.userId);
 
-        if (user.image !== null || user.image !== "") { //remover caso seja update de imagem
+        if (user.image !== null) { //remover caso seja update de imagem
             const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', user.image);
 
             fs.unlink(file, function (err) {

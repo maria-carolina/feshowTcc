@@ -13,9 +13,11 @@ const fs = require('fs');
 const path = require('path');
 
 function searchEquipment(equipmentId, array) {
+    let qtd;
     for (var i = 0; i < array.length; i++) {
         if (array[i].equipment_id === equipmentId) {
-            return true;
+            qtd = array[i].quantity;
+            return qtd;
         }
     }
     return false;
@@ -79,7 +81,7 @@ module.exports = {
 
             const event = await Event.findByPk(id)
 
-            if (event.image !== "" || event.image !== null) { //remover caso seja update de imagem
+            if (event.image !== null) { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
 
                 fs.unlink(file, function (err) {
@@ -172,7 +174,7 @@ module.exports = {
             }
 
             await Event.update({
-                image: ""
+                image: null
             }, {
                 where: { id }
             });
@@ -188,7 +190,7 @@ module.exports = {
 
         const { id } = req.params;
 
-        const event = await Event.findByPk(id,{
+        const event = await Event.findByPk(id, {
             include: {
                 association: 'venue',
                 attributes: ['id', 'name']
@@ -285,7 +287,7 @@ module.exports = {
         let artistEquipment;
         let equipments = [], equipmentsVenue = [];
         let obj = {};
-        let equipment, artist, result;
+        let equipment, artist, result, qtd;
 
         //espaço do evento
         const equipmentVenue = await EquipmentVenue.findAll({
@@ -303,12 +305,33 @@ module.exports = {
                 artist = await Artist.findByPk(equip.artist_id);
 
                 if (result) {
-                    equipmentsVenue.push({
-                        artistId: artist.id,
-                        name: artist.name,
-                        equipment: equipment.name,
-                        quantity: equip.quantity
-                    });
+                    //result retorna quantidade que espaço tem 
+                    if (equip.quantity > result) {
+                        qtd = equip.quantity - result;
+
+                        //o que o espaço irá emprestar
+                        equipmentsVenue.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: result
+                        });
+
+                        equipments.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: qtd
+                        });
+                    } else if (equip.quantity <= result) {
+                        equipmentsVenue.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: equip.quantity
+                        });
+                    }
+
                 } else {
                     equipments.push({
                         artistId: artist.id,
@@ -320,7 +343,7 @@ module.exports = {
             }
         }
 
-        return res.send({equipments, equipmentsVenue});
+        return res.send({ equipments, equipmentsVenue });
     },
 
     async delete(req, res) {
@@ -345,7 +368,7 @@ module.exports = {
             await Event.destroy({
                 where: { id }
             });
-            
+
             return res.status(200).send('ok');
 
         } catch (err) {
