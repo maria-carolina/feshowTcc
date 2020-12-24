@@ -8,7 +8,7 @@ const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
 
-const { Op, QueryTypes } = require('sequelize');
+const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 
@@ -208,7 +208,7 @@ module.exports = {
         const { id } = req.params;
 
         const lineup = await ArtistEvent.findAll({
-            attributes: ['event_id', 'start_time'],
+            attributes: ['event_id', 'date', 'start_time'],
             where: {
                 [Op.and]: [{ event_id: id }, { status: 1 }]
             },
@@ -283,7 +283,7 @@ module.exports = {
         const event = await Event.findByPk(id);
 
         let artistEquipment;
-        let equipments = [];
+        let equipments = [], equipmentsVenue = [];
         let obj = {};
         let equipment, artist, result;
 
@@ -303,7 +303,12 @@ module.exports = {
                 artist = await Artist.findByPk(equip.artist_id);
 
                 if (result) {
-                    //o espaço tem
+                    equipmentsVenue.push({
+                        artistId: artist.id,
+                        name: artist.name,
+                        equipment: equipment.name,
+                        quantity: equip.quantity
+                    });
                 } else {
                     equipments.push({
                         artistId: artist.id,
@@ -315,7 +320,7 @@ module.exports = {
             }
         }
 
-        return res.send(equipments);
+        return res.send({equipments, equipmentsVenue});
     },
 
     async delete(req, res) {
