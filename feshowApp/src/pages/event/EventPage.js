@@ -3,8 +3,9 @@ import {View, Text, TouchableOpacity, FlatList, ScrollView, Modal, Image, Alert}
 import ImagePicker from 'react-native-image-picker';
 import styles from '../../styles';
 import api from '../../services/api';
-import path from 'path';
 import AuthContext from '../../contexts/auth';
+import PageBody from '../event/EventPageBody';
+import ImageChangeModal from '../utils/ImageChange';
 
 
 const invitationModal = () => {
@@ -15,144 +16,22 @@ const invitationModal = () => {
 
 }
 
-const ImageChangeModal = (props) => {
-    return(
-        <Modal
-            visible = {props.visible}
-            transparent = {true}
-            animationType = 'fade'
-            onRequestClose = {props.closeModal}
-        >
-            <View style = {styles.container}>
-                    <Text style = {{...styles.title, marginBottom: 10}}>Novo Flyer</Text>
+function blobTo64data(imageBlob) {
+    return new Promise((resolve) => {
+        const fileReader = new FileReader();
 
-                    <Image 
-                        source = {props.source}
-                        style = {{
-                            width: '80%',
-                            height: '70%',
-                        }}
-                    />
+        var base64data;
 
-                    <TouchableOpacity 
-                        style = {{
-                            ...styles.button, 
-                            marginTop: 10, 
-                            marginBottom: 5
-                        }}
-                        onPress = {props.saveImage}
-                    >
-                        <Text style = {styles.buttonLabel}>Salvar</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                        style = {{
-                            ...styles.button, 
-                            marginTop: 5
-                        }}
-                        onPress = {props.closeModal}
-                    >
-                        <Text style = {styles.buttonLabel}>Cancelar</Text>
-                    </TouchableOpacity>
-            </View>
-
-        </Modal>
-    )
-}
-
-const PageBody = (props) => {
-    if(props.selectedTab == 1){
-        return (
-            <View style = {{width: '90%'}}>
-                <Text style = {{...styles.title, textAlign: 'left'}}>Sobre o evento...</Text>
-                <Text>{props.loaded}</Text>
-            </View>
-        )
-    }
-
-    var list = props.loaded.map((item) => {
-        if(props.selectedTab == 0){ 
-            return (
-                <View 
-                    style = {{...styles.row, 
-                        borderBottomWidth: .5,
-                        padding: 20,
-                        position: 'relative'
-                    }}
-                    key = {props.loaded.indexOf(item)}
-                >
-                    <Text style = {{color: '#000'}}>{item.artists.name}</Text>
-                    <Text style = {{
-                        right: 50,
-                        position: 'absolute'
-                    }}>
-                        {item.start_time} 
-                    </Text>
-                </View>
-            )
-        }else if(props.selectedTab == 2){
-            return(
-                <View 
-                    style = {{ 
-                        borderBottomWidth: .5,
-                        padding: 10,
-                        position: 'relative'
-                    }}
-                    key = {props.loaded.indexOf(item)}
-                >
-                    <Text 
-                        style = {{
-                            fontWeight: 'bold', 
-                            color: '#3F2058'
-                        }}>
-                        {item.name}
-                    </Text>
-                    <Text>
-                        {item.post}
-                    </Text>
-                </View>
-            )
-        }else{
-            var equipment = item.quantity > 1 ? 
-            (item.equipment.charAt(item.equipment.length - 1) === 'r' ? 
-            `${item.equipment}es`: `${item.equipment}s`)
-            : item.equipment;
-
-            return(
-                
-                <View
-                    style = {{
-                        borderBottomWidth: .5,
-                        padding: 20,
-                    }}
-                    key = {props.loaded.indexOf(item)}
-                >
-                    <Text>{`É necessário arrumar ${item.quantity} ${equipment} para ${item.name}`}</Text>
-                </View>
-            )
+        fileReader.readAsDataURL(imageBlob);
+        
+        fileReader.onload = () => {
+            base64data = fileReader.result;
+            resolve(base64data);
         }
-    })
-
-    return (
-        <View style = {{width: '90%'}}>
-            {props.selectedTab == 2 && 
-                <TouchableOpacity
-                    style = {{...styles.textInput,
-                        padding: 10,
-                        width: '100%',
-                        marginTop: 5
-                    }}
-                >
-                    <Text
-                        style = {{color: '#8E8E8E'}} 
-                    >Insira um comentário...</Text>
-                </TouchableOpacity>
-            }
-
-            {list}
-        </View>
-    );
+    }) 
 }
+
+
 
 const TABS = [
     {id: 0, label:'Line-up', value: 'lineup'},
@@ -179,42 +58,58 @@ class EventPage extends Component{
 
     loadEventData = async (selectedTab) => {
         try{
-            var result = await api.get('/event/show/2', {headers: {
-                Authorization: `Bearer ${this.context.token}`
-            }});
-
+            var result = await api.get('/event/show/2', {
+                headers: {
+                    Authorization: `Bearer ${this.context.token}`
+                }
+            });
+            
+            
             let splitted = result.data.start_date.split('-'); 
             result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+
             splitted = result.data.end_date.split('-');
             result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-
             
+            var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${this.context.token}`,
+                },
+                responseType: 'blob'
+            })
+            
+            var currentAvatar = await blobTo64data(imageBlob.data);
 
-            this.setState({
+            this.setState({ 
                 event: result.data,
                 description: result.data.description,
                 selectedTab: selectedTab,
+                currentAvatar: currentAvatar
             })
+
         }catch(e){
-            console.log(e)
+            throw e
         }
 
-        
     }
 
     loadLineUp = async (selectedTab) => {
         try{
+            console.log(this.context.token)
             var result = await api.get('event/showLineup/2', {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }});
+
+            this.setState({
+                lineup: result.data,
+                selectedTab: selectedTab
+            })
         }catch(e){
-            console.log(e)
+            console.log(e) 
         }
 
-        this.setState({
-            lineup: result.data,
-            selectedTab: selectedTab
-        })
+        
     }
 
     loadPosts = async (selectedTab) => {
@@ -230,27 +125,33 @@ class EventPage extends Component{
             posts: result.data,
             selectedTab: selectedTab 
         })
+
     }
 
     loadWarnings = async (selectedTab) => {
         try{
             var result = await api.get('event/showEquipments/2', {headers: {
                 Authorization: `Bearer ${this.context.token}`
-            }});
+            }}); 
+
+
+            this.setState({
+                warnings: result.data,
+                selectedTab: selectedTab
+            })
         }catch(e){
             console.log(e)
         }
 
-        this.setState({
-            warnings: result.data,
-            selectedTab: selectedTab
-        })
+       
     }
 
     changeTab = async (selectedTab) => {
        
         if(!(selectedTab.value in this.state)){
+            console.log(selectedTab.id)
             if(selectedTab.id == 0){
+                console.log('entrou')
                 await this.loadLineUp(selectedTab);
             }else if(selectedTab.id == 1){
                 await this.loadEventData(selectedTab);
@@ -281,10 +182,59 @@ class EventPage extends Component{
                     }
                 }
             )
+
+            this.setState({
+                imageChangeVisible: false
+            })
+
+            this.loadEventData(TABS[1]);
+
         }catch(e){
             throw (e);
         }
     }
+
+    removeImage = async () => {
+        try{
+            await api.get(`/event/removeImage/${this.state.event.id}`, 
+                { 
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            this.loadEventData(TABS[1]);
+
+        }catch(e){
+            throw (e);
+        }
+    }
+
+    openImagePicker = () => {
+        ImagePicker.showImagePicker({
+            title: 'Selecione uma imagem',
+            storageOptions: {
+                skipBackup: true,
+                path: 'images'
+            }},
+            (response) => {
+                if (response.didCancel) return;
+                if (response.error) return;
+
+                const avatar = {
+                    uri: response.uri,
+                    name: response.fileName,
+                    type: response.type
+                }
+
+                this.setState({
+                    imageChangeVisible: true,
+                    newAvatar: avatar
+                })
+            })
+    }
+
 
     openEventEditPage = () => {}
 
@@ -321,45 +271,54 @@ class EventPage extends Component{
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}
-                            onPress = {() => ImagePicker.showImagePicker({
-                                title: 'Selecione uma imagem',
-                                storageOptions: {
-                                    skipBackup: true,
-                                    path: 'images'
-                                }},
-                                (response) => {
-                                    if (response.didCancel) return;
-                                    if (response.error) return;
-
-                                    const avatar = {
-                                        uri: response.uri,
-                                        name: response.fileName,
-                                        type: response.type
-                                    }
-
-                                    this.setState({
-                                        imageChangeVisible: true,
-                                        newAvatar: avatar
-                                    })
-                                } 
-                            )}
+                            onPress = {() => {
+                                 this.openImagePicker();
+                            }}
                         >
                             <Text>Adicionar flyer</Text>
                         </TouchableOpacity>
-                        ) || 
-                        <Image
-                            source = {{uri: `http://192.168.1.33:3001/uploads/events/${this.state.event.image}`}}
+                        ) ||
+                        <View
                             style = {{
                                 width: '37%',
                                 height: 175,
+                                marginRight: 10
                             }}
-                        />
+                        > 
+                            <TouchableOpacity
+                                onPress = {() => {
+                                    this.openImagePicker();
+                                }}
+                            >
+                                <Image
+                                    source = {{uri: this.state.currentAvatar}}
+                                    style = {{
+                                        width: '100%',
+                                        height: '100%', 
+                                    }}
+                                    
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style = {{
+                                    marginTop: 3,
+                                    marginBottom: 5,
+                                    alignSelf: 'center'
+                                }}
+                                onPress = {() => {
+                                    this.removeImage();
+                                }}
+                            >
+                                <Text>Remover flyer</Text>
+                            </TouchableOpacity>
+                        </View>
                         }
 
                         <View>
 
                             <Text style = {{
-                                ...styles.title, 
+                                ...styles.title,
                                 textAlign: 'left',
                                 marginBottom: 0 }}>
                                     {'event' in this.state && this.state.event.name}

@@ -385,7 +385,7 @@ module.exports = {
 
         if (event.image !== null) {
             const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
-            if (fs.existsSync(path)) {
+            if (fs.existsSync(file)) {
                 return res.sendFile(file);
             } else {
                 return res.send({ msg: 'Evento não possui imagem' })
