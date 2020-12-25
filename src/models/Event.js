@@ -14,12 +14,7 @@ class Event extends Model {
             },
             description: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo descrição não pode ser vazio'
-                    }
-                }
+                allowNull: true
             },
             image: {
                 type: DataTypes.STRING,

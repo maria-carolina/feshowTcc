@@ -8,14 +8,16 @@ const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
 
-const { Op, QueryTypes } = require('sequelize');
+const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 
 function searchEquipment(equipmentId, array) {
+    let qtd;
     for (var i = 0; i < array.length; i++) {
         if (array[i].equipment_id === equipmentId) {
-            return true;
+            qtd = array[i].quantity;
+            return qtd;
         }
     }
     return false;
@@ -34,7 +36,7 @@ module.exports = {
                 end_time
             } = req.body;
 
-            let endDate;
+            let endDate, descript;
 
             if (end_date !== undefined || end_date !== "") {
                 endDate = end_date;
@@ -42,11 +44,17 @@ module.exports = {
                 endDate = start_date;
             }
 
+            if (description !== undefined || description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
             const event = await Event.create({
                 organizer_id: req.userId,
                 venue_id,
                 name,
-                description,
+                description: descript,
                 start_date,
                 end_date: endDate,
                 start_time,
@@ -77,12 +85,13 @@ module.exports = {
             if (event.image !== null) { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
 
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                })
+                if (fs.existsSync(path)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    })
+                }
             }
-
 
             await Event.update({
                 image: key
@@ -112,7 +121,7 @@ module.exports = {
                 end_time
             } = req.body;
 
-            let endDate;
+            let endDate, descript;
 
             if (end_date !== undefined || end_date !== "") {
                 endDate = end_date;
@@ -120,11 +129,17 @@ module.exports = {
                 endDate = start_date;
             }
 
+            if (description !== undefined || description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
             const event = await Event.update({
                 organizer_id: req.userId,
                 venue_id,
                 name,
-                description,
+                description: descript,
                 start_date,
                 end_date: endDate,
                 start_time,
@@ -161,7 +176,7 @@ module.exports = {
             }
 
             await Event.update({
-                image: ""
+                image: null
             }, {
                 where: { id }
             });
@@ -177,7 +192,12 @@ module.exports = {
 
         const { id } = req.params;
 
-        const event = await Event.findByPk(id);
+        const event = await Event.findByPk(id, {
+            include: {
+                association: 'venue',
+                attributes: ['id', 'name']
+            }
+        });
 
         if (!event) {
             return res.send({ error: 'Erro ao gravar evento no sistema' });
@@ -192,7 +212,7 @@ module.exports = {
         const { id } = req.params;
 
         const lineup = await ArtistEvent.findAll({
-            attributes: ['event_id', 'start_time'],
+            attributes: ['event_id', 'date', 'start_time'],
             where: {
                 [Op.and]: [{ event_id: id }, { status: 1 }]
             },
@@ -267,9 +287,9 @@ module.exports = {
         const event = await Event.findByPk(id);
 
         let artistEquipment;
-        let equipments = [];
+        let equipments = [], equipmentsVenue = [];
         let obj = {};
-        let equipment, artist, result;
+        let equipment, artist, result, qtd;
 
         //espaço do evento
         const equipmentVenue = await EquipmentVenue.findAll({
@@ -287,7 +307,33 @@ module.exports = {
                 artist = await Artist.findByPk(equip.artist_id);
 
                 if (result) {
-                    //o espaço tem
+                    //result retorna quantidade que espaço tem 
+                    if (equip.quantity > result) {
+                        qtd = equip.quantity - result;
+
+                        //o que o espaço irá emprestar
+                        equipmentsVenue.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: result
+                        });
+
+                        equipments.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: qtd
+                        });
+                    } else if (equip.quantity <= result) {
+                        equipmentsVenue.push({
+                            artistId: artist.id,
+                            name: artist.name,
+                            equipment: equipment.name,
+                            quantity: equip.quantity
+                        });
+                    }
+
                 } else {
                     equipments.push({
                         artistId: artist.id,
@@ -299,7 +345,7 @@ module.exports = {
             }
         }
 
-        return res.send(equipments);
+        return res.send({ equipments, equipmentsVenue });
     },
 
     async delete(req, res) {
@@ -324,12 +370,30 @@ module.exports = {
             await Event.destroy({
                 where: { id }
             });
-            
+
             return res.status(200).send('ok');
 
         } catch (err) {
             return res.send({ error: 'Erro ao deletar evento' })
         }
+    },
+
+    async getImage(req, res) {
+        const { id } = req.params;
+
+        const event = await Event.findByPk(id)
+
+        if (event.image !== null) {
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+            if (fs.existsSync(path)) {
+                return res.sendFile(file);
+            } else {
+                return res.send({ msg: 'Evento não possui imagem' })
+            }
+        } else {
+            return res.send({ msg: 'Evento não possui imagem' })
+        }
+
     }
 
 };
