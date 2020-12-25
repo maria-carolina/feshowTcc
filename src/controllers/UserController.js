@@ -145,10 +145,13 @@ module.exports = {
         if (user.image !== null) { //remover caso seja update de imagem
             const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', user.image);
 
-            fs.unlink(file, function (err) {
-                if (err) throw err;
-                console.log('Arquivo deletado!');
-            })
+            if (fs.existsSync(path)) {
+                fs.unlink(file, function (err) {
+                    if (err) throw err;
+                    console.log('Arquivo deletado!');
+                });
+            }
+
         }
 
         await User.update({
@@ -329,12 +332,12 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao alterar senha' })
         }
-    }, 
-    
+    },
+
     async verifyEmail(req, res) {
         const { email } = req.body;
 
-        const user = await User.findOne({ where: { email }});
+        const user = await User.findOne({ where: { email } });
 
         if (user) {
             return res.send({ error: 'Este e-mail já existe no sistema' })
@@ -347,7 +350,7 @@ module.exports = {
     async verifyUsername(req, res) {
         const { username } = req.body;
 
-        const user = await User.findOne({ where: { username }});
+        const user = await User.findOne({ where: { username } });
 
         if (user) {
             return res.send({ error: 'Este username já existe no sistema' })

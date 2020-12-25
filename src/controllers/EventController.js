@@ -84,12 +84,13 @@ module.exports = {
             if (event.image !== null) { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
 
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                })
+                if (fs.existsSync(path)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    })
+                }
             }
-
 
             await Event.update({
                 image: key
@@ -374,6 +375,24 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao deletar evento' })
         }
+    },
+
+    async getImage(req, res) {
+        const { id } = req.params;
+
+        const event = await Event.findByPk(id)
+
+        if (event.image !== null) {
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+            if (fs.existsSync(path)) {
+                return res.sendFile(file);
+            } else {
+                return res.send({ msg: 'Evento não possui imagem' })
+            }
+        } else {
+            return res.send({ msg: 'Evento não possui imagem' })
+        }
+
     }
 
 };
