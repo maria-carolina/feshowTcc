@@ -124,6 +124,14 @@ const Styles = StyleSheet.create({
 
     purpleText: {
         color: '#3F2058'
+    },
+
+    modalBox: {
+        width: '70%',
+        height: '90%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1
     }
 
 })

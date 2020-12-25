@@ -70,10 +70,11 @@ module.exports = {
 
         try {
             const { filename: key } = req.file;
+        
 
             const event = await Event.findByPk(id)
 
-            if (event.image !== "" || event.image !== null) { //remover caso seja update de imagem
+            if (event.image !== null) { //remover caso seja update de imagem
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
 
                 fs.unlink(file, function (err) {

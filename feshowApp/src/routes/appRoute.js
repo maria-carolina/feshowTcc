@@ -9,7 +9,7 @@ import styles from '../styles'
 
 //só para teste
 import InitialPage from '../pages/access/InitialPage';
-import SignInPage from '../pages/access/SignInPage';
+import ImageTest from '../pages/event/ImageTest';
 //
 
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -177,7 +177,7 @@ const NavStack = (props) => {
             />
              <Stack.Screen 
                 name = 'drawerTestPage'
-                component = {SignInPage} //provisório
+                component = {ImageTest} //provisório
             />
             
         </Stack.Navigator>

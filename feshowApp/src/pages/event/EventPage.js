@@ -1,7 +1,9 @@
-import React, { Component, useEffect } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ScrollView, TextInput, Image} from 'react-native';
+import React, { Component } from 'react';
+import {View, Text, TouchableOpacity, FlatList, ScrollView, Modal, Image, Alert} from 'react-native';
+import ImagePicker from 'react-native-image-picker';
 import styles from '../../styles';
 import api from '../../services/api';
+import path from 'path';
 import AuthContext from '../../contexts/auth';
 
 
@@ -11,6 +13,51 @@ const invitationModal = () => {
     sendInvitation = () => {}
     finish = () => {}
 
+}
+
+const ImageChangeModal = (props) => {
+    return(
+        <Modal
+            visible = {props.visible}
+            transparent = {true}
+            animationType = 'fade'
+            onRequestClose = {props.closeModal}
+        >
+            <View style = {styles.container}>
+                    <Text style = {{...styles.title, marginBottom: 10}}>Novo Flyer</Text>
+
+                    <Image 
+                        source = {props.source}
+                        style = {{
+                            width: '80%',
+                            height: '70%',
+                        }}
+                    />
+
+                    <TouchableOpacity 
+                        style = {{
+                            ...styles.button, 
+                            marginTop: 10, 
+                            marginBottom: 5
+                        }}
+                        onPress = {props.saveImage}
+                    >
+                        <Text style = {styles.buttonLabel}>Salvar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        style = {{
+                            ...styles.button, 
+                            marginTop: 5
+                        }}
+                        onPress = {props.closeModal}
+                    >
+                        <Text style = {styles.buttonLabel}>Cancelar</Text>
+                    </TouchableOpacity>
+            </View>
+
+        </Modal>
+    )
 }
 
 const PageBody = (props) => {
@@ -116,8 +163,12 @@ const TABS = [
 
 class EventPage extends Component{
     constructor(props){
-        super(props)
-        this.state = {selectedTab: TABS[1]}
+        super(props) 
+        this.state = {
+            selectedTab: TABS[1],
+            imageChangeVisible: false,
+            newAvatar: null
+        }
     }
 
     static contextType = AuthContext;
@@ -131,20 +182,24 @@ class EventPage extends Component{
             var result = await api.get('/event/show/2', {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }});
+
+            let splitted = result.data.start_date.split('-'); 
+            result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+            splitted = result.data.end_date.split('-');
+            result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+
+            
+
+            this.setState({
+                event: result.data,
+                description: result.data.description,
+                selectedTab: selectedTab,
+            })
         }catch(e){
             console.log(e)
         }
 
-        let splitted = result.data.start_date.split('-'); 
-        result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-        splitted = result.data.end_date.split('-');
-        result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-
-        this.setState({
-            event: result.data,
-            description: result.data.description,
-            selectedTab: selectedTab
-        })
+        
     }
 
     loadLineUp = async (selectedTab) => {
@@ -212,6 +267,25 @@ class EventPage extends Component{
 
     }
 
+    saveImage = async () => {
+        try{
+            var formData = new FormData();
+            formData.append('file', this.state.newAvatar);
+            await api.post(`/event/storeImage/${this.state.event.id}`, 
+                formData, 
+                { 
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`, 
+                        'Content-type': 'multipart/form-data', 
+                        'Accept': 'application/json'
+                    }
+                }
+            )
+        }catch(e){
+            throw (e);
+        }
+    }
+
     openEventEditPage = () => {}
 
     sendSolicitation = () => {}
@@ -237,7 +311,7 @@ class EventPage extends Component{
                     justifyContent: 'flex-start'}
                 }>
                     <View style = {styles.row}>
-
+                        {(this.state.event.image == null &&
                         <TouchableOpacity
                             style = {{
                                 width: '37%',
@@ -247,9 +321,40 @@ class EventPage extends Component{
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}
+                            onPress = {() => ImagePicker.showImagePicker({
+                                title: 'Selecione uma imagem',
+                                storageOptions: {
+                                    skipBackup: true,
+                                    path: 'images'
+                                }},
+                                (response) => {
+                                    if (response.didCancel) return;
+                                    if (response.error) return;
+
+                                    const avatar = {
+                                        uri: response.uri,
+                                        name: response.fileName,
+                                        type: response.type
+                                    }
+
+                                    this.setState({
+                                        imageChangeVisible: true,
+                                        newAvatar: avatar
+                                    })
+                                } 
+                            )}
                         >
                             <Text>Adicionar flyer</Text>
                         </TouchableOpacity>
+                        ) || 
+                        <Image
+                            source = {{uri: `http://192.168.1.33:3001/uploads/events/${this.state.event.image}`}}
+                            style = {{
+                                width: '37%',
+                                height: 175,
+                            }}
+                        />
+                        }
 
                         <View>
 
@@ -313,6 +418,17 @@ class EventPage extends Component{
                         selectedTab = {this.state.selectedTab.id}
                     />
 
+                    <ImageChangeModal
+                        visible = {this.state.imageChangeVisible} 
+                        source = {this.state.newAvatar}
+                        saveImage = {() => this.saveImage()}
+                        closeModal = {() => {
+                            this.setState({
+                                avatar: null,
+                                imageChangeVisible: false
+                            })
+                        }}
+                    />
 
                 </ScrollView>
                 )}
