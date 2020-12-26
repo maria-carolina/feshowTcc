@@ -175,6 +175,11 @@ const NavStack = (props) => {
                 name = 'newEventPage'
                 component = {NewEventPage} 
             />
+
+            <Stack.Screen 
+                name = 'eventPage' 
+                component = {EventPage} //provisório
+            />
              <Stack.Screen 
                 name = 'drawerTestPage'
                 component = {ImageTest} //provisório

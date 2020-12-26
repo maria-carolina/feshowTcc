@@ -27,9 +27,11 @@ const ImageChangeModal = (props) => {
                             marginTop: 10, 
                             marginBottom: 5
                         }}
-                        onPress = {props.saveImage}
+                        onPress = {props.firstButtonHandleClick}
                     >
-                        <Text style = {styles.buttonLabel}>Salvar</Text>
+                        <Text style = {styles.buttonLabel}>
+                            {props.newAvatar ? 'Salvar' : 'Alterar'}
+                        </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity 
@@ -37,9 +39,11 @@ const ImageChangeModal = (props) => {
                             ...styles.button, 
                             marginTop: 5
                         }}
-                        onPress = {props.closeModal}
+                        onPress = {props.secondButtonHandleClick}
                     >
-                        <Text style = {styles.buttonLabel}>Cancelar</Text>
+                        <Text style = {styles.buttonLabel}>
+                            {props.newAvatar ? 'Cancelar' : 'Remover'}
+                        </Text>
                     </TouchableOpacity>
             </View>
 

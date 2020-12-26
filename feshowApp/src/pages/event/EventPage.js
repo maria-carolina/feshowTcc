@@ -45,7 +45,7 @@ class EventPage extends Component{
         super(props) 
         this.state = {
             selectedTab: TABS[1],
-            imageChangeVisible: false,
+            currentAvatar: null,
             newAvatar: null
         }
     }
@@ -64,12 +64,20 @@ class EventPage extends Component{
                 }
             });
             
-            
             let splitted = result.data.start_date.split('-'); 
             result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
             splitted = result.data.end_date.split('-');
             result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+
+           
+            let newState = { 
+                event: result.data,
+                description: result.data.description,
+                selectedTab: selectedTab,
+                imageChangeVisible: false,
+                currentAvatar: null
+            }
             
             var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
             {
@@ -79,14 +87,13 @@ class EventPage extends Component{
                 responseType: 'blob'
             })
             
-            var currentAvatar = await blobTo64data(imageBlob.data);
-
-            this.setState({ 
-                event: result.data,
-                description: result.data.description,
-                selectedTab: selectedTab,
-                currentAvatar: currentAvatar
-            })
+            if((imageBlob.data._data.size != 35)){
+                console.log('entrou aqui p')
+                var currentAvatar = await blobTo64data(imageBlob.data);
+                newState.currentAvatar = currentAvatar;
+            }
+            
+            this.setState(newState)
 
         }catch(e){
             throw e
@@ -194,7 +201,7 @@ class EventPage extends Component{
         }
     }
 
-    removeImage = async () => {
+    removeImage = async () => { 
         try{
             await api.get(`/event/removeImage/${this.state.event.id}`, 
                 { 
@@ -230,13 +237,17 @@ class EventPage extends Component{
 
                 this.setState({
                     imageChangeVisible: true,
+                    currentAvatar: null,
                     newAvatar: avatar
                 })
             })
     }
 
 
-    openEventEditPage = () => {}
+    openEventEditPage = () => {
+        let event = this.state.event;
+        this.props.navigation.navigate('newEventPage', {event: event})
+    }
 
     sendSolicitation = () => {}
 
@@ -261,7 +272,7 @@ class EventPage extends Component{
                     justifyContent: 'flex-start'}
                 }>
                     <View style = {styles.row}>
-                        {(this.state.event.image == null &&
+                        {(this.state.currentAvatar == null &&
                         <TouchableOpacity
                             style = {{
                                 width: '37%',
@@ -287,7 +298,9 @@ class EventPage extends Component{
                         > 
                             <TouchableOpacity
                                 onPress = {() => {
-                                    this.openImagePicker();
+                                    this.setState({
+                                        imageChangeVisible: true
+                                    })
                                 }}
                             >
                                 <Image
@@ -300,18 +313,6 @@ class EventPage extends Component{
                                 />
                             </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style = {{
-                                    marginTop: 3,
-                                    marginBottom: 5,
-                                    alignSelf: 'center'
-                                }}
-                                onPress = {() => {
-                                    this.removeImage();
-                                }}
-                            >
-                                <Text>Remover flyer</Text>
-                            </TouchableOpacity>
                         </View>
                         }
 
@@ -324,7 +325,22 @@ class EventPage extends Component{
                                     {'event' in this.state && this.state.event.name}
                             </Text>
 
-                            <Text style = {{fontSize: 16, marginBottom: 10}}>@ Bar do zé</Text>
+                            <TouchableOpacity
+                                onPress = {() => {
+                                    this.openEventEditPage();
+                                }}
+                            >
+                                <Text>Editar</Text>
+                            </TouchableOpacity>
+
+                            <Text 
+                                style = {{
+                                    fontSize: 16, 
+                                    marginBottom: 10
+                                }}
+                            >
+                                @ {this.state.event.venue.name}
+                            </Text>
                             {('end_date' in this.state.event &&
                             <View>
                                 <Text>de {this.state.event.start_date} às {this.state.event.start_time}</Text>
@@ -376,17 +392,41 @@ class EventPage extends Component{
                         loaded = {this.state[this.state.selectedTab.value]} 
                         selectedTab = {this.state.selectedTab.id}
                     />
-
+                    {console.log('currentAvatar' in this.state)}
                     <ImageChangeModal
                         visible = {this.state.imageChangeVisible} 
-                        source = {this.state.newAvatar}
-                        saveImage = {() => this.saveImage()}
-                        closeModal = {() => {
-                            this.setState({
-                                avatar: null,
-                                imageChangeVisible: false
-                            })
-                        }}
+
+                        source = {  
+                            this.state.currentAvatar != null ? 
+                            {uri: this.state.currentAvatar} : this.state.newAvatar
+                        }
+
+                        newAvatar = {this.state.currentAvatar == null}
+
+                        firstButtonHandleClick = {
+                            this.state.currentAvatar != null ?
+                            () => this.openImagePicker() : () => this.saveImage() 
+                        }
+
+                        secondButtonHandleClick = {
+                            this.state.currentAvatar != null  ?
+                            () => this.removeImage() : 
+                            () => {
+                                this.setState({
+                                    imageChangeVisible: false
+                                })
+                                this.loadEventData(TABS[1]);
+                            }
+                        }
+
+                        closeModal = {
+                            () => {
+                                this.setState({
+                                    imageChangeVisible: false
+                                })
+                                this.loadEventData(TABS[1]);
+                            }
+                        }
                     />
 
                 </ScrollView>

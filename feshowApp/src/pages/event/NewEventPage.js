@@ -22,14 +22,24 @@ const Form = (props) => {
 
     return(
         <Formik
-            initialValues = {{
+            initialValues = {props.event == null ? {
                 name: '',
                 start_date: '',
                 end_date: '',
                 start_time: '',
                 end_time: '',
-                description: ''
-            }}
+                description:  ''
+            }:
+            {
+                name: props.event.name,
+                start_date: props.event.start_date,
+                end_date: props.event.end_date,
+                start_time: props.event.start_time,
+                end_time: props.event.end_time,
+                description: props.event.description
+            }
+
+            }
             onSubmit = {(values) => {
                 props.save(values);
             }}
@@ -45,7 +55,7 @@ const Form = (props) => {
                             marginBottom: 20,
                             fontSize: 16
                         }}>
-                            Local: X
+                            Local: {props.event != null ? props.event.venue.name : 'X'}
                         </Text>
 
                         {Object.keys(errors).length > 0 && 
@@ -153,7 +163,9 @@ const Form = (props) => {
                         >
                             <Text 
                                 style = {styles.buttonLabel}
-                            >Criar evento</Text>
+                            >
+                                {props.event != null ? 'Salvar alterações':'Criar evento'}
+                            </Text>
                         </TouchableOpacity>
                     </ScrollView>
 
@@ -167,8 +179,9 @@ const Form = (props) => {
                             if(date){
                                 let currentDate = new Date().getTime().toString().slice(0, 5) ;
                                 if(currentDate < date.getTime().toString().slice(0, 5)){
+                                    console.log(date.getMonth())
                                     let formattedDate = 
-                                    `${date.getDate().toString().padStart(2, '0')}/${date.getMonth().toString()}/`+
+                                    `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString()}/`+
                                     `${date.getFullYear().toString()}`;
                                     handleChange(selectedPicker)(formattedDate);
                                 }else{
@@ -228,24 +241,34 @@ class NewEventPage extends Component{
 
             values.venue_id = 1;
 
+            var config = {
+                headers: {
+                    Authorization: `Bearer ${this.context.token}`
+                }
+            }
+
             try{
-                let result = await api.post('/event/store', values, {
-                    headers: {
-                        Authorization: `Bearer ${this.context.token}`
-                    }
-                });
-                console.log(result.data)
+                if(this.props.route.params == undefined){
+                    await api.post('/event/store', values, config);
+                }else{
+                    await api.put(`/event/update/${this.props.route.params.event.id}`, values, config);
+                }
             }catch(e){
                 console.log(e);
             }
+
+            this.props.navigation.navigate('eventPage');
 
         }
     }
 
     render(){
+        let event = this.props.route.params != undefined ?
+        this.props.route.params.event : null
         return(
             <Form
-                save = {(values) => this.save(values)} 
+                save = {(values) => this.save(values)}
+                event =  {event}
             />
         )
     }
