@@ -12,7 +12,7 @@ const Venue = require('../models/Venue');
 const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
-const e = require('express');
+const moment = require('moment');
 
 function searchEquipment(equipmentId, array) {
     let qtd;
@@ -410,6 +410,25 @@ module.exports = {
             return res.send({ msg: 'Evento não possui imagem' })
         }
 
+    },
+
+    async getDateTime(req, res) {
+
+        const { id } = req.params;
+
+        const event = await Event.findByPk(id);
+
+        var limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
+     
+        const eventDate = {
+            id: event.id,
+            start_date: event.start_date,
+            end_date: event.end_date,
+            start_time: event.start_time,
+            end_time: limitTime
+        }
+
+        return res.send(eventDate);
     }
 
 };
