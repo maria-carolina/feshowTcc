@@ -1,4 +1,5 @@
 const Event = require('../models/Event');
+const EventImage = require('../models/EventImage');
 const ArtistEvent = require('../models/ArtistEvent');
 const Post = require('../models/Post');
 const ArtistEquipment = require('../models/ArtistEquipment');
@@ -11,6 +12,7 @@ const Venue = require('../models/Venue');
 const { Op } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
+const e = require('express');
 
 function searchEquipment(equipmentId, array) {
     let qtd;
@@ -78,26 +80,30 @@ module.exports = {
 
         try {
             const { filename: key } = req.file;
-        
 
-            const event = await Event.findByPk(id)
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-            if (event.image !== null) { //remover caso seja update de imagem
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+            if (eventImage) { //remover caso seja update de imagem
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
 
-                if (fs.existsSync(path)) {
+                if (fs.existsSync(file)) {
                     fs.unlink(file, function (err) {
                         if (err) throw err;
                         console.log('Arquivo deletado!');
                     })
-                }
-            }
 
-            await Event.update({
-                image: key
-            }, {
-                where: { id }
-            });
+                    await EventImage.update({
+                        name: key
+                    }, {
+                        where: { event_id: id }
+                    });
+                }
+            } else {
+                await EventImage.create({
+                    event_id: id,
+                    name: key
+                });
+            }
 
             return res.status(200).send('ok');
 
@@ -164,23 +170,22 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const event = await Event.findByPk(id)
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-            if (event.image !== null || event.image !== "") { //remover caso seja update de imagem
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+            if (eventImage) {
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
 
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                })
+                if (fs.existsSync(file)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    })
+
+                    await EventImage.destroy({
+                        where: { event_id: id }
+                    });
+                }
             }
-
-            await Event.update({
-                image: null
-            }, {
-                where: { id }
-            });
-
             return res.status(200).send('ok');
 
         } catch (err) {
@@ -192,19 +197,24 @@ module.exports = {
 
         const { id } = req.params;
 
-        const event = await Event.findByPk(id, {
+        let event = await Event.findByPk(id, {
             include: {
                 association: 'venue',
                 attributes: ['id', 'name']
             }
         });
 
+        const eventImage = await EventImage.findOne({ where: { event_id: id } });
+
+        const imageStatus = eventImage ? true : false;
+
         if (!event) {
             return res.send({ error: 'Erro ao gravar evento no sistema' });
         }
 
-        return res.send(event);
+        event.dataValues.image = imageStatus;
 
+        return res.send(event);
     },
 
     async showLineup(req, res) {
@@ -353,14 +363,20 @@ module.exports = {
             const { id } = req.params;
 
             const event = await Event.findByPk(id);
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-            if (event.image !== null) { //remover imagem do sistema
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+            if (eventImage.name) { //remover imagem do sistema
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                if (fs.existsSync(file)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
 
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                })
+                await EventImage.destroy({
+                    where: { event_id: id }
+                });
             }
 
             await ArtistEvent.destroy({
@@ -381,10 +397,10 @@ module.exports = {
     async getImage(req, res) {
         const { id } = req.params;
 
-        const event = await Event.findByPk(id)
+        const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-        if (event.image !== null) {
-            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', event.image);
+        if (eventImage) {
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
             if (fs.existsSync(file)) {
                 return res.sendFile(file);
             } else {

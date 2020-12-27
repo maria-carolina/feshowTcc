@@ -8,6 +8,7 @@ const authConfig = require('../config/auth.json');
 
 //models
 const User = require('../models/User');
+const ImageUser = require('../models/ImageUser');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
@@ -140,10 +141,12 @@ module.exports = {
 
         const { filename: key } = req.file;
 
-        const user = await User.findByPk(req.userId);
+        const imageUser = await ImageUser.findOne({
+            where: { user_id: req.userId }
+        });
 
-        if (user.image !== null) { //remover caso seja update de imagem
-            const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', user.image);
+        if (imageUser) { //remover caso seja update de imagem
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
 
             if (fs.existsSync(path)) {
                 fs.unlink(file, function (err) {
@@ -152,13 +155,18 @@ module.exports = {
                 });
             }
 
-        }
+            await ImageUser.update({
+                name: key
+            }, {
+                where: { user_id: req.userId }
+            });
 
-        await User.update({
-            image: key
-        }, {
-            where: { id: req.userId }
-        });
+        } else {
+            await ImageUser.create({
+                user_id: req.userId,
+                name: key
+            });
+        }
 
         return res.send({ message: "Imagem inserida com sucesso" })
 

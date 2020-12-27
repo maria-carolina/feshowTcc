@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS `feshow`.`users` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(20) NOT NULL,
   `email` VARCHAR(30) NOT NULL,
-  `image` VARCHAR(50) NULL,
   `password` VARCHAR(100) NOT NULL,
   `type` TINYINT(1) NOT NULL,
   PRIMARY KEY (`id`),
@@ -141,7 +140,6 @@ CREATE TABLE IF NOT EXISTS `feshow`.`events` (
   `organizer_id` INT(11) NOT NULL,
   `venue_id` INT(11) NOT NULL,
   `name` VARCHAR(60) NOT NULL,
-  `image` VARCHAR(100) NULL,
   `description` VARCHAR(255) NULL,
   `start_date` DATE NOT NULL,
   `end_date` DATE NOT NULL,
@@ -459,6 +457,38 @@ CREATE TABLE IF NOT EXISTS `feshow`.`posts` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_table1_users1`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `feshow`.`users` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `feshow`.`event_images`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `feshow`.`event_images` (
+  `event_id` INT(11) NOT NULL,
+  `name` VARCHAR(60) NOT NULL,
+  INDEX `fk_event_images_events1_idx` (`event_id` ASC),
+  PRIMARY KEY (`event_id`),
+  CONSTRAINT `fk_event_images_events1`
+    FOREIGN KEY (`event_id`)
+    REFERENCES `feshow`.`events` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `feshow`.`image_users`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `feshow`.`image_users` (
+  `user_id` INT(11) NOT NULL,
+  `name` VARCHAR(60) NOT NULL,
+  INDEX `fk_image_users_users1_idx` (`user_id` ASC),
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `fk_image_users_users1`
     FOREIGN KEY (`user_id`)
     REFERENCES `feshow`.`users` (`id`)
     ON DELETE NO ACTION

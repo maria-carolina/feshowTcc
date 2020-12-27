@@ -16,10 +16,6 @@ class Event extends Model {
                 type: DataTypes.STRING,
                 allowNull: true
             },
-            image: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
             start_date: {
                 type: DataTypes.DATE,
                 allowNull: false,
