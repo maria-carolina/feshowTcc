@@ -22,6 +22,7 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         margin: 25,
+        marginBottom: 5
     },
 
     title: {
@@ -116,8 +117,9 @@ const Styles = StyleSheet.create({
     },
 
     cardTitle: {
-        fontSize: 16,
-        fontWeight: 'bold'
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#3F2058'
     },
 
     cardButton: {

@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, Modal, TextInput} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
 import ConfirmationModal from '../event/EventPageInvitation2';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
 
 
 const InvitationModal = (props) => {
     const [choosenArtist, chooseArtist] = useState(null);
-    const [list, setList] = useState(props.suggestions);
+    const [searchResult, setSearchResult] = useState(null);
 
     const search = async (text) => {
         try{
@@ -17,11 +19,14 @@ const InvitationModal = (props) => {
                     Authorization: `Bearer ${props.token}`
                 }
             })
-
-            setList(result.data);
+            setSearchResult(result.data);
         }catch(e){
             console.log(e)
         }
+    }
+
+    const cancelChoice = () => {
+        chooseArtist(null)
     }
     
     return(
@@ -29,13 +34,30 @@ const InvitationModal = (props) => {
             visible = {props.visible}
             transparent = {true}
             animationType = 'fade'
+            onRequestClose = {props.closeModal}
+            
         >
-            <View style = {styles.container}>
+            <View style = {{...styles.container, justifyContent: 'flex-start'}}>
+                <FontAwesome
+                    style = {{
+                        position: 'absolute',
+                        top: 5,
+                        right: 5
+                    }}
+                    name = {'close'}
+                    size = {25}
+                    onPress = {props.closeModal}
+                />
+                    
                 <TextInput
-                    style = {styles.textInput} 
+                    style = {{...styles.textInput,
+                        margin: 15
+                    }} 
                     onChangeText = {(text) => search(text)}
                 />
-                {list != null && list.map((item) => 
+                {console.log(props.suggestions)}
+                {props.suggestions != null && 
+                (searchResult||props.suggestions).map((item) => 
                     (
                         <View 
                             style = {styles.smallCard}
@@ -44,6 +66,15 @@ const InvitationModal = (props) => {
                             <Text style = {styles.cardTitle}>
                                 {item.name}
                             </Text>
+                            <Text>
+                                {item.city}
+                            </Text>
+                            <View style = {styles.row}>
+                                {item.genres.map((item) => 
+                                <Text key={item.id}>
+                                    {item.name}
+                                </Text>)}
+                            </View>
                             <TouchableOpacity
                                 style = {styles.cardButton}
                                 onPress = {() => {
@@ -64,6 +95,7 @@ const InvitationModal = (props) => {
                 limits = {props.limits}
                 eventId = {props.eventId}
                 token = {props.token}
+                closeModal = {() => cancelChoice()}
             />
         </Modal>
         

@@ -50,19 +50,16 @@ class EventPage extends Component{
 
     loadEventData = async (selectedTab) => {
         try{
-
             var result = await api.get('/event/show/2', {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
                 }
             });
             
+            console.log(result.data)
             let splitted = result.data.start_date.split('-'); 
             result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
-            splitted = result.data.end_date.split('-');
-            result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-        
             let newState = { 
                 event: result.data,
                 description: result.data.description,
@@ -88,7 +85,7 @@ class EventPage extends Component{
             this.setState(newState)
 
         }catch(e){
-            throw e
+            console.log(e)
         }
 
     }
@@ -283,6 +280,12 @@ class EventPage extends Component{
         }
     }
 
+    closeInvitationModal = () =>{
+        this.setState({
+            invitationVisible: false
+        })
+    }
+
 
     render(){
         return(
@@ -457,7 +460,8 @@ class EventPage extends Component{
                         suggestions = {this.state.suggestions}
                         limits = {this.state.limits}
                         eventId = {this.state.event.id}
-                        token = {this.context.token}         
+                        token = {this.context.token}
+                        closeModal = {() => this.closeInvitationModal()}         
                     />
 
                 </ScrollView>

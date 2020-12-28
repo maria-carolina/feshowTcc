@@ -3,6 +3,8 @@ import {View, Text, TouchableOpacity, Modal, FlatList, Alert} from 'react-native
 import styles from '../../styles';
 import api from '../../services/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
 
 
 const InvitationModal = (props) =>{
@@ -58,28 +60,91 @@ const InvitationModal = (props) =>{
             visible = {!!props.artist}
             transparent = {true}
             animationType = 'fade'
+            onRequestClose = {props.closeModal}
         >
-            <View style = {styles.container}>
 
-                {props.artist != null &&
-                <Text style = {styles.title}>{props.artist.name}</Text>}
+            {props.artist != null &&
+            <View style = {styles.container}>
+                <FontAwesome
+                    style = {{
+                        position: 'absolute',
+                        top: 5,
+                        right: 5
+                    }}
+                    name = {'close'}
+                    size = {25}
+                    onPress = {props.closeModal}
+                />
+                <Text 
+                    style = {{
+                        ...styles.title, 
+                        fontSize: 30,
+                        marginBottom: 5
+                    }
+                    }>
+                        {props.artist.name}
+                </Text>
+
+                <Text>{props.artist.city}</Text>
+
+                <View style = {styles.row}>
+                    {props.artist.genres.map((item) =>
+                        <Text key = {item.id}>{item.name} </Text>
+                    )}
+                </View>
+                
 
                 {(showtime == null &&
                 <TouchableOpacity
                     onPress = {() => setTimePickerVisible(true)}
+                    style = {{
+                        borderRadius: 5,
+                        borderWidth: 1,
+                        borderColor: '#3F2058',
+                        padding: 5,
+                        marginTop: 20
+                    }}
                 >
                     <Text>Escolher horário</Text>
                 </TouchableOpacity>) ||
-                <View>
-                    <Text>{showtime}</Text>
+                <View 
+                    style = {{...styles.center,
+                        width: '50%'
+                    }}
+                >
+                    <Text 
+                        style = {{
+                            fontSize: 16,
+                            fontWeight: 'bold',
+                            marginTop: 15,
+                        }}
+                    >
+                        {`Para tocar ${showtime}`}
+                    </Text>
+
+                    <Text
+                        style = {{
+                            textAlign: 'center'
+                        }}
+                    >
+                        Esse horário poderá ser reajustado posteriormente.
+                    </Text>
+
                     <TouchableOpacity
-                        style = {styles.button}
+                        style = {{
+                            ...styles.button, 
+                            width:'100%',
+                        }}
                         onPress = {() => sendInvitation()}
                     >
-                        <Text style = {styles.buttonLabel}>Enviar</Text>
+                        <Text style = {styles.buttonLabel}>
+                            Enviar convite
+                        </Text>
                     </TouchableOpacity>
+
+
                 </View>
-              
+                
                 }
 
                 {timePickerVisible && <DateTimePicker 
@@ -89,7 +154,7 @@ const InvitationModal = (props) =>{
                     display = "default"
                     onChange = {(event, date) => verifyChoosenTime(date)}
                 />}
-            </View>
+            </View>}
         </Modal>
         
     )
