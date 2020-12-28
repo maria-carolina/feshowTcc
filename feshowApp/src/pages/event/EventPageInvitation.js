@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
-import {View, Text, TouchableOpacity, Modal, FlatList} from 'react-native';
+import {View, Text, TouchableOpacity, Modal, TextInput} from 'react-native';
 import styles from '../../styles';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../../services/api';
 import ConfirmationModal from '../event/EventPageInvitation2';
 
 
 const InvitationModal = (props) => {
-    const [choosenArtist, chooseArtist] = useState(null)
+    const [choosenArtist, chooseArtist] = useState(null);
+    const [list, setList] = useState(props.suggestions);
+
+    const search = async (text) => {
+        try{
+            let result = await api.post(`/searchArtist/${props.eventId}`, 
+            {name: text}, {
+                headers: {
+                    Authorization: `Bearer ${props.token}`
+                }
+            })
+
+            setList(result.data);
+        }catch(e){
+            console.log(e)
+        }
+    }
     
     return(
         <Modal
@@ -16,9 +31,16 @@ const InvitationModal = (props) => {
             animationType = 'fade'
         >
             <View style = {styles.container}>
-                {props.suggestions != null && props.suggestions.map((item) => 
+                <TextInput
+                    style = {styles.textInput} 
+                    onChangeText = {(text) => search(text)}
+                />
+                {list != null && list.map((item) => 
                     (
-                        <View style = {styles.smallCard}>
+                        <View 
+                            style = {styles.smallCard}
+                            key = {item.id}
+                        >
                             <Text style = {styles.cardTitle}>
                                 {item.name}
                             </Text>
