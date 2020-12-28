@@ -19,6 +19,8 @@ const ArtistEquipment = require('../models/ArtistEquipment');
 const ArtistInstrument = require('../models/ArtistInstrument');
 const EquipmentVenue = require('../models/EquipmentVenue');
 const Address = require('../models/Address');
+const Event = require('../models/Event');
+const ArtistEvent = require('../models/ArtistEvent');
 
 function generateToken(params = {}) {
     return jwt.sign(params, authConfig.secret, {
@@ -357,5 +359,19 @@ module.exports = {
         }
 
         return res.status(200).send('ok');
+    },
+
+    async getInvitations(req, res){
+
+        const user = await User.findByPk(req.userId);
+
+        const organizerInvitation = await ArtistEvent.findAll({
+            where: {
+                [Op.and]: [{ organizer_id: req.userId }, { status: 1 }]
+            }
+        });
+
+        return res.send({ organizer_id: req.userId })
+        
     }
 };

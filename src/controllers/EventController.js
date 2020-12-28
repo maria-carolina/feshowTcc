@@ -25,7 +25,7 @@ function searchEquipment(equipmentId, array) {
 
 module.exports = {
     async store(req, res) {
-        try {
+        //try {
             const {
                 venue_id,
                 name,
@@ -38,7 +38,7 @@ module.exports = {
 
             let endDate, descript;
 
-            if (end_date !== undefined || end_date !== "") {
+            if (end_date != "") {
                 endDate = end_date;
             } else {
                 endDate = start_date;
@@ -68,15 +68,15 @@ module.exports = {
 
             return res.send(event);
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao gravar evento' })
-        }
+       // } catch (err) {
+       //     return res.send({ error: 'Erro ao gravar evento' })
+       // }
     },
 
     async storeImage(req, res) {
         const { id } = req.params;
 
-        try {
+        //try {
             const { filename: key } = req.file;
 
             const event = await Event.findByPk(id)
@@ -100,14 +100,14 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao inserir imagem' })
-        }
+        //} catch (err) {
+       //     return res.send({ error: 'Erro ao inserir imagem' })
+       // }
     },
 
 
     async update(req, res) {
-        try {
+      //  try {
             const { id } = req.params;
 
             const {
@@ -122,13 +122,13 @@ module.exports = {
 
             let endDate, descript;
 
-            if (end_date !== undefined || end_date !== "") {
+            if (end_date !== "") {
                 endDate = end_date;
             } else {
                 endDate = start_date;
             }
 
-            if (description !== undefined || description !== "") {
+            if (description !== "") {
                 descript = description;
             } else {
                 descript = null;
@@ -154,13 +154,13 @@ module.exports = {
 
             return res.send(event);
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao editar evento' })
-        }
+        //} catch (err) {
+       //     return res.send({ error: 'Erro ao editar evento' })
+       // }
     },
 
     async removeImage(req, res) {
-        try {
+      //  try {
             const { id } = req.params;
 
             const event = await Event.findByPk(id)
@@ -182,9 +182,9 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao remover imagem' })
-        }
+        //} catch (err) {
+       //     return res.send({ error: 'Erro ao remover imagem' })
+       // }
     },
 
     async show(req, res) {
@@ -226,7 +226,7 @@ module.exports = {
     },
 
     async showPosts(req, res) {
-        try {
+        //try {
             const { id } = req.params;
 
             const postagens = await Post.findAll({
@@ -262,9 +262,9 @@ module.exports = {
 
             };
             return res.send(posts);
-        } catch (err) {
-            return res.send({ error: 'Erro ao listar posts' })
-        }
+       // } catch (err) {
+      //      return res.send({ error: 'Erro ao listar posts' })
+        //}
     },
 
     async showEquipments(req, res) {
@@ -348,7 +348,7 @@ module.exports = {
     },
 
     async delete(req, res) {
-        try {
+       // try {
             const { id } = req.params;
 
             const event = await Event.findByPk(id);
@@ -372,9 +372,9 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao deletar evento' })
-        }
+    //    } catch (err) {
+      //      return res.send({ error: 'Erro ao deletar evento' })
+      //  }
     },
 
     async getImage(req, res) {
