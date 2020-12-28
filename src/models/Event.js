@@ -25,15 +25,6 @@ class Event extends Model {
                     }
                 }
             },
-            end_date: {
-                type: DataTypes.DATE,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo data final não pode ser vazio'
-                    }
-                }
-            },
             start_time: {
                 type: DataTypes.TIME,
                 allowNull: false,
@@ -64,15 +55,17 @@ class Event extends Model {
                 type: DataTypes.DATE,
                 allowNull: false
             }
-        },{
+        }, {
             sequelize,
             timestamps: true,
             tableName: 'events'
         })
     }
-    static associate(models){
+    static associate(models) {
         this.belongsTo(models.User, { foreignKey: 'organizer_id', as: 'organizer' });
         this.belongsTo(models.Venue, { foreignKey: 'venue_id', as: 'venue' });
+        this.hasMany(models.ArtistEvent, { foreignKey: 'event_id', as: 'invitations' });
+
     }
 
 }

@@ -41,6 +41,7 @@ class ArtistEvent extends Model {
     }
     static associate(models){
         this.belongsTo(models.Artist, { foreignKey: 'artist_id', as: 'artists' })
+        this.belongsTo(models.Event, { foreignKey: 'event_id', as: 'events' })
     }
 
 }
