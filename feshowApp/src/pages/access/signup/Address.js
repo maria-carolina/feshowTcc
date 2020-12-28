@@ -17,7 +17,6 @@ const FormSchema = yup.object().shape({
 
 
 const Form = (props) => {
-    console.log(props.preloadedAddress != '')
     return(
         <Formik
             enableReinitialize = {true}

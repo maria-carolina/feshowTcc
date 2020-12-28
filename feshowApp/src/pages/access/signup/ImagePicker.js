@@ -31,7 +31,6 @@ const ImagePick = (props) => {
             throw e;
         }
 
-        console.log(response.data);
     }
 
     return(
