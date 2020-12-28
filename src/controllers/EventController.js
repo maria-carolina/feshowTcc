@@ -33,20 +33,13 @@ module.exports = {
                 name,
                 description,
                 start_date,
-                end_date,
                 start_time,
                 end_time
             } = req.body;
 
-            let endDate, descript;
-
-            if (end_date != "") {
-                endDate = end_date;
-            } else {
-                endDate = start_date;
-            }
-
-            if (description !== undefined || description !== "") {
+            let descript;
+            
+            if (description !== "") {
                 descript = description;
             } else {
                 descript = null;
@@ -58,7 +51,6 @@ module.exports = {
                 name,
                 description: descript,
                 start_date,
-                end_date: endDate,
                 start_time,
                 end_time,
                 status: 1
@@ -122,18 +114,11 @@ module.exports = {
                 name,
                 description,
                 start_date,
-                end_date,
                 start_time,
                 end_time
             } = req.body;
 
-            let endDate, descript;
-
-            if (end_date !== "") {
-                endDate = end_date;
-            } else {
-                endDate = start_date;
-            }
+            let descript;
 
             if (description !== "") {
                 descript = description;
@@ -147,7 +132,6 @@ module.exports = {
                 name,
                 description: descript,
                 start_date,
-                end_date: endDate,
                 start_time,
                 end_time,
                 status: 1
@@ -423,7 +407,6 @@ module.exports = {
         const eventDate = {
             id: event.id,
             start_date: event.start_date,
-            end_date: event.end_date,
             start_time: event.start_time,
             end_time: limitTime
         }

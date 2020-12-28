@@ -25,15 +25,6 @@ class Event extends Model {
                     }
                 }
             },
-            end_date: {
-                type: DataTypes.DATE,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo data final não pode ser vazio'
-                    }
-                }
-            },
             start_time: {
                 type: DataTypes.TIME,
                 allowNull: false,

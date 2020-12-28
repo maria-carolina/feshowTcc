@@ -142,7 +142,6 @@ CREATE TABLE IF NOT EXISTS `feshow`.`events` (
   `name` VARCHAR(60) NOT NULL,
   `description` VARCHAR(255) NULL,
   `start_date` DATE NOT NULL,
-  `end_date` DATE NOT NULL,
   `start_time` TIME NOT NULL,
   `end_time` TIME NOT NULL,
   `status` TINYINT(1) NOT NULL,

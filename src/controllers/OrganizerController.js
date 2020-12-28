@@ -47,11 +47,7 @@ module.exports = {
             const { artistId, eventId, date, time } = req.body;
 
             const event = await Event.findByPk(eventId);
-
-            if (date < event.start_date || date > event.end_date) {
-                return res.send({ error: 'O evento não acontecerá nesta data' })
-            }
-
+            
             if (time < event.start_time || time > event.end_time) {
                 return res.send({ error: 'O evento não acontecerá neste horário' })
             }
