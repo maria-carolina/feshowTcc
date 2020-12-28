@@ -45,29 +45,29 @@ module.exports = {
     async store(req, res) {
         try {
             const { artistId, eventId, date, time } = req.body;
-            
+
             const event = await Event.findByPk(eventId);
 
             if (date < event.start_date || date > event.end_date) {
                 return res.send({ error: 'O evento não acontecerá nesta data' })
             }
 
-            if(time < event.start_time || time > event.end_time) {
+            if (time < event.start_time || time > event.end_time) {
                 return res.send({ error: 'O evento não acontecerá neste horário' })
             }
-            
-            const artist = await ArtistEvent.findAll({ 
-                where: { 
+
+            const artist = await ArtistEvent.findAll({
+                where: {
                     event_id: eventId,
                     artist_id: artistId
                 }
             })
 
-            if (artist.length > 0){
-                return res.send({ error: 'Artista já incluso no evento'})
+            if (artist.length > 0) {
+                return res.send({ error: 'Artista já incluso no evento' })
             }
-           
-            await ArtistEvent.create({ 
+
+            await ArtistEvent.create({
                 event_id: eventId,
                 artist_id: artistId,
                 date,
@@ -186,5 +186,35 @@ module.exports = {
 
         return res.send(artistVerified);
 
+    },
+
+    async cancelInvitation(req, res) {
+
+        const { artistId, eventId } = req.body;
+
+        await ArtistEvent.destroy({
+            where: [
+                { artist_id: artistId },
+                { event_id: eventId }
+            ]
+        });
+
+        return res.status(200).send('ok');
+    },
+
+    async acceptParticipation(req, res){
+
+        const { artistId, eventId } = req.body;
+
+        await ArtistEvent.update({
+            status: 3
+        }, {
+            where: [
+                { artist_id: artistId },
+                { event_id: eventId }
+            ]
+        });
+
+        return res.status(200).send('ok');
     }
 };

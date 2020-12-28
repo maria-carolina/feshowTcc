@@ -369,17 +369,113 @@ module.exports = {
         return res.status(200).send('ok');
     },
 
-    async getInvitations(req, res){
+    async getInvitations(req, res) {
 
         const user = await User.findByPk(req.userId);
 
-        const organizerInvitation = await ArtistEvent.findAll({
-            where: {
-                [Op.and]: [{ organizer_id: req.userId }, { status: 1 }]
-            }
+        let received = [],
+            sent = [];
+
+        //recebido do organizador
+        let organizerReceived = await ArtistEvent.findAll({
+            include: [
+                {
+                    association: 'artists',
+                    attributes: ['id', 'name']
+                },
+                {
+                    association: 'events',
+                    attributes: ['id', 'name'],
+                    where: {
+                        organizer_id: user.id
+                    }
+                }
+            ],
+            where: { status: 2 }
         });
 
-        return res.send({ organizer_id: req.userId })
+        //enviado pelo organizador
+        let organizerSent = await ArtistEvent.findAll({
+            include: [
+                {
+                    association: 'artists',
+                    attributes: ['id', 'name']
+                },
+                {
+                    association: 'events',
+                    attributes: ['id', 'name'],
+                    where: {
+                        organizer_id: user.id
+                    }
+                }
+            ],
+            where: { status: 1 }
+        });
+
+
+        if (user.type == 0) {
+            const artist = await Artist.findOne({ where: { user_id: user.id } });
+
+            let artistReceived = await ArtistEvent.findAll({
+                include: [
+                    {
+                        association: 'artists',
+                        attributes: ['id', 'name']
+                    },
+                    {
+                        association: 'events',
+                        attributes: ['id', 'name']
+                    }
+                ],
+                where: [
+                    { artist_id: artist.id },
+                    { status: 1 }
+                ]
+            });
+
+            let artistSent = await ArtistEvent.findAll({
+                include: [
+                    {
+                        association: 'artists',
+                        attributes: ['id', 'name']
+                    },
+                    {
+                        association: 'events',
+                        attributes: ['id', 'name']
+                    }
+                ],
+                where: [
+                    { artist_id: artist.id },
+                    { status: 2 }
+                ]
+            });
+
+            received = organizerReceived.concat(artistReceived);
+            sent = organizerSent.concat(artistSent);
+
+        } else {
+            received = organizerReceived;
+            sent = organizerSent;
+        }
+
+        received.sort(function (a, b) {
+            var dateA = new Date(a.updatedAt),
+                dateB = new Date(b.updatedAt);
+            //maior para menor
+            if (dateA > dateB) return -1;
+            if (dateA < dateB) return 1;
+            return 0;
+        });
+
+        sent.sort(function (a, b) {
+            var dateA = new Date(a.updatedAt),
+                dateB = new Date(b.updatedAt);
+            //maior para menor
+            if (dateA > dateB) return -1;
+            if (dateA < dateB) return 1;
+            return 0;
+        });
         
+        return res.send({received, sent});
     }
 };
