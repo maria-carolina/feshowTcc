@@ -6,15 +6,7 @@ import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import PageBody from '../event/EventPageBody';
 import ImageChangeModal from '../utils/ImageChange';
-
-
-const invitationModal = () => {
-    loadSuggestions = () => {}
-    search = () => {}
-    sendInvitation = () => {}
-    finish = () => {}
-
-}
+import InvitationModal from '../event/EventPageInvitation'
 
 function blobTo64data(imageBlob) {
     return new Promise((resolve) => {
@@ -34,8 +26,8 @@ function blobTo64data(imageBlob) {
 
 
 const TABS = [
-    {id: 0, label:'Line-up', value: 'lineup'},
-    {id: 1, label:'Descrição', value: 'description'},
+    {id: 0, label:'Descrição', value: 'description'},
+    {id: 1, label:'Line-up', value: 'lineup'},
     {id: 2, label:'Postagens', value: 'posts'},
     {id: 3, label:'Avisos', value: 'warnings'}, 
 ]
@@ -44,7 +36,7 @@ class EventPage extends Component{
     constructor(props){
         super(props) 
         this.state = {
-            selectedTab: TABS[1],
+            selectedTab: TABS[0],
             currentAvatar: null,
             newAvatar: null
         }
@@ -53,11 +45,12 @@ class EventPage extends Component{
     static contextType = AuthContext;
 
     componentDidMount(){
-        this.loadEventData(TABS[1]);
+        this.loadEventData(TABS[0]);
     }
 
     loadEventData = async (selectedTab) => {
         try{
+
             var result = await api.get('/event/show/2', {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
@@ -69,26 +62,25 @@ class EventPage extends Component{
 
             splitted = result.data.end_date.split('-');
             result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-
-           
+        
             let newState = { 
                 event: result.data,
                 description: result.data.description,
                 selectedTab: selectedTab,
                 imageChangeVisible: false,
+                invitationVisible: false,
                 currentAvatar: null
             }
-            
-            var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${this.context.token}`,
-                },
-                responseType: 'blob'
-            })
-            
-            if((imageBlob.data._data.size != 35)){
-                console.log('entrou aqui p')
+
+            if(result.data.image){
+                var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`,
+                    },
+                    responseType: 'blob'
+                })
+                
                 var currentAvatar = await blobTo64data(imageBlob.data);
                 newState.currentAvatar = currentAvatar;
             }
@@ -103,8 +95,8 @@ class EventPage extends Component{
 
     loadLineUp = async (selectedTab) => {
         try{
-            console.log(this.context.token)
-            var result = await api.get('event/showLineup/2', {headers: {
+            var result = await api.get(`event/showLineup/${this.state.event.id}`, 
+            {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }});
 
@@ -112,22 +104,26 @@ class EventPage extends Component{
                 lineup: result.data,
                 selectedTab: selectedTab
             })
+
         }catch(e){
             console.log(e) 
         }
-
+         
         
+
     }
 
     loadPosts = async (selectedTab) => {
         try{
-            var result = await api.get('event/showPosts/2', {headers: {
+            var result = await api.get(`event/showPosts/${this.state.event.id}`, 
+            {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }});
         }catch(e){
             console.log(e)
         }
 
+        
         this.setState({
             posts: result.data,
             selectedTab: selectedTab 
@@ -156,12 +152,10 @@ class EventPage extends Component{
     changeTab = async (selectedTab) => {
        
         if(!(selectedTab.value in this.state)){
-            console.log(selectedTab.id)
             if(selectedTab.id == 0){
-                console.log('entrou')
-                await this.loadLineUp(selectedTab);
-            }else if(selectedTab.id == 1){
                 await this.loadEventData(selectedTab);
+            }else if(selectedTab.id == 1){
+                await this.loadLineUp(selectedTab);
             }else if(selectedTab.id == 2){
                 await this.loadPosts(selectedTab)
             }else{
@@ -194,7 +188,7 @@ class EventPage extends Component{
                 imageChangeVisible: false
             })
 
-            this.loadEventData(TABS[1]);
+            this.loadEventData(TABS[0]);
 
         }catch(e){
             throw (e);
@@ -211,7 +205,7 @@ class EventPage extends Component{
                 }
             )
 
-            this.loadEventData(TABS[1]);
+            this.loadEventData(TABS[0]);
 
         }catch(e){
             throw (e);
@@ -244,7 +238,7 @@ class EventPage extends Component{
     }
 
 
-    openEventEditPage = () => {
+    openEventEditPage = async () => {
         let event = this.state.event;
         this.props.navigation.navigate('newEventPage', {event: event})
     }
@@ -261,7 +255,34 @@ class EventPage extends Component{
 
     changeStatus = () => {}
     
-    openInvitationModal = () => {}
+    openInvitationModal = async () => {
+        try{
+            let suggestionsResult = await api.get(`/getSuggestions/${this.state.event.id}`, 
+                {headers: {
+                    Authorization: `Bearer ${this.context.token}`,
+                }}
+            )
+
+            let limitsResult = await api.get(`/event/getDateTime/${this.state.event.id}`,
+                {headers: {
+                    Authorization: `Bearer ${this.context.token}`,
+                }}
+            )
+            
+            console.log(this.context.token)
+            console.log(limitsResult.data)
+
+            this.setState({
+                suggestions: suggestionsResult.data,
+                limits: limitsResult.data, 
+                invitationVisible: true 
+            })
+
+        }catch(e){
+            console.log(e);
+        }
+    }
+
 
     render(){
         return(
@@ -388,13 +409,15 @@ class EventPage extends Component{
                         keyExtractor = {(item, index) => index.toString()} 
                     />
 
+
                     <PageBody
                         loaded = {this.state[this.state.selectedTab.value]} 
                         selectedTab = {this.state.selectedTab.id}
+                        openInvitation = {() => this.openInvitationModal()}
                     />
-                    {console.log('currentAvatar' in this.state)}
+ 
                     <ImageChangeModal
-                        visible = {this.state.imageChangeVisible} 
+                        visible = {this.state.imageChangeVisible}
 
                         source = {  
                             this.state.currentAvatar != null ? 
@@ -429,11 +452,20 @@ class EventPage extends Component{
                         }
                     />
 
+                    <InvitationModal 
+                        visible = {this.state.invitationVisible} 
+                        suggestions = {this.state.suggestions}
+                        limits = {this.state.limits}
+                        eventId = {this.state.event.id}
+                        token = {this.context.token}         
+                    />
+
                 </ScrollView>
                 )}
             </View>
         )
     }
 }
+
 
 export default EventPage;

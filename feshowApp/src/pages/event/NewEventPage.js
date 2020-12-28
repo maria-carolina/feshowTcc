@@ -223,12 +223,8 @@ class NewEventPage extends Component{
     static contextType = AuthContext;
 
     save = async (values) => {
-        if((values.end_time < values.start_time) && 
-        (values.end_date == '' || values.end_date === values.start_date)){
-            Alert.alert('Horário inválida', 
-            'Em casos de eventos com um dia só,'+
-            'o horário final deve ser posterior ao inicial');
-        }else if((values.end_date < values.start_date) && values.end_date != ''){
+        
+        if((values.end_date < values.start_date) && values.end_date != ''){
             Alert.alert('Data inválida', 'A data final deve ser posterior a inicial');
         }else{
             let splitted = values.start_date.split('/');
@@ -249,15 +245,21 @@ class NewEventPage extends Component{
 
             try{
                 if(this.props.route.params == undefined){
-                    await api.post('/event/store', values, config);
+                    console.log('entrou certo');
+                    console.log(values)
+                    var result = await api.post('/event/store', values, config);
                 }else{
-                    await api.put(`/event/update/${this.props.route.params.event.id}`, values, config);
+                    var result = await api.put(`/event/update/${this.props.route.params.event.id}`, values, config);
+                }
+
+                if(!('error' in result.data)){
+                    this.props.navigation.navigate('eventPage');
                 }
             }catch(e){
                 console.log(e);
             }
 
-            this.props.navigation.navigate('eventPage');
+            
 
         }
     }
@@ -265,6 +267,7 @@ class NewEventPage extends Component{
     render(){
         let event = this.props.route.params != undefined ?
         this.props.route.params.event : null
+
         return(
             <Form
                 save = {(values) => this.save(values)}

@@ -3,7 +3,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import styles from '../../styles';
 
 const PageBody = (props) => {
-    if(props.selectedTab == 1){
+    if(props.selectedTab == 0){
         return (
             <View style = {{width: '90%'}}>
                 <Text style = {{...styles.title, textAlign: 'left'}}>Sobre o evento...</Text>
@@ -37,8 +37,9 @@ const PageBody = (props) => {
     }
 
     //listas fixas do evento, independente do usuário
+    
     var list = props.loaded.map((item) => {
-        if(props.selectedTab == 0){ 
+        if(props.selectedTab == 1){ 
             return (
                 <View 
                     style = {{...styles.row, 
@@ -48,7 +49,7 @@ const PageBody = (props) => {
                     }}
                     key = {props.loaded.indexOf(item)}
                 >
-                    <Text style = {{color: '#000'}}>{item.artists.name}</Text>
+                    <Text style = {{color: '#000'}}>{item.artists.name || null}</Text>
                     <Text style = {{
                         right: 50,
                         position: 'absolute'
@@ -99,6 +100,17 @@ const PageBody = (props) => {
             }
 
             {list}
+
+            {props.selectedTab == 1 &&
+                <TouchableOpacity
+                    style = {{...styles.button, alignSelf: 'center'}}
+                    onPress = {props.openInvitation}
+                >
+                    <Text style = {styles.buttonLabel}>
+                        Convidar artistas
+                    </Text>
+                </TouchableOpacity>
+            }
         </View>
     );
 }

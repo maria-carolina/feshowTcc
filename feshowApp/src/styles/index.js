@@ -104,6 +104,35 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
     },
 
+    smallCard: {
+        position: 'relative',
+        width: '90%',
+        height: 75,
+        borderWidth: .5,
+        padding: 5,
+        margin: 5,
+        borderColor: '#3F2058',
+        borderRadius: 5,
+    },
+
+    cardTitle: {
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+
+    cardButton: {
+        position: 'absolute',
+        marginTop: 5,
+        right: 5,
+        width: 100,
+        height: 30,
+        borderWidth: 1,
+        borderColor: '#3F2058',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
     rowInput: {
         width: '42%',
         position: 'relative',

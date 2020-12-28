@@ -39,10 +39,12 @@ export const AuthProvider = ({ children }) => {
             return result;
         }
 
-        setUser(result.user);
+
         setToken(result.token);
+        setUser(result.user);
+        
         await AsyncStorage.setItem('auth_user', JSON.stringify(result.user));
-        await AsyncStorage.setItem('auth_token', result.token);
+        await AsyncStorage.setItem('auth_token', result.token);    
         
     }
 
