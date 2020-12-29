@@ -35,6 +35,9 @@ const TABS = [
 class EventPage extends Component{
     constructor(props){
         super(props) 
+        this.reRender = this.props.navigation.addListener('focus', () => {
+            this.loadEventData(TABS[0])
+        });
         this.state = {
             selectedTab: TABS[0],
             currentAvatar: null,
@@ -46,7 +49,10 @@ class EventPage extends Component{
 
     componentDidMount(){
         this.loadEventData(TABS[0]);
+        
+        this.reRender;
     }
+
 
     loadEventData = async (selectedTab) => {
         try{
@@ -56,7 +62,6 @@ class EventPage extends Component{
                 }
             });
             
-            console.log(result.data)
             let splitted = result.data.start_date.split('-'); 
             result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
@@ -237,7 +242,8 @@ class EventPage extends Component{
 
     openEventEditPage = async () => {
         let event = this.state.event;
-        this.props.navigation.navigate('newEventPage', {event: event})
+        this.props.navigation.navigate('newEventPage', 
+        {event: event})
     }
 
     sendSolicitation = () => {}
@@ -365,17 +371,12 @@ class EventPage extends Component{
                             >
                                 @ {this.state.event.venue.name}
                             </Text>
-                            {('end_date' in this.state.event &&
-                            <View>
-                                <Text>de {this.state.event.start_date} às {this.state.event.start_time}</Text>
-                                <Text>até {this.state.event.end_date} às {this.state.event.end_time}</Text>
-                            </View>
-                            ) ||
+                            
                             <View>
                                 <Text>{this.state.event.start_date}</Text>
                                 <Text>das {this.state.event.start_time} às {this.state.event.end_time}</Text>
                             </View>
-                            }
+                            
 
                         </View> 
                     </View>

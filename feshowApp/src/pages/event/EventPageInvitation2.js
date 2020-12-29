@@ -18,13 +18,16 @@ const InvitationModal = (props) =>{
             date: props.limits.start_date,
             time: showtime
         }
-        let res = await api.post('/storeInvitation', values, 
-            {headers: {
-                Authorization: `Bearer ${props.token}`,
-            }}
-        );
-        console.log(values)
-        console.log(res.data)
+
+        try{
+            await api.post('/storeInvitation', values, 
+                {headers: {
+                    Authorization: `Bearer ${props.token}`,
+                }}
+            );
+        }catch(e){
+            console.log(e)
+        }
     }
 
     const verifyChoosenTime = (date) => {

@@ -22,7 +22,7 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         margin: 25,
-        marginBottom: 5
+        marginBottom: 5,
     },
 
     title: {
