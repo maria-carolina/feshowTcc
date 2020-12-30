@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, Alert} from 'react-native';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import styles from '../../styles';
@@ -12,6 +12,9 @@ const TABS = [
 class InvitationsPage extends Component{
     constructor(props){
         super(props)
+        this.reRender = this.props.navigation.addListener('focus', () => {
+            this.loadInvitations()
+        });
         this.state = {
             selectedTab: TABS[0]
         }
@@ -21,6 +24,7 @@ class InvitationsPage extends Component{
 
     componentDidMount(){
         this.loadInvitations();
+        this.reRender;
     }
 
 
@@ -32,6 +36,7 @@ class InvitationsPage extends Component{
                 }
             })
 
+
             this.setState({
                 invitations: result.data
             })
@@ -39,17 +44,88 @@ class InvitationsPage extends Component{
         }catch(e){
             console.log(e)
         }
+
+        
     } 
 
-    cancelInvitation = () => {} 
+    cancelInvitation = async (artistId, eventId) => {
+        try{
+            let result = await api.post(
+                '/cancelInvitation', 
+                {artistId, eventId},
+                {  
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
 
-    loadConfirmation = () => {}
+            if(!('error' in result)){
+                Alert.alert('Pronto', 'O convite foi excluído.')
+                this.loadInvitations();
+            }
+        }catch(e){
+            console.log(e)
+        }
+    } 
 
-    confirmCancellation = () => {}
+    loadConfirmation = (artistId, eventId, accepted) => {
 
-    respondParticipation = () => {} //aceitar solicitação de participação de artista em evento 
+        Alert.alert(
+            'Opa', 
+            `Realmente quer ${accepted ? 'aceitar' : 'recusar'} esse convite?`, 
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => this.respondInvitation(artistId, eventId, accepted)
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ])
+    }
 
-    respondInvitation = () => {}
+    confirmCancellation = (artistId, eventId) => {
+        Alert.alert(
+            'Opa', 
+            `Realmente quer cancelar esse convite?`, 
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => this.cancelInvitation(artistId, eventId)
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ])
+    }
+
+    respondInvitation = async (artistId, eventId, accepted) => {
+        var url = accepted ? '/acceptParticipation' : '/cancelInvitation';
+        try{
+            let result = await api.post(
+                url, 
+                {artistId, eventId},
+                {  
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            let message = accepted ? `${this.context.user.type == 0 ? 'Você' : 'O artista'} foi adicionado ao evento` : 'O convite foi excluído'
+
+            if(!('error' in result)){
+                Alert.alert('Pronto', message);
+                this.loadInvitations();
+            }
+
+        }catch(e){
+            console.log(e)
+        }
+    }
 
     cancelSolicitation = () => {} 
 
@@ -134,6 +210,8 @@ class InvitationsPage extends Component{
                                             color: 'red',
                                             fontWeight: 'bold'
                                         }}
+                                        onPress = {() =>
+                                                this.confirmCancellation(item.artists.id, item.events.id)}
                                     >
                                         Cancelar
                                     </Text>
@@ -159,6 +237,8 @@ class InvitationsPage extends Component{
                                         padding: 10,
                                         borderRightWidth: 1
                                     }}
+                                    onPress = {() => 
+                                        this.loadConfirmation(item.artists.id, item.events.id, true)}
                                 >
                                     <Text
                                         style = {{
@@ -180,6 +260,8 @@ class InvitationsPage extends Component{
                                             color: 'red',
                                             fontWeight: 'bold'
                                         }}
+                                        onPress = {() => 
+                                            this.loadConfirmation(item.artists.id, item.events.id, false)}
                                     >
                                         Recusar
                                     </Text>
