@@ -47,11 +47,7 @@ module.exports = {
             const { artistId, eventId, date, time } = req.body;
 
             const event = await Event.findByPk(eventId);
-            
-            if (time < event.start_time || time > event.end_time) {
-                return res.send({ error: 'O evento não acontecerá neste horário' })
-            }
-
+        
             const artist = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
@@ -60,7 +56,7 @@ module.exports = {
             })
 
             if (artist.length > 0) {
-                return res.send({ error: 'Artista já incluso no evento' })
+                return res.send({ error: 'Artista já está no evento' })
             }
 
             await ArtistEvent.create({
