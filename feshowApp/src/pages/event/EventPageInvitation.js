@@ -87,7 +87,7 @@ const InvitationModal = (props) => {
                     )
                  
                 )}
-               
+            
             </View>
 
             <ConfirmationModal
@@ -96,7 +96,9 @@ const InvitationModal = (props) => {
                 eventId = {props.eventId}
                 token = {props.token}
                 closeModal = {() => cancelChoice()}
+                finishInvitation = {props.closeModal}
             />
+
         </Modal>
         
     )

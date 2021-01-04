@@ -7,7 +7,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
 
-const InvitationModal = (props) =>{
+const InvitationModal = (props) => {
     const [timePickerVisible, setTimePickerVisible] = useState(false);
     const [showtime, setShowtime] = useState(null)
 
@@ -20,11 +20,16 @@ const InvitationModal = (props) =>{
         }
 
         try{
-            await api.post('/storeInvitation', values, 
+            let result = await api.post('/storeInvitation', values, 
                 {headers: {
                     Authorization: `Bearer ${props.token}`,
                 }}
             );
+
+            if(result.data === 'ok'){
+                props.finishInvitation();
+                Alert.alert('Pronto!', 'O artista foi convidado para o evento. Aguarde a resposta.') 
+            }
         }catch(e){
             console.log(e)
         }
@@ -63,7 +68,10 @@ const InvitationModal = (props) =>{
             visible = {!!props.artist}
             transparent = {true}
             animationType = 'fade'
-            onRequestClose = {props.closeModal}
+            onRequestClose = {() => { 
+                setShowtime(null);
+                props.closeModal(); 
+            }}
         >
 
             {props.artist != null &&
@@ -76,7 +84,10 @@ const InvitationModal = (props) =>{
                     }}
                     name = {'close'}
                     size = {25}
-                    onPress = {props.closeModal}
+                    onPress = {() => {
+                        setShowtime(null);
+                        props.closeModal();
+                    }}
                 />
                 <Text 
                     style = {{

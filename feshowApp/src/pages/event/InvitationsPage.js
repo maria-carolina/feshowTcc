@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, Alert, ActivityIndicator} from 'react-native';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import styles from '../../styles';
@@ -12,9 +12,7 @@ const TABS = [
 class InvitationsPage extends Component{
     constructor(props){
         super(props)
-        this.reRender = this.props.navigation.addListener('focus', () => {
-            this.loadInvitations()
-        });
+        this.reload;
         this.state = {
             selectedTab: TABS[0]
         }
@@ -24,7 +22,9 @@ class InvitationsPage extends Component{
 
     componentDidMount(){
         this.loadInvitations();
-        this.reRender;
+        this.reload = this.props.navigation.addListener('focus', () => {
+            this.loadInvitations();
+        })
     }
 
 
@@ -36,10 +36,11 @@ class InvitationsPage extends Component{
                 }
             })
 
-
-            this.setState({
-                invitations: result.data
-            })
+            if(!('error' in result.data)){
+                this.setState({
+                    invitations: result.data
+                })
+            }
 
         }catch(e){
             console.log(e)
@@ -182,7 +183,7 @@ class InvitationsPage extends Component{
 
                 </View>
                 
-                {'invitations' in this.state &&
+                {('invitations' in this.state &&
                 this.state.invitations[this.state.selectedTab.value]
                 .map((item) => {
                     console.log(item)
@@ -297,7 +298,12 @@ class InvitationsPage extends Component{
                         </View>
                     )
                     }
-                )}
+                )) ||
+                <ActivityIndicator
+                    size = 'large'
+                    color = '#000'
+                />
+                }
             </View>
         )
     }

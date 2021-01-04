@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ScrollView, Modal, Image, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, ScrollView, Image, ActivityIndicator, Alert} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import styles from '../../styles';
 import api from '../../services/api';
@@ -35,9 +35,7 @@ const TABS = [
 class EventPage extends Component{
     constructor(props){
         super(props) 
-        this.reRender = this.props.navigation.addListener('focus', () => {
-            this.loadEventData(TABS[0])
-        });
+        this.reload;
         this.state = {
             selectedTab: TABS[0],
             currentAvatar: null,
@@ -48,13 +46,20 @@ class EventPage extends Component{
     static contextType = AuthContext;
 
     componentDidMount(){
-        this.loadEventData(TABS[0]);
-        
-        this.reRender;
+        this.loadEventData();
+        this.reload = this.props.navigation.addListener('focus', () => {
+            this.loadEventData();
+            this.setState({
+                lineup: undefined,
+                posts: undefined,
+                warnings: undefined
+            })
+        })
     }
 
-
-    loadEventData = async (selectedTab) => {
+    
+    
+    loadEventData = async () => {
         try{
             var result = await api.get('/event/show/2', {
                 headers: {
@@ -68,7 +73,7 @@ class EventPage extends Component{
             let newState = { 
                 event: result.data,
                 description: result.data.description,
-                selectedTab: selectedTab,
+                selectedTab: TABS[0],
                 imageChangeVisible: false,
                 invitationVisible: false,
                 currentAvatar: null
@@ -86,6 +91,7 @@ class EventPage extends Component{
                 var currentAvatar = await blobTo64data(imageBlob.data);
                 newState.currentAvatar = currentAvatar;
             }
+
             
             this.setState(newState)
 
@@ -95,7 +101,7 @@ class EventPage extends Component{
 
     }
 
-    loadLineUp = async (selectedTab) => {
+    loadLineUp = async () => {
         try{
             var result = await api.get(`event/showLineup/${this.state.event.id}`, 
             {headers: {
@@ -103,19 +109,17 @@ class EventPage extends Component{
             }});
 
             this.setState({
-                lineup: result.data,
-                selectedTab: selectedTab
+                lineup: result.data
             })
-
+            
         }catch(e){
             console.log(e) 
         }
          
-        
-
+    
     }
 
-    loadPosts = async (selectedTab) => {
+    loadPosts = async () => {
         try{
             var result = await api.get(`event/showPosts/${this.state.event.id}`, 
             {headers: {
@@ -124,26 +128,23 @@ class EventPage extends Component{
         }catch(e){
             console.log(e)
         }
-
         
         this.setState({
-            posts: result.data,
-            selectedTab: selectedTab 
+            posts: result.data
         })
 
     }
 
-    loadWarnings = async (selectedTab) => {
+    loadWarnings = async () => {
         try{
             var result = await api.get('event/showEquipments/2', {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }}); 
 
-
             this.setState({
-                warnings: result.data,
-                selectedTab: selectedTab
+                warnings: result.data
             })
+
         }catch(e){
             console.log(e)
         }
@@ -152,8 +153,13 @@ class EventPage extends Component{
     }
 
     changeTab = async (selectedTab) => {
-       
-        if(!(selectedTab.value in this.state)){
+
+        this.setState({
+            selectedTab: selectedTab
+        })
+
+
+        if(this.state[selectedTab.value] === undefined){
             if(selectedTab.id == 0){
                 await this.loadEventData(selectedTab);
             }else if(selectedTab.id == 1){
@@ -161,12 +167,8 @@ class EventPage extends Component{
             }else if(selectedTab.id == 2){
                 await this.loadPosts(selectedTab)
             }else{
-                this.loadWarnings(selectedTab);
+                await this.loadWarnings(selectedTab);
             }
-        }else{
-            this.setState({
-                selectedTab: selectedTab
-            })
         }
 
     }
@@ -272,8 +274,6 @@ class EventPage extends Component{
                 }}
             )
             
-            console.log(this.context.token)
-            console.log(limitsResult.data)
 
             this.setState({
                 suggestions: suggestionsResult.data,
@@ -414,11 +414,20 @@ class EventPage extends Component{
                     />
 
 
-                    <PageBody
-                        loaded = {this.state[this.state.selectedTab.value]} 
-                        selectedTab = {this.state.selectedTab.id}
-                        openInvitation = {() => this.openInvitationModal()}
-                    />
+                    {
+                        (  
+                            this.state[this.state.selectedTab.value] != null &&
+                            <PageBody
+                                loaded = {this.state[this.state.selectedTab.value]} 
+                                selectedTab = {this.state.selectedTab.id}
+                                openInvitation = {() => this.openInvitationModal()}
+                            />
+                        ) || 
+                        <ActivityIndicator
+                            size = 'large'
+                            color = '#000'
+                        />
+                    }
  
                     <ImageChangeModal
                         visible = {this.state.imageChangeVisible}
@@ -466,7 +475,12 @@ class EventPage extends Component{
                     />
 
                 </ScrollView>
-                )}
+                ) ||
+                    <ActivityIndicator
+                        size = 'large'
+                        color = '#000'
+                    /> 
+                }
             </View>
         )
     }
