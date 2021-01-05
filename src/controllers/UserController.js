@@ -33,9 +33,10 @@ function generateToken(params = {}) {
 
 module.exports = {
     async store(req, res) {
-        const { username, email, password, type } = req.body
 
         try {
+            const { username, email, password, type } = req.body
+
             const user = await User.create({
                 username, email, password, type
             });
@@ -141,50 +142,56 @@ module.exports = {
     },
 
     async storeImage(req, res) {
+        try {
+            const { filename: key } = req.file;
 
-        const { filename: key } = req.file;
-
-        const imageUser = await ImageUser.findOne({
-            where: { user_id: req.userId }
-        });
-
-        if (imageUser) { //remover caso seja update de imagem
-            const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
-
-            if (fs.existsSync(path)) {
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                });
-            }
-
-            await ImageUser.update({
-                name: key
-            }, {
+            const imageUser = await ImageUser.findOne({
                 where: { user_id: req.userId }
             });
 
-        } else {
-            await ImageUser.create({
-                user_id: req.userId,
-                name: key
-            });
+            if (imageUser) { //remover caso seja update de imagem
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
+
+                if (fs.existsSync(path)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
+
+                await ImageUser.update({
+                    name: key
+                }, {
+                    where: { user_id: req.userId }
+                });
+
+            } else {
+                await ImageUser.create({
+                    user_id: req.userId,
+                    name: key
+                });
+            }
+
+            return res.send({ message: "Imagem inserida com sucesso" })
+        } catch (err) {
+            return res.send({ error: 'Erro ao inserir imagem' })
         }
-
-        return res.send({ message: "Imagem inserida com sucesso" })
-
     },
 
     async storeRider(req, res) {
-        const { filename: key } = req.file;
+        try {
+            const { filename: key } = req.file;
 
-        const artist = await Artist.findAll({ where: { user_id: req.userId } })
-        await Rider.create({
-            name: key,
-            artist_id: artist.id
-        });
+            const artist = await Artist.findAll({ where: { user_id: req.userId } })
+            await Rider.create({
+                name: key,
+                artist_id: artist.id
+            });
 
-        return res.send({ message: "Rider inserido com sucesso" })
+            return res.send({ message: "Rider inserido com sucesso" })
+        } catch (err) {
+            return res.send({ error: 'Erro ao inserir rider' })
+        }
 
     },
 
@@ -204,28 +211,32 @@ module.exports = {
     },
 
     async login(req, res) {
-        const { username, password } = req.body;
-        console.log('back-end:' + username)
-        const user = await User.findOne({
-            where: {
-                [Op.or]: [{ username }, { email: username }]
+        try {
+            const { username, password } = req.body;
+            console.log('back-end:' + username)
+            const user = await User.findOne({
+                where: {
+                    [Op.or]: [{ username }, { email: username }]
+                }
+            });
+
+            if (!user) {
+                return res.send({ error: 'Usuário não encontrado no sistema' })
             }
-        });
 
-        if (!user) {
-            return res.send({ error: 'Usuário não encontrado no sistema' })
+            if (!await bcrypt.compare(password, user.password)) {
+                return res.send({ error: 'Senha incorreta' })
+            }
+
+            user.password = undefined; //nao retornar senha 
+
+            return res.send({
+                user,
+                token: generateToken({ id: user.id })
+            });
+        } catch (err) {
+            return res.send({ error: 'Erro realizar login' })
         }
-
-        if (!await bcrypt.compare(password, user.password)) {
-            return res.send({ error: 'Senha incorreta' })
-        }
-
-        user.password = undefined; //nao retornar senha 
-
-        return res.send({
-            user,
-            token: generateToken({ id: user.id })
-        });
     },
 
     async recoverPassword(req, res) {
@@ -371,53 +382,15 @@ module.exports = {
     },
 
     async getInvitations(req, res) {
+        try {
 
-        const user = await User.findByPk(req.userId);
+            const user = await User.findByPk(req.userId);
 
-        let received = [],
-            sent = [];
+            let received = [],
+                sent = [];
 
-        //recebido do organizador
-        let organizerReceived = await ArtistEvent.findAll({
-            include: [
-                {
-                    association: 'artists',
-                    attributes: ['id', 'name']
-                },
-                {
-                    association: 'events',
-                    attributes: ['id', 'name'],
-                    where: {
-                        organizer_id: user.id
-                    }
-                }
-            ],
-            where: { status: 2 }
-        });
-
-        //enviado pelo organizador
-        let organizerSent = await ArtistEvent.findAll({
-            include: [
-                {
-                    association: 'artists',
-                    attributes: ['id', 'name']
-                },
-                {
-                    association: 'events',
-                    attributes: ['id', 'name'],
-                    where: {
-                        organizer_id: user.id
-                    }
-                }
-            ],
-            where: { status: 1 }
-        });
-
-
-        if (user.type == 0) {
-            const artist = await Artist.findOne({ where: { user_id: user.id } });
-
-            let artistReceived = await ArtistEvent.findAll({
+            //recebido do organizador
+            let organizerReceived = await ArtistEvent.findAll({
                 include: [
                     {
                         association: 'artists',
@@ -425,16 +398,17 @@ module.exports = {
                     },
                     {
                         association: 'events',
-                        attributes: ['id', 'name']
+                        attributes: ['id', 'name'],
+                        where: {
+                            organizer_id: user.id
+                        }
                     }
                 ],
-                where: [
-                    { artist_id: artist.id },
-                    { status: 1 }
-                ]
+                where: { status: 2 }
             });
 
-            let artistSent = await ArtistEvent.findAll({
+            //enviado pelo organizador
+            let organizerSent = await ArtistEvent.findAll({
                 include: [
                     {
                         association: 'artists',
@@ -442,41 +416,82 @@ module.exports = {
                     },
                     {
                         association: 'events',
-                        attributes: ['id', 'name']
+                        attributes: ['id', 'name'],
+                        where: {
+                            organizer_id: user.id
+                        }
                     }
                 ],
-                where: [
-                    { artist_id: artist.id },
-                    { status: 2 }
-                ]
+                where: { status: 1 }
             });
 
-            received = organizerReceived.concat(artistReceived);
-            sent = organizerSent.concat(artistSent);
 
-        } else {
-            received = organizerReceived;
-            sent = organizerSent;
+            if (user.type == 0) {
+                const artist = await Artist.findOne({ where: { user_id: user.id } });
+
+                let artistReceived = await ArtistEvent.findAll({
+                    include: [
+                        {
+                            association: 'artists',
+                            attributes: ['id', 'name']
+                        },
+                        {
+                            association: 'events',
+                            attributes: ['id', 'name']
+                        }
+                    ],
+                    where: [
+                        { artist_id: artist.id },
+                        { status: 1 }
+                    ]
+                });
+
+                let artistSent = await ArtistEvent.findAll({
+                    include: [
+                        {
+                            association: 'artists',
+                            attributes: ['id', 'name']
+                        },
+                        {
+                            association: 'events',
+                            attributes: ['id', 'name']
+                        }
+                    ],
+                    where: [
+                        { artist_id: artist.id },
+                        { status: 2 }
+                    ]
+                });
+
+                received = organizerReceived.concat(artistReceived);
+                sent = organizerSent.concat(artistSent);
+
+            } else {
+                received = organizerReceived;
+                sent = organizerSent;
+            }
+
+            received.sort(function (a, b) {
+                var dateA = new Date(a.updatedAt),
+                    dateB = new Date(b.updatedAt);
+                //maior para menor
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+                return 0;
+            });
+
+            sent.sort(function (a, b) {
+                var dateA = new Date(a.updatedAt),
+                    dateB = new Date(b.updatedAt);
+                //maior para menor
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+                return 0;
+            });
+
+            return res.send({ received, sent });
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir convites' })
         }
-
-        received.sort(function (a, b) {
-            var dateA = new Date(a.updatedAt),
-                dateB = new Date(b.updatedAt);
-            //maior para menor
-            if (dateA > dateB) return -1;
-            if (dateA < dateB) return 1;
-            return 0;
-        });
-
-        sent.sort(function (a, b) {
-            var dateA = new Date(a.updatedAt),
-                dateB = new Date(b.updatedAt);
-            //maior para menor
-            if (dateA > dateB) return -1;
-            if (dateA < dateB) return 1;
-            return 0;
-        });
-        
-        return res.send({received, sent});
     }
 };
