@@ -197,6 +197,9 @@ module.exports = {
             }
 
             event.dataValues.image = imageStatus;
+            event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+            event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
+
 
             return res.send(event);
         } catch (err) {
@@ -209,7 +212,7 @@ module.exports = {
         try {
             const { id } = req.params;
 
-            const lineup = await ArtistEvent.findAll({
+            let lineup = await ArtistEvent.findAll({
                 attributes: ['event_id', 'date', 'start_time'],
                 where: {
                     [Op.and]: [{ event_id: id }, { status: 3 }]
@@ -222,6 +225,10 @@ module.exports = {
                     ['date', 'ASC'],
                     ['start_time', 'ASC']
                 ]
+            });
+
+            lineup.forEach((data) => {
+                data.dataValues.start_time = moment(data.start_time, 'HH:mm:ss').format("HH:mm");
             });
 
             return res.send(lineup);
