@@ -24,8 +24,9 @@ const Event = require('../models/Event');
 const ArtistEvent = require('../models/ArtistEvent');
 
 function generateToken(params = {}) {
+    //expirar em 1 ano 
     return jwt.sign(params, authConfig.secret, {
-        expiresIn: 84600
+        expiresIn: '365d'
     });
 
 }

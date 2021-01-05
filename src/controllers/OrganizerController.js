@@ -47,7 +47,8 @@ module.exports = {
             const { artistId, eventId, date, time } = req.body;
 
             const event = await Event.findByPk(eventId);
-        
+
+            //verificar artista no evento
             const artist = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
@@ -56,7 +57,19 @@ module.exports = {
             })
 
             if (artist.length > 0) {
-                return res.send({ error: 'Artista já está no evento' })
+                return res.send({ error: 'Artista já está no evento' });
+            }
+
+            //verificar se não há show acontecendo
+            const verifyLineup = await ArtistEvent.findAll({ 
+                where: {
+                    event_id: eventId,
+                    start_time: { [Op.eq]: time }
+                }
+            });
+
+            if (verifyLineup.length > 0) {
+                return res.send({ error: 'Há um artista encaixado neste horário' });
             }
 
             await ArtistEvent.create({
@@ -194,7 +207,21 @@ module.exports = {
         return res.status(200).send('ok');
     },
 
-    async acceptParticipation(req, res){
+    async refuseInvitation(req, res) {
+
+        const { artistId, eventId } = req.body;
+
+        await ArtistEvent.destroy({
+            where: [
+                { artist_id: artistId },
+                { event_id: eventId }
+            ]
+        });
+
+        return res.status(200).send('ok');
+    },
+
+    async acceptParticipation(req, res) {
 
         const { artistId, eventId } = req.body;
 
@@ -207,6 +234,39 @@ module.exports = {
             ]
         });
 
+        return res.status(200).send('ok');
+    },
+
+    async updateLineup(req, res) {
+        const { id } = req.params;
+
+        const { lineup } = req.body;
+
+        //remover todos
+
+        await ArtistEvent.destroy({
+            where: {
+                [Op.and]: [{ event_id: id }, { status: 3 }]
+            }
+        });
+
+        const event = await Event.findByPk(id);
+
+        if (lineup !== undefined) {
+            const newLineup = lineup.map(
+                data => {
+                    return {
+                        event_id: id,
+                        artist_id: data.artist_id,
+                        date: event.start_date,
+                        start_time: data.time,
+                        status: 3
+                    }
+                });
+
+            await ArtistEvent.bulkCreate(newLineup);
+
+        }
         return res.status(200).send('ok');
     }
 };

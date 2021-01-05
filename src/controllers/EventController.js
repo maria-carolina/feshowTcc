@@ -27,7 +27,7 @@ function searchEquipment(equipmentId, array) {
 
 module.exports = {
     async store(req, res) {
-        //try {
+        try {
             const {
                 venue_id,
                 name,
@@ -38,7 +38,7 @@ module.exports = {
             } = req.body;
 
             let descript;
-            
+
             if (description !== "") {
                 descript = description;
             } else {
@@ -62,15 +62,15 @@ module.exports = {
 
             return res.send(event);
 
-       // } catch (err) {
-       //     return res.send({ error: 'Erro ao gravar evento' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao gravar evento' })
+        }
     },
 
     async storeImage(req, res) {
         const { id } = req.params;
 
-        //try {
+        try {
             const { filename: key } = req.file;
 
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
@@ -99,14 +99,14 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao inserir imagem' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao inserir imagem' })
+        }
     },
 
 
     async update(req, res) {
-      //  try {
+        try {
             const { id } = req.params;
 
             const {
@@ -145,13 +145,13 @@ module.exports = {
 
             return res.send(event);
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao editar evento' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar evento' })
+        }
     },
 
     async removeImage(req, res) {
-      //  try {
+        try {
             const { id } = req.params;
 
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
@@ -172,9 +172,9 @@ module.exports = {
             }
             return res.status(200).send('ok');
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao remover imagem' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao remover imagem' })
+        }
     },
 
     async show(req, res) {
@@ -208,12 +208,16 @@ module.exports = {
         const lineup = await ArtistEvent.findAll({
             attributes: ['event_id', 'date', 'start_time'],
             where: {
-                [Op.and]: [{ event_id: id }, { status: 1 }]
+                [Op.and]: [{ event_id: id }, { status: 3 }]
             },
             include: {
                 association: 'artists',
                 attributes: ['id', 'name']
-            }
+            },
+            order: [
+                ['date', 'ASC'],
+                ['start_time', 'ASC']
+            ]
         });
 
         return res.send(lineup);
@@ -221,7 +225,7 @@ module.exports = {
     },
 
     async showPosts(req, res) {
-        //try {
+        try {
             const { id } = req.params;
 
             const postagens = await Post.findAll({
@@ -256,10 +260,20 @@ module.exports = {
                 });
 
             };
+
+            posts.sort(function (a, b) {
+                var dateA = new Date(a.updatedAt),
+                    dateB = new Date(b.updatedAt);
+                //maior para menor
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+                return 0;
+            });
+
             return res.send(posts);
-       // } catch (err) {
-      //      return res.send({ error: 'Erro ao listar posts' })
-        //}
+        } catch (err) {
+            return res.send({ error: 'Erro ao listar posts' })
+        }
     },
 
     async showEquipments(req, res) {
@@ -343,39 +357,39 @@ module.exports = {
     },
 
     async delete(req, res) {
-       // try {
-            const { id } = req.params;
+        // try {
+        const { id } = req.params;
 
-            const event = await Event.findByPk(id);
-            const eventImage = await EventImage.findOne({ where: { event_id: id } });
+        const event = await Event.findByPk(id);
+        const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-            if (eventImage.name) { //remover imagem do sistema
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                if (fs.existsSync(file)) {
-                    fs.unlink(file, function (err) {
-                        if (err) throw err;
-                        console.log('Arquivo deletado!');
-                    });
-                }
-
-                await EventImage.destroy({
-                    where: { event_id: id }
+        if (eventImage.name) { //remover imagem do sistema
+            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+            if (fs.existsSync(file)) {
+                fs.unlink(file, function (err) {
+                    if (err) throw err;
+                    console.log('Arquivo deletado!');
                 });
             }
 
-            await ArtistEvent.destroy({
+            await EventImage.destroy({
                 where: { event_id: id }
             });
+        }
 
-            await Event.destroy({
-                where: { id }
-            });
+        await ArtistEvent.destroy({
+            where: { event_id: id }
+        });
 
-            return res.status(200).send('ok');
+        await Event.destroy({
+            where: { id }
+        });
 
-    //    } catch (err) {
-      //      return res.send({ error: 'Erro ao deletar evento' })
-      //  }
+        return res.status(200).send('ok');
+
+        //    } catch (err) {
+        //      return res.send({ error: 'Erro ao deletar evento' })
+        //  }
     },
 
     async getImage(req, res) {
@@ -403,7 +417,7 @@ module.exports = {
         const event = await Event.findByPk(id);
 
         var limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
-     
+
         const eventDate = {
             id: event.id,
             start_date: event.start_date,
