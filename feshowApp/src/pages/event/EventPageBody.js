@@ -85,6 +85,17 @@ const PageBody = (props) => {
 
     return (
         <View style = {{width: '90%'}}>
+            {props.selectedTab == 1 &&
+                <TouchableOpacity
+                    style = {{...styles.button}}
+                    onPress = {props.openLineUpEdit}
+                >
+                    <Text style = {styles.buttonLabel}>
+                        Alterar line-up
+                    </Text>
+                </TouchableOpacity>
+            }
+
             {props.selectedTab == 2 && 
                 <TouchableOpacity
                     style = {{...styles.textInput,

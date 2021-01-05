@@ -104,7 +104,7 @@ class InvitationsPage extends Component{
     }
 
     respondInvitation = async (artistId, eventId, accepted) => {
-        var url = accepted ? '/acceptParticipation' : '/cancelInvitation';
+        var url = accepted ? '/acceptParticipation' : '/refuseInvitation';
         try{
             let result = await api.post(
                 url, 

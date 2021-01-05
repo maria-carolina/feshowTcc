@@ -23,8 +23,6 @@ function blobTo64data(imageBlob) {
     }) 
 }
 
-
-
 const TABS = [
     {id: 0, label:'Descrição', value: 'description'},
     {id: 1, label:'Line-up', value: 'lineup'},
@@ -57,8 +55,6 @@ class EventPage extends Component{
         })
     }
 
-    
-    
     loadEventData = async () => {
         try{
             var result = await api.get('/event/show/2', {
@@ -241,11 +237,36 @@ class EventPage extends Component{
             })
     }
 
-
-    openEventEditPage = async () => {
+    openEventEditPage = () => {
         let event = this.state.event;
         this.props.navigation.navigate('newEventPage', 
         {event: event})
+    }
+
+    openLineUpEditPage = async () => {
+        if(!('limits' in this.state)){
+            try{
+                var result = 
+                await api.get(`/event/getDateTime/${this.state.event.id}`,
+                    {headers: {
+                        Authorization: `Bearer ${this.context.token}`,
+                    }}
+                )
+            }catch(e){
+                console.log(e)
+            }
+        }
+
+        if(!('error' in result.data)){
+            this.props.navigation.navigate('lineUpEditPage', 
+            {
+                eventId: this.state.event.id,
+                lineup: this.state.lineup,
+                limits: result.data
+            })
+        }else{
+            Alert.alert('Ops', 'Ocorreu um erro, tente novamente.')
+        }
     }
 
     sendSolicitation = () => {}
@@ -421,6 +442,7 @@ class EventPage extends Component{
                                 loaded = {this.state[this.state.selectedTab.value]} 
                                 selectedTab = {this.state.selectedTab.id}
                                 openInvitation = {() => this.openInvitationModal()}
+                                openLineUpEdit = {() => this.openLineUpEditPage()}
                             />
                         ) || 
                         <ActivityIndicator

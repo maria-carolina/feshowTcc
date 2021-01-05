@@ -18,6 +18,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
+import LineUpEditPage from '../pages/event/LineUpEditPage';
 
 
 const Stack = createStackNavigator();
@@ -183,6 +184,12 @@ const NavStack = (props) => {
                 name = 'eventPage' 
                 component = {EventPage} //provisório
             />
+
+            <Stack.Screen 
+                name = 'lineUpEditPage' 
+                component = {LineUpEditPage} //provisório
+            />
+
              <Stack.Screen 
                 name = 'drawerTestPage'
                 component = {EventPage} //provisório
