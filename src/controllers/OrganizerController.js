@@ -288,5 +288,22 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao editar line-up' })
         }
-    }
+    },
+
+    async removeArtist(req, res) {
+        try {
+            const { artistId, eventId } = req.body;
+
+            await ArtistEvent.destroy({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao remover artista do evento' })
+        }
+    },
 };

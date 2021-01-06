@@ -9,5 +9,6 @@ organizerRoutes.post('/cancelInvitation', OrganizerController.cancelInvitation);
 organizerRoutes.post('/refuseInvitation', OrganizerController.refuseInvitation);
 organizerRoutes.post('/acceptParticipation', OrganizerController.acceptParticipation);
 organizerRoutes.post('/updateLineup/:id', OrganizerController.updateLineup);
+organizerRoutes.post('/removeArtist', OrganizerController.removeArtist);
 
 module.exports = organizerRoutes;
