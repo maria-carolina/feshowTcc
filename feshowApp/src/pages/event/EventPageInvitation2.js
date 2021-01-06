@@ -27,6 +27,7 @@ const InvitationModal = (props) => {
             );
 
             if(result.data === 'ok'){
+                props.closeModal();
                 props.finishInvitation();
                 Alert.alert('Pronto!', 'O artista foi convidado para o evento. Aguarde a resposta.') 
             }

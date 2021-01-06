@@ -5,6 +5,7 @@ import styles from '../../styles';
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
 
@@ -31,14 +32,12 @@ class LineUpEditPage extends Component{
                 }
             })
         }
-        console.log(this.state.eventId)
+
         try{
             let result = await api.post(`/updateLineup/${this.state.eventId}`, values, 
             {headers: {
                 Authorization: `Bearer ${this.context.token}`,
             }})
-
-            console.log(result.data)
 
             if(result.data === 'ok'){
                 this.props.navigation.navigate('eventPage');
@@ -52,6 +51,44 @@ class LineUpEditPage extends Component{
             console.log(e)
         }
         
+    }
+
+    excludeFromLineup = async (artistId) => {
+
+        try{
+            let result = await api.post(
+                '/removeArtist',
+                {
+                    artistId,
+                    eventId: this.state.eventId
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`,
+                    }
+                }
+            )
+
+            if(result.data === 'ok'){
+                let newLineup = this.state.lineup.filter(item => 
+                    item.artists.id != artistId)
+
+                
+                if(newLineup.length > 0){
+                    this.setState({
+                        lineup: newLineup
+                    })
+                }else{
+                    this.props.navigation.navigate('eventPage');
+                }
+                
+                Alert.alert('Pronto', 'Artista foi removido do evento.');
+            }else{
+                Alert.alert('Ops', result.data.error);
+            }
+        }catch(e){
+            console.log(e)
+        }
     }
 
     verifyChoosenTime = (date) => {
@@ -108,11 +145,12 @@ class LineUpEditPage extends Component{
     render(){
         return(
             <View style = {styles.container}>
+                <Text style = {styles.title}>Altere os horários ou remova alguém</Text>
                 {this.state.lineup.map(item => {
                     return(
                         <View 
                             style = {{...styles.row, 
-                                width: '98%',
+                                width: '90%',
                                 borderBottomWidth: .5,
                                 padding: 20,
                                 position: 'relative'
@@ -120,7 +158,13 @@ class LineUpEditPage extends Component{
                             key = {this.state.lineup.indexOf(item)}
                         >
 
-                            <Text style = {{color: '#000'}}>{item.artists.name || null}</Text>
+                            <Text style = {{
+                                color: '#000',
+                                fontSize: 16,
+                                fontWeight: 'bold'
+                            }}>
+                                {item.artists.name || null}
+                            </Text>
 
                             <TouchableOpacity 
                                 style = {{
@@ -141,6 +185,18 @@ class LineUpEditPage extends Component{
                                     {item.start_time} 
                                 </Text>
                             </TouchableOpacity>
+                            
+                            <FontAwesome
+                                name = {'close'}
+                                size = {30}
+                                color = {'#000'} 
+                                style = {{
+                                    position: 'absolute',
+                                    right: 20
+                                }}
+                                onPress = {() => this.excludeFromLineup(item.artists.id)}
+                            />
+                            
                         </View>
                     )
                 })}

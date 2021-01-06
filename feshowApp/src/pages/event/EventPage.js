@@ -244,6 +244,9 @@ class EventPage extends Component{
     }
 
     openLineUpEditPage = async () => {
+
+        var limits;
+
         if(!('limits' in this.state)){
             try{
                 var result = 
@@ -255,18 +258,25 @@ class EventPage extends Component{
             }catch(e){
                 console.log(e)
             }
+
+            if(!('error' in result.data)){
+                limits = result.data;
+            }else{
+                Alert.alert('Ops', 'Ocorreu um erro, tente novamente.')
+            }
+        }else{
+            limits = this.state.limits;
         }
 
-        if(!('error' in result.data)){
-            this.props.navigation.navigate('lineUpEditPage', 
+        this.props.navigation.navigate('lineUpEditPage', 
             {
                 eventId: this.state.event.id,
                 lineup: this.state.lineup,
-                limits: result.data
-            })
-        }else{
-            Alert.alert('Ops', 'Ocorreu um erro, tente novamente.')
-        }
+                limits: limits
+            }
+        )
+
+
     }
 
     sendSolicitation = () => {}
