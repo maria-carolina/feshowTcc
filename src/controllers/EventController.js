@@ -8,6 +8,7 @@ const Equipment = require('../models/Equipment');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
+const User = require('../models/User');
 
 const { Op } = require('sequelize');
 const fs = require('fs');
@@ -463,6 +464,119 @@ module.exports = {
             return res.send(eventDate);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir data e hora de evento' })
+        }
+
+    },
+
+    async getFutureEvents(req, res) {
+
+        try {
+
+            const { page } = req.params
+
+            let limit = 10;
+            let offset = limit * (page - 1);
+
+            const user = await User.findByPk(req.userId);
+
+            let events = await Event.findAll({
+                attributes: ['id', 'name', 'start_date', 'status'],
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name']
+                },
+                limit,
+                offset,
+                where: {
+                    organizer_id: user.id
+                },
+                order: [
+                    ['start_date', 'ASC']
+                ]
+            });
+
+            if (user.type == 0) {
+
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                let artistEvents = [];
+
+                let artistEvts = await ArtistEvent.findAll({
+                    include: [
+                        { association: 'artists' },
+                        {
+                            association: 'events',
+                            include: {
+                                association: 'venue'
+                            },
+                        },
+                    ],
+                    where: {
+                        artist_id: artist.id,
+                        status: 3
+                    }
+                });
+
+                artistEvts.forEach((event) => {
+                    artistEvents.push({
+                        id: event.events.id,
+                        name: event.events.name,
+                        start_date: event.events.start_date,
+                        status: event.events.status,
+                        venue: {
+                            id: event.events.venue.id,
+                            name: event.events.venue.name
+                        }
+                    });
+                });
+
+                //ordenar menor para maior
+                artistEvents.sort(function (a, b) {
+                    var dateA = new Date(a.start_date),
+                        dateB = new Date(b.start_date);
+
+                    if (dateA > dateB) return 1;
+                    if (dateA < dateB) return -1;
+                    return 0;
+                });
+
+                //paginação
+                artistEvents = artistEvents.slice(offset).slice(0, limit),
+                    total_pages = Math.ceil(artistEvents.length / limit);
+
+                return res.send({ events, artistEvents });
+
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                let venueEvents = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    offset,
+                    where: {
+                        venue_id: venue.id
+                    },
+                    order: [
+                        ['start_date', 'ASC']
+                    ]
+                });
+
+                return res.send({ events, venueEvents });
+
+            } else {
+                return res.send(events);
+            }
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir eventos futuros' })
         }
 
     }
