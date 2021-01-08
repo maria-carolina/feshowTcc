@@ -3,12 +3,20 @@ const { Model, DataTypes } = require('sequelize');
 class Solicitation extends Model {
     static init(sequelize) {
         super.init({
-            description: {
+            venue_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+            },
+            user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+            },
+            name: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {
                     notEmpty: {
-                        msg: 'O campo descrição não pode ser vazio'
+                        msg: 'O campo nome não pode ser vazio'
                     }
                 }
             },
@@ -18,15 +26,6 @@ class Solicitation extends Model {
                 validate: {
                     notEmpty: {
                         msg: 'O campo data de início não pode ser vazio'
-                    }
-                }
-            },
-            end_date: {
-                type: DataTypes.DATE,
-                allowNull: false,
-                validate: {
-                    notEmpty: {
-                        msg: 'O campo data final não pode ser vazio'
                     }
                 }
             },
@@ -48,7 +47,7 @@ class Solicitation extends Model {
                     }
                 }
             },
-            status: {
+            note: {
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
