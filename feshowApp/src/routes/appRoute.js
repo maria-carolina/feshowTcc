@@ -3,13 +3,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import NewEventPage from '../pages/event/NewEventPage';
+import InvitationsPage from '../pages/event/InvitationsPage';
+
 import EventPage from '../pages/event/EventPage';
 import ProfilePage from '../pages/access/ProfilePage';
 import styles from '../styles'
 
 //só para teste
 import InitialPage from '../pages/access/InitialPage';
-import ImageTest from '../pages/event/ImageTest';
 //
 
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -17,6 +18,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
+import LineUpEditPage from '../pages/event/LineUpEditPage';
 
 
 const Stack = createStackNavigator();
@@ -146,6 +148,8 @@ const NavStack = (props) => {
                 
             </View>
         )
+
+
     }
 
     const headerOptions = {
@@ -169,7 +173,7 @@ const NavStack = (props) => {
         >
             <Stack.Screen 
                 name = 'invitationsPage' 
-                component = {EventPage} //provisório
+                component = {InvitationsPage} //provisório
             />
             <Stack.Screen 
                 name = 'newEventPage'
@@ -180,9 +184,15 @@ const NavStack = (props) => {
                 name = 'eventPage' 
                 component = {EventPage} //provisório
             />
+
+            <Stack.Screen 
+                name = 'lineUpEditPage' 
+                component = {LineUpEditPage} //provisório
+            />
+
              <Stack.Screen 
                 name = 'drawerTestPage'
-                component = {ImageTest} //provisório
+                component = {EventPage} //provisório
             />
             
         </Stack.Navigator>
@@ -234,7 +244,7 @@ const AppRoute = () => {
             />
 
             <Tabs.Screen 
-                name = 'newEvent' 
+                name = 'event' 
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {

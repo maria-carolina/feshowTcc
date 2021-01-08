@@ -25,7 +25,6 @@ const Form = (props) => {
             initialValues = {props.event == null ? {
                 name: '',
                 start_date: '',
-                end_date: '',
                 start_time: '',
                 end_time: '',
                 description:  ''
@@ -33,7 +32,6 @@ const Form = (props) => {
             {
                 name: props.event.name,
                 start_date: props.event.start_date,
-                end_date: props.event.end_date,
                 start_time: props.event.start_time,
                 end_time: props.event.end_time,
                 description: props.event.description
@@ -87,25 +85,6 @@ const Form = (props) => {
                                 }}>Data do evento</Text>}
 
                             </TouchableOpacity>
-
-
-                            <TouchableOpacity 
-                                style = {styles.rowInput}
-                                onPress = {() => {
-                                    setSelectedPicker('end_date');
-                                    setDatePickerVisible(true);
-                                }}
-                            >
-                                {values.end_date != '' ? 
-                                <Text style = {{ color: '#000' }}>
-                                    {values.end_date}</Text> :
-                                <Text style = {{
-                                    color: '#8E8E8E',
-                                    fontSize: 14
-                                }}>Data final (opcional)</Text>}
-
-                            </TouchableOpacity>
-
 
                         </View>
 
@@ -229,11 +208,6 @@ class NewEventPage extends Component{
         }else{
             let splitted = values.start_date.split('/');
             values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
-
-            if(values.end_date != ''){
-                splitted = values.end_date.split('/');
-                values.end_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
-            } 
 
             values.venue_id = 1;
 

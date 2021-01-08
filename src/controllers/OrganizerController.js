@@ -47,11 +47,8 @@ module.exports = {
             const { artistId, eventId, date, time } = req.body;
 
             const event = await Event.findByPk(eventId);
-            
-            if (time < event.start_time || time > event.end_time) {
-                return res.send({ error: 'O evento não acontecerá neste horário' })
-            }
 
+            //verificar artista no evento
             const artist = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
@@ -60,7 +57,19 @@ module.exports = {
             })
 
             if (artist.length > 0) {
-                return res.send({ error: 'Artista já incluso no evento' })
+                return res.send({ error: 'Artista já está no evento' });
+            }
+
+            //verificar se não há show acontecendo
+            const verifyLineup = await ArtistEvent.findAll({
+                where: {
+                    event_id: eventId,
+                    start_time: { [Op.eq]: time }
+                }
+            });
+
+            if (verifyLineup.length > 0) {
+                return res.send({ error: 'Há um artista encaixado neste horário' });
             }
 
             await ArtistEvent.create({
@@ -80,137 +89,221 @@ module.exports = {
     },
 
     async getSuggestions(req, res) {
+        try {
+            const { id } = req.params;
+            let artistVerified = [],
+                artistsCity = [],
+                cityGenre = [],
+                artistsGenres = [],
+                otherArtists = [],
+                artists = [];
 
-        const { id } = req.params;
-        let artistVerified = [],
-            artistsCity = [],
-            cityGenre = [],
-            artistsGenres = [],
-            otherArtists = [],
-            artists = [];
+            let result, resultGenre;
 
-        let result, resultGenre;
-
-        const artistsAll = await Artist.findAll({
-            attributes: ['id', 'name', 'city'],
-            include: {
-                association: 'genres',
-                attributes: ['id', 'name']
-            }
-        });
-        const event = await Event.findByPk(id);
-        const address = await Address.findByPk(event.venue_id);
-        const genreVenue = await GenreVenue.findAll({ where: { venue_id: event.venue_id } })
-
-        const invitations = await ArtistEvent.findAll({
-            where: { event_id: id }
-        });
-
-        artistsAll.forEach((artist) => {
-            //pegar os que nao estão no evento
-            result = verifyArtist(artist.id, invitations)
-            if (!result) {
-                artistVerified.push(artist);
-            }
-        });
-
-        artistVerified.forEach((artist) => {
-            artist.genres.forEach((genre) => {
-                resultGenre = verifyGenre(genre.id, genreVenue)
-
-                if (artist.city === address.city) {
-                    if (resultGenre) {
-                        if (isUnique(artist.id, cityGenre) && isUnique(artist.id, artistsCity))
-                            cityGenre.push(artist);
-                    } else {
-                        if (isUnique(artist.id, cityGenre) && isUnique(artist.id, artistsCity))
-                            artistsCity.push(artist);
-                    }
+            const artistsAll = await Artist.findAll({
+                attributes: ['id', 'name', 'city'],
+                include: {
+                    association: 'genres',
+                    attributes: ['id', 'name']
                 }
-                else {
-                    if (resultGenre) {
-                        if (isUnique(artist.id, artistsGenres) && isUnique(artist.id, otherArtists))
-                            artistsGenres.push(artist);
-                    } else {
-                        if (isUnique(artist.id, artistsGenres) && isUnique(artist.id, otherArtists))
-                            otherArtists.push(artist);
-                    }
+            });
+            const event = await Event.findByPk(id);
+            const address = await Address.findByPk(event.venue_id);
+            const genreVenue = await GenreVenue.findAll({ where: { venue_id: event.venue_id } })
+
+            const invitations = await ArtistEvent.findAll({
+                where: { event_id: id }
+            });
+
+            artistsAll.forEach((artist) => {
+                //pegar os que nao estão no evento
+                result = verifyArtist(artist.id, invitations)
+                if (!result) {
+                    artistVerified.push(artist);
                 }
             });
 
-        });
-        artists = cityGenre.concat(artistsCity, artistsGenres, otherArtists);
+            artistVerified.forEach((artist) => {
+                artist.genres.forEach((genre) => {
+                    resultGenre = verifyGenre(genre.id, genreVenue)
 
-        return res.send(artists);
+                    if (artist.city === address.city) {
+                        if (resultGenre) {
+                            if (isUnique(artist.id, cityGenre) && isUnique(artist.id, artistsCity))
+                                cityGenre.push(artist);
+                        } else {
+                            if (isUnique(artist.id, cityGenre) && isUnique(artist.id, artistsCity))
+                                artistsCity.push(artist);
+                        }
+                    }
+                    else {
+                        if (resultGenre) {
+                            if (isUnique(artist.id, artistsGenres) && isUnique(artist.id, otherArtists))
+                                artistsGenres.push(artist);
+                        } else {
+                            if (isUnique(artist.id, artistsGenres) && isUnique(artist.id, otherArtists))
+                                otherArtists.push(artist);
+                        }
+                    }
+                });
+
+            });
+            artists = cityGenre.concat(artistsCity, artistsGenres, otherArtists);
+
+            return res.send(artists);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir sugestões' })
+        }
 
     },
 
     async search(req, res) {
+        try {
+            const { id } = req.params;
+            const { name } = req.body;
+            let artistVerified = [];
+            let status;
 
-        const { id } = req.params;
-        const { name } = req.body;
-        let artistVerified = [];
-        let status;
-
-        const invitations = await ArtistEvent.findAll({
-            where: { event_id: id }
-        });
-
-        const artists = await Artist.findAll({
-            attributes: ['id', 'name'],
-            where: {
-                name: {
-                    [Op.like]: '%' + name + '%'
-                }
-            }
-        });
-
-        artists.forEach((artist) => {
-            result = verifyArtist(artist.id, invitations)
-            if (!result) {
-                status = 0  //fora do evento
-            } else {
-                status = 1  //dentro do evento
-            }
-
-            artistVerified.push({
-                id: artist.id,
-                name: artist.name,
-                status: status
+            const invitations = await ArtistEvent.findAll({
+                where: { event_id: id }
             });
-        });
 
-        return res.send(artistVerified);
+            const artists = await Artist.findAll({
+                attributes: ['id', 'name'],
+                where: {
+                    name: {
+                        [Op.like]: '%' + name + '%'
+                    }
+                }
+            });
 
+            artists.forEach((artist) => {
+                result = verifyArtist(artist.id, invitations)
+                if (!result) {
+                    status = 0  //fora do evento
+                } else {
+                    status = 1  //dentro do evento
+                }
+
+                artistVerified.push({
+                    id: artist.id,
+                    name: artist.name,
+                    status: status
+                });
+            });
+
+            return res.send(artistVerified);
+        } catch (err) {
+            return res.send({ error: 'Erro ao realizar busca' })
+        }
     },
 
     async cancelInvitation(req, res) {
+        try {
+            const { artistId, eventId } = req.body;
 
-        const { artistId, eventId } = req.body;
+            await ArtistEvent.destroy({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
 
-        await ArtistEvent.destroy({
-            where: [
-                { artist_id: artistId },
-                { event_id: eventId }
-            ]
-        });
-
-        return res.status(200).send('ok');
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao cancelar convite' })
+        }
     },
 
-    async acceptParticipation(req, res){
+    async refuseInvitation(req, res) {
+        try {
+            const { artistId, eventId } = req.body;
 
-        const { artistId, eventId } = req.body;
+            await ArtistEvent.destroy({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
 
-        await ArtistEvent.update({
-            status: 3
-        }, {
-            where: [
-                { artist_id: artistId },
-                { event_id: eventId }
-            ]
-        });
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao cancelar convite' })
+        }
+    },
 
-        return res.status(200).send('ok');
-    }
+    async acceptParticipation(req, res) {
+
+        try {
+            const { artistId, eventId } = req.body;
+
+            await ArtistEvent.update({
+                status: 3
+            }, {
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao aceitar participaçãoem evento' })
+        }
+    },
+
+    async updateLineup(req, res) {
+        try {
+            const { id } = req.params;
+
+            const { lineup } = req.body;
+
+            //remover todos
+
+            await ArtistEvent.destroy({
+                where: {
+                    [Op.and]: [{ event_id: id }, { status: 3 }]
+                }
+            });
+
+            const event = await Event.findByPk(id);
+
+            if (lineup !== undefined) {
+                const newLineup = lineup.map(
+                    data => {
+                        return {
+                            event_id: id,
+                            artist_id: data.artist_id,
+                            date: event.start_date,
+                            start_time: data.time,
+                            status: 3
+                        }
+                    });
+
+                await ArtistEvent.bulkCreate(newLineup);
+
+            }
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar line-up' })
+        }
+    },
+
+    async removeArtist(req, res) {
+        try {
+            const { artistId, eventId } = req.body;
+
+            await ArtistEvent.destroy({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao remover artista do evento' })
+        }
+    },
 };

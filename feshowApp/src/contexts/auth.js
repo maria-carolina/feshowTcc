@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }) => {
             return result;
         }
 
-
         setToken(result.token);
         setUser(result.user);
         

@@ -8,6 +8,7 @@ const Equipment = require('../models/Equipment');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
+const User = require('../models/User');
 
 const { Op } = require('sequelize');
 const fs = require('fs');
@@ -27,7 +28,7 @@ function searchEquipment(equipmentId, array) {
 
 module.exports = {
     async store(req, res) {
-        //try {
+        try {
             const {
                 venue_id,
                 name,
@@ -38,7 +39,7 @@ module.exports = {
             } = req.body;
 
             let descript;
-            
+
             if (description !== "") {
                 descript = description;
             } else {
@@ -62,15 +63,15 @@ module.exports = {
 
             return res.send(event);
 
-       // } catch (err) {
-       //     return res.send({ error: 'Erro ao gravar evento' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao gravar evento' })
+        }
     },
 
     async storeImage(req, res) {
-        const { id } = req.params;
 
-        //try {
+        try {
+            const { id } = req.params;
             const { filename: key } = req.file;
 
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
@@ -99,14 +100,14 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao inserir imagem' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao inserir imagem' })
+        }
     },
 
 
     async update(req, res) {
-      //  try {
+        try {
             const { id } = req.params;
 
             const {
@@ -145,13 +146,13 @@ module.exports = {
 
             return res.send(event);
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao editar evento' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar evento' })
+        }
     },
 
     async removeImage(req, res) {
-      //  try {
+        try {
             const { id } = req.params;
 
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
@@ -172,56 +173,74 @@ module.exports = {
             }
             return res.status(200).send('ok');
 
-        //} catch (err) {
-       //     return res.send({ error: 'Erro ao remover imagem' })
-       // }
+        } catch (err) {
+            return res.send({ error: 'Erro ao remover imagem' })
+        }
     },
 
     async show(req, res) {
+        try {
+            const { id } = req.params;
 
-        const { id } = req.params;
+            let event = await Event.findByPk(id, {
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name']
+                }
+            });
 
-        let event = await Event.findByPk(id, {
-            include: {
-                association: 'venue',
-                attributes: ['id', 'name']
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
+
+            const imageStatus = eventImage ? true : false;
+
+            if (!event) {
+                return res.send({ error: 'Erro ao exibir evento' });
             }
-        });
 
-        const eventImage = await EventImage.findOne({ where: { event_id: id } });
+            event.dataValues.image = imageStatus;
+            event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+            event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 
-        const imageStatus = eventImage ? true : false;
 
-        if (!event) {
-            return res.send({ error: 'Erro ao gravar evento no sistema' });
+            return res.send(event);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir evento' })
         }
 
-        event.dataValues.image = imageStatus;
-
-        return res.send(event);
     },
 
     async showLineup(req, res) {
+        try {
+            const { id } = req.params;
 
-        const { id } = req.params;
+            let lineup = await ArtistEvent.findAll({
+                attributes: ['event_id', 'date', 'start_time'],
+                where: {
+                    [Op.and]: [{ event_id: id }, { status: 3 }]
+                },
+                include: {
+                    association: 'artists',
+                    attributes: ['id', 'name']
+                },
+                order: [
+                    ['date', 'ASC'],
+                    ['start_time', 'ASC']
+                ]
+            });
 
-        const lineup = await ArtistEvent.findAll({
-            attributes: ['event_id', 'date', 'start_time'],
-            where: {
-                [Op.and]: [{ event_id: id }, { status: 1 }]
-            },
-            include: {
-                association: 'artists',
-                attributes: ['id', 'name']
-            }
-        });
+            lineup.forEach((data) => {
+                data.dataValues.start_time = moment(data.start_time, 'HH:mm:ss').format("HH:mm");
+            });
 
-        return res.send(lineup);
+            return res.send(lineup);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir line-up' })
+        }
 
     },
 
     async showPosts(req, res) {
-        //try {
+        try {
             const { id } = req.params;
 
             const postagens = await Post.findAll({
@@ -256,100 +275,130 @@ module.exports = {
                 });
 
             };
+
+            posts.sort(function (a, b) {
+                var dateA = new Date(a.updatedAt),
+                    dateB = new Date(b.updatedAt);
+                //maior para menor
+                if (dateA > dateB) return -1;
+                if (dateA < dateB) return 1;
+                return 0;
+            });
+
             return res.send(posts);
-       // } catch (err) {
-      //      return res.send({ error: 'Erro ao listar posts' })
-        //}
+        } catch (err) {
+            return res.send({ error: 'Erro ao listar posts' })
+        }
     },
 
     async showEquipments(req, res) {
+        try {
+            const { id } = req.params;
 
-        const { id } = req.params;
-
-        //artistas no lineup
-        const artistsLineup = await ArtistEvent.findAll({
-            attributes: [],
-            where: {
-                [Op.and]: [{ event_id: id }, { status: 1 }]
-            },
-            include: {
-                association: 'artists',
-                attributes: ['id', 'name']
-            }
-        });
-
-        const event = await Event.findByPk(id);
-
-        let artistEquipment;
-        let equipments = [], equipmentsVenue = [];
-        let obj = {};
-        let equipment, artist, result, qtd;
-
-        //espaço do evento
-        const equipmentVenue = await EquipmentVenue.findAll({
-            where: { venue_id: event.venue_id }
-        });
-
-        for (let artistLineup of artistsLineup) {
-            artistEquipment = await ArtistEquipment.findAll({
-                where: { artist_id: artistLineup.artists.id }
+            //artistas no lineup
+            const artistsLineup = await ArtistEvent.findAll({
+                attributes: [],
+                where: {
+                    [Op.and]: [{ event_id: id }, { status: 1 }]
+                },
+                include: {
+                    association: 'artists',
+                    attributes: ['id', 'name']
+                }
             });
 
-            for (let equip of artistEquipment) {
-                result = searchEquipment(equip.equipment_id, equipmentVenue);
-                equipment = await Equipment.findByPk(equip.equipment_id);
-                artist = await Artist.findByPk(equip.artist_id);
+            const event = await Event.findByPk(id);
 
-                if (result) {
-                    //result retorna quantidade que espaço tem 
-                    if (equip.quantity > result) {
-                        qtd = equip.quantity - result;
+            let artistEquipment;
+            let equipments = [], equipmentsVenue = [];
+            let obj = {};
+            let equipment, artist, result, qtd;
 
-                        //o que o espaço irá emprestar
-                        equipmentsVenue.push({
-                            artistId: artist.id,
-                            name: artist.name,
-                            equipment: equipment.name,
-                            quantity: result
-                        });
+            //espaço do evento
+            const equipmentVenue = await EquipmentVenue.findAll({
+                where: { venue_id: event.venue_id }
+            });
 
+            for (let artistLineup of artistsLineup) {
+                artistEquipment = await ArtistEquipment.findAll({
+                    where: { artist_id: artistLineup.artists.id }
+                });
+
+                for (let equip of artistEquipment) {
+                    result = searchEquipment(equip.equipment_id, equipmentVenue);
+                    equipment = await Equipment.findByPk(equip.equipment_id);
+                    artist = await Artist.findByPk(equip.artist_id);
+
+                    if (result) {
+                        //result retorna quantidade que espaço tem 
+                        if (equip.quantity > result) {
+                            qtd = equip.quantity - result;
+
+                            //o que o espaço irá emprestar
+                            equipmentsVenue.push({
+                                artistId: artist.id,
+                                name: artist.name,
+                                equipment: equipment.name,
+                                quantity: result
+                            });
+
+                            equipments.push({
+                                artistId: artist.id,
+                                name: artist.name,
+                                equipment: equipment.name,
+                                quantity: qtd
+                            });
+                        } else if (equip.quantity <= result) {
+                            equipmentsVenue.push({
+                                artistId: artist.id,
+                                name: artist.name,
+                                equipment: equipment.name,
+                                quantity: equip.quantity
+                            });
+                        }
+
+                    } else {
                         equipments.push({
-                            artistId: artist.id,
-                            name: artist.name,
-                            equipment: equipment.name,
-                            quantity: qtd
-                        });
-                    } else if (equip.quantity <= result) {
-                        equipmentsVenue.push({
                             artistId: artist.id,
                             name: artist.name,
                             equipment: equipment.name,
                             quantity: equip.quantity
                         });
                     }
-
-                } else {
-                    equipments.push({
-                        artistId: artist.id,
-                        name: artist.name,
-                        equipment: equipment.name,
-                        quantity: equip.quantity
-                    });
                 }
             }
-        }
 
-        return res.send({ equipments, equipmentsVenue });
+            return res.send({ equipments, equipmentsVenue });
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir avisos' })
+        }
     },
 
     async delete(req, res) {
-       // try {
+        try {
             const { id } = req.params;
 
             const event = await Event.findByPk(id);
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-            if (eventImage.name) { //remover imagem do sistema
+            //verificar se não tem convites em aberto
+            const verify = await ArtistEvent.findAll({
+                where: {
+                    event_id: id,
+                    status: { [Op.ne]: 3 }
+                }
+            });
+
+            if (verify.length > 0) {
+                return res.send({ error: 'Há convites em aberto, para proseguir na exclusão é preciso recusar ou cancelar convites ligados a este evento.' })
+            }
+
+            await ArtistEvent.destroy({
+                where: { event_id: id }
+            });
+
+
+            if (eventImage) { //remover imagem do sistema
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
                 if (fs.existsSync(file)) {
                     fs.unlink(file, function (err) {
@@ -363,55 +412,173 @@ module.exports = {
                 });
             }
 
-            await ArtistEvent.destroy({
-                where: { event_id: id }
-            });
-
             await Event.destroy({
                 where: { id }
             });
 
             return res.status(200).send('ok');
 
-    //    } catch (err) {
-      //      return res.send({ error: 'Erro ao deletar evento' })
-      //  }
+        } catch (err) {
+            return res.send({ error: 'Erro ao deletar evento' })
+        }
     },
 
     async getImage(req, res) {
-        const { id } = req.params;
+        try {
+            const { id } = req.params;
 
-        const eventImage = await EventImage.findOne({ where: { event_id: id } });
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
-        if (eventImage) {
-            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-            if (fs.existsSync(file)) {
-                return res.sendFile(file);
+            if (eventImage) {
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                if (fs.existsSync(file)) {
+                    return res.sendFile(file);
+                } else {
+                    return res.send({ msg: 'Evento não possui imagem' })
+                }
             } else {
                 return res.send({ msg: 'Evento não possui imagem' })
             }
-        } else {
-            return res.send({ msg: 'Evento não possui imagem' })
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir imagem' })
         }
 
     },
 
     async getDateTime(req, res) {
 
-        const { id } = req.params;
+        try {
+            const { id } = req.params;
 
-        const event = await Event.findByPk(id);
+            const event = await Event.findByPk(id);
 
-        var limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
-     
-        const eventDate = {
-            id: event.id,
-            start_date: event.start_date,
-            start_time: event.start_time,
-            end_time: limitTime
+            var limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
+
+            const eventDate = {
+                id: event.id,
+                start_date: event.start_date,
+                start_time: event.start_time,
+                end_time: limitTime
+            }
+
+            return res.send(eventDate);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir data e hora de evento' })
         }
 
-        return res.send(eventDate);
+    },
+
+    async getFutureEvents(req, res) {
+
+        try {
+
+            const { page } = req.params
+
+            let limit = 10;
+            let offset = limit * (page - 1);
+
+            const user = await User.findByPk(req.userId);
+
+            let events = await Event.findAll({
+                attributes: ['id', 'name', 'start_date', 'status'],
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name']
+                },
+                limit,
+                offset,
+                where: {
+                    organizer_id: user.id
+                },
+                order: [
+                    ['start_date', 'ASC']
+                ]
+            });
+
+            if (user.type == 0) {
+
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                let artistEvents = [];
+
+                let artistEvts = await ArtistEvent.findAll({
+                    include: [
+                        { association: 'artists' },
+                        {
+                            association: 'events',
+                            include: {
+                                association: 'venue'
+                            },
+                        },
+                    ],
+                    where: {
+                        artist_id: artist.id,
+                        status: 3
+                    }
+                });
+
+                artistEvts.forEach((event) => {
+                    artistEvents.push({
+                        id: event.events.id,
+                        name: event.events.name,
+                        start_date: event.events.start_date,
+                        status: event.events.status,
+                        venue: {
+                            id: event.events.venue.id,
+                            name: event.events.venue.name
+                        }
+                    });
+                });
+
+                //ordenar menor para maior
+                artistEvents.sort(function (a, b) {
+                    var dateA = new Date(a.start_date),
+                        dateB = new Date(b.start_date);
+
+                    if (dateA > dateB) return 1;
+                    if (dateA < dateB) return -1;
+                    return 0;
+                });
+
+                //paginação
+                artistEvents = artistEvents.slice(offset).slice(0, limit),
+                    total_pages = Math.ceil(artistEvents.length / limit);
+
+                return res.send({ events, artistEvents });
+
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                let venueEvents = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    offset,
+                    where: {
+                        venue_id: venue.id
+                    },
+                    order: [
+                        ['start_date', 'ASC']
+                    ]
+                });
+
+                return res.send({ events, venueEvents });
+
+            } else {
+                return res.send(events);
+            }
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir eventos futuros' })
+        }
+
     }
 
 };

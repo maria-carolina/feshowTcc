@@ -17,11 +17,22 @@ const Styles = StyleSheet.create({
     button: {
         backgroundColor: '#3F2058',
         width: '70%',
-        height: 40,
+        padding: 5,
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
         margin: 25,
+        marginBottom: 5,
+    },
+
+    outlineButton: {
+        borderWidth: .5,
+        borderColor: '#3F2058',
+        padding: 5,
+        height: 40,
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     title: {
@@ -37,7 +48,12 @@ const Styles = StyleSheet.create({
         fontSize: 20,
         color: 'white',
         fontWeight: 'bold'
+    },
 
+    outlineButtonLabel: {
+        fontSize: 15,
+        color: '#3F2058',
+        fontWeight: 'bold'
     },
 
     textInput: {
@@ -116,8 +132,9 @@ const Styles = StyleSheet.create({
     },
 
     cardTitle: {
-        fontSize: 16,
-        fontWeight: 'bold'
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#3F2058'
     },
 
     cardButton: {

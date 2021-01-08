@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ScrollView, Modal, Image, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, ScrollView, Image, ActivityIndicator, Alert} from 'react-native';
 import ImagePicker from 'react-native-image-picker';
 import styles from '../../styles';
 import api from '../../services/api';
@@ -23,8 +23,6 @@ function blobTo64data(imageBlob) {
     }) 
 }
 
-
-
 const TABS = [
     {id: 0, label:'Descrição', value: 'description'},
     {id: 1, label:'Line-up', value: 'lineup'},
@@ -35,6 +33,7 @@ const TABS = [
 class EventPage extends Component{
     constructor(props){
         super(props) 
+        this.reload;
         this.state = {
             selectedTab: TABS[0],
             currentAvatar: null,
@@ -45,12 +44,19 @@ class EventPage extends Component{
     static contextType = AuthContext;
 
     componentDidMount(){
-        this.loadEventData(TABS[0]);
+        this.loadEventData();
+        this.reload = this.props.navigation.addListener('focus', () => {
+            this.loadEventData();
+            this.setState({
+                lineup: undefined,
+                posts: undefined,
+                warnings: undefined
+            })
+        })
     }
 
-    loadEventData = async (selectedTab) => {
+    loadEventData = async () => {
         try{
-
             var result = await api.get('/event/show/2', {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
@@ -60,13 +66,10 @@ class EventPage extends Component{
             let splitted = result.data.start_date.split('-'); 
             result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
-            splitted = result.data.end_date.split('-');
-            result.data.end_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
-        
             let newState = { 
                 event: result.data,
                 description: result.data.description,
-                selectedTab: selectedTab,
+                selectedTab: TABS[0],
                 imageChangeVisible: false,
                 invitationVisible: false,
                 currentAvatar: null
@@ -84,16 +87,17 @@ class EventPage extends Component{
                 var currentAvatar = await blobTo64data(imageBlob.data);
                 newState.currentAvatar = currentAvatar;
             }
+
             
             this.setState(newState)
 
         }catch(e){
-            throw e
+            console.log(e)
         }
 
     }
 
-    loadLineUp = async (selectedTab) => {
+    loadLineUp = async () => {
         try{
             var result = await api.get(`event/showLineup/${this.state.event.id}`, 
             {headers: {
@@ -101,19 +105,17 @@ class EventPage extends Component{
             }});
 
             this.setState({
-                lineup: result.data,
-                selectedTab: selectedTab
+                lineup: result.data
             })
-
+            
         }catch(e){
             console.log(e) 
         }
          
-        
-
+    
     }
 
-    loadPosts = async (selectedTab) => {
+    loadPosts = async () => {
         try{
             var result = await api.get(`event/showPosts/${this.state.event.id}`, 
             {headers: {
@@ -122,26 +124,23 @@ class EventPage extends Component{
         }catch(e){
             console.log(e)
         }
-
         
         this.setState({
-            posts: result.data,
-            selectedTab: selectedTab 
+            posts: result.data
         })
 
     }
 
-    loadWarnings = async (selectedTab) => {
+    loadWarnings = async () => {
         try{
             var result = await api.get('event/showEquipments/2', {headers: {
                 Authorization: `Bearer ${this.context.token}`
             }}); 
 
-
             this.setState({
-                warnings: result.data,
-                selectedTab: selectedTab
+                warnings: result.data
             })
+
         }catch(e){
             console.log(e)
         }
@@ -150,8 +149,13 @@ class EventPage extends Component{
     }
 
     changeTab = async (selectedTab) => {
-       
-        if(!(selectedTab.value in this.state)){
+
+        this.setState({
+            selectedTab: selectedTab
+        })
+
+
+        if(this.state[selectedTab.value] === undefined){
             if(selectedTab.id == 0){
                 await this.loadEventData(selectedTab);
             }else if(selectedTab.id == 1){
@@ -159,12 +163,8 @@ class EventPage extends Component{
             }else if(selectedTab.id == 2){
                 await this.loadPosts(selectedTab)
             }else{
-                this.loadWarnings(selectedTab);
+                await this.loadWarnings(selectedTab);
             }
-        }else{
-            this.setState({
-                selectedTab: selectedTab
-            })
         }
 
     }
@@ -237,10 +237,46 @@ class EventPage extends Component{
             })
     }
 
-
-    openEventEditPage = async () => {
+    openEventEditPage = () => {
         let event = this.state.event;
-        this.props.navigation.navigate('newEventPage', {event: event})
+        this.props.navigation.navigate('newEventPage', 
+        {event: event})
+    }
+
+    openLineUpEditPage = async () => {
+
+        var limits;
+
+        if(!('limits' in this.state)){
+            try{
+                var result = 
+                await api.get(`/event/getDateTime/${this.state.event.id}`,
+                    {headers: {
+                        Authorization: `Bearer ${this.context.token}`,
+                    }}
+                )
+            }catch(e){
+                console.log(e)
+            }
+
+            if(!('error' in result.data)){
+                limits = result.data;
+            }else{
+                Alert.alert('Ops', 'Ocorreu um erro, tente novamente.')
+            }
+        }else{
+            limits = this.state.limits;
+        }
+
+        this.props.navigation.navigate('lineUpEditPage', 
+            {
+                eventId: this.state.event.id,
+                lineup: this.state.lineup,
+                limits: limits
+            }
+        )
+
+
     }
 
     sendSolicitation = () => {}
@@ -269,8 +305,6 @@ class EventPage extends Component{
                 }}
             )
             
-            console.log(this.context.token)
-            console.log(limitsResult.data)
 
             this.setState({
                 suggestions: suggestionsResult.data,
@@ -281,6 +315,12 @@ class EventPage extends Component{
         }catch(e){
             console.log(e);
         }
+    }
+
+    closeInvitationModal = () =>{
+        this.setState({
+            invitationVisible: false
+        })
     }
 
 
@@ -362,17 +402,12 @@ class EventPage extends Component{
                             >
                                 @ {this.state.event.venue.name}
                             </Text>
-                            {('end_date' in this.state.event &&
-                            <View>
-                                <Text>de {this.state.event.start_date} às {this.state.event.start_time}</Text>
-                                <Text>até {this.state.event.end_date} às {this.state.event.end_time}</Text>
-                            </View>
-                            ) ||
+                            
                             <View>
                                 <Text>{this.state.event.start_date}</Text>
                                 <Text>das {this.state.event.start_time} às {this.state.event.end_time}</Text>
                             </View>
-                            }
+                            
 
                         </View> 
                     </View>
@@ -410,11 +445,21 @@ class EventPage extends Component{
                     />
 
 
-                    <PageBody
-                        loaded = {this.state[this.state.selectedTab.value]} 
-                        selectedTab = {this.state.selectedTab.id}
-                        openInvitation = {() => this.openInvitationModal()}
-                    />
+                    {
+                        (  
+                            this.state[this.state.selectedTab.value] != null &&
+                            <PageBody
+                                loaded = {this.state[this.state.selectedTab.value]} 
+                                selectedTab = {this.state.selectedTab.id}
+                                openInvitation = {() => this.openInvitationModal()}
+                                openLineUpEdit = {() => this.openLineUpEditPage()}
+                            />
+                        ) || 
+                        <ActivityIndicator
+                            size = 'large'
+                            color = '#000'
+                        />
+                    }
  
                     <ImageChangeModal
                         visible = {this.state.imageChangeVisible}
@@ -457,11 +502,17 @@ class EventPage extends Component{
                         suggestions = {this.state.suggestions}
                         limits = {this.state.limits}
                         eventId = {this.state.event.id}
-                        token = {this.context.token}         
+                        token = {this.context.token}
+                        closeModal = {() => this.closeInvitationModal()}         
                     />
 
                 </ScrollView>
-                )}
+                ) ||
+                    <ActivityIndicator
+                        size = 'large'
+                        color = '#000'
+                    /> 
+                }
             </View>
         )
     }

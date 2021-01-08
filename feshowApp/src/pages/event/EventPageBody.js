@@ -85,6 +85,23 @@ const PageBody = (props) => {
 
     return (
         <View style = {{width: '90%'}}>
+            {props.selectedTab == 1 && props.loaded.length > 0 &&
+                <TouchableOpacity
+                    style = {
+                        {
+                            ...styles.outlineButton,
+                            alignSelf: 'flex-end',
+                            right: 10,
+                        }
+                    }
+                    onPress = {props.openLineUpEdit}
+                >
+                    <Text style = {styles.outlineButtonLabel}>
+                        Alterar line-up
+                    </Text>
+                </TouchableOpacity>
+            }
+
             {props.selectedTab == 2 && 
                 <TouchableOpacity
                     style = {{...styles.textInput,
