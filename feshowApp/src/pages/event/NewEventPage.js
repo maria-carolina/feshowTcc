@@ -1,5 +1,5 @@
 import React, { Component, useState } from 'react';
-import {View, Text, TouchableOpacity, TextInput, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import styles from '../../styles';
 import api from '../../services/api';
@@ -40,13 +40,17 @@ const Form = (props) => {
             }
             onSubmit = {(values) => {
                 props.save(values);
+                let keys = Object.keys(values);
+                for (let key in keys){
+                    values[keys[key]] = ''
+                }
             }}
             validationSchema = {FormSchema}
             validateOnChange = {false}
             validateOnBlur = {false}
         >
             {({values, handleChange, handleSubmit, errors}) => (
-                <View style = {styles.container}>
+                
                     <ScrollView contentContainerStyle = {styles.center}>
                         <Text style = {styles.title}>Insira as informações do evento</Text>
                         <Text style = {{
@@ -70,7 +74,11 @@ const Form = (props) => {
 
 
                             <TouchableOpacity 
-                                style = {{...styles.rowInput, marginRight: '6%'}}
+                                style = {{
+                                    ...styles.rowInput, 
+                                    width: '90%',
+                                    alignItems: 'flex-start'
+                                }}
                                 onPress = {() => {
                                     setSelectedPicker('start_date');
                                     setDatePickerVisible(true);
@@ -81,8 +89,10 @@ const Form = (props) => {
                                     {values.start_date}</Text> :
                                 <Text style = {{
                                     color: '#8E8E8E',
-                                    fontSize: 16
-                                }}>Data do evento</Text>}
+                                    fontSize: 16,
+                                }}>
+                                    Data do evento
+                                </Text>}
 
                             </TouchableOpacity>
 
@@ -146,7 +156,7 @@ const Form = (props) => {
                                 {props.event != null ? 'Salvar alterações':'Criar evento'}
                             </Text>
                         </TouchableOpacity>
-                    </ScrollView>
+                    
 
                     {isDatePickerVisible && <DateTimePicker
                         value = {new Date()}
@@ -185,9 +195,8 @@ const Form = (props) => {
                         }} 
                     />}
 
-                    
+                    </ScrollView>
 
-                </View>
             )}
         </Formik>
     )
@@ -197,9 +206,18 @@ const Form = (props) => {
 class NewEventPage extends Component{
     constructor(props){
         super(props);
+        this.state = {
+            event: null
+        }
     }
 
     static contextType = AuthContext;
+
+    componentDidMount(){
+        this.setState({
+            event: this.props.route.params != undefined ? this.props.route.params.event : null
+        })
+    }
 
     save = async (values) => {
         
@@ -219,34 +237,34 @@ class NewEventPage extends Component{
 
             try{
                 if(this.props.route.params == undefined){
-                    console.log('entrou certo');
-                    console.log(values)
                     var result = await api.post('/event/store', values, config);
                 }else{
                     var result = await api.put(`/event/update/${this.props.route.params.event.id}`, values, config);
                 }
 
                 if(!('error' in result.data)){
+                    this.setState({
+                        event: null
+                    });
                     this.props.navigation.navigate('eventPage');
+                    Alert.alert('Pronto!', 'Evento cadastrado com sucesso!')
                 }
             }catch(e){
                 console.log(e);
             }
-
-            
-
         }
     }
 
     render(){
-        let event = this.props.route.params != undefined ?
-        this.props.route.params.event : null
-
         return(
-            <Form
-                save = {(values) => this.save(values)}
-                event =  {event}
-            />
+            <View style = {styles.container}>
+                
+                    <Form
+                        save = {(values) => this.save(values)}
+                        event = {this.state.event}
+                    />
+                
+            </View>
         )
     }
 }

@@ -40,6 +40,9 @@ module.exports = {
 
             let descript;
 
+            console.log(name);
+            console.log(start_date);
+
             if (description !== "") {
                 descript = description;
             } else {

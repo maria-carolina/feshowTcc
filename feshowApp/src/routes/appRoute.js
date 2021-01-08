@@ -19,6 +19,7 @@ import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
 import { View } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import LineUpEditPage from '../pages/event/LineUpEditPage';
+import FutureEventsPage from '../pages/social/FutureEventsPage';
 
 
 const Stack = createStackNavigator();
@@ -165,16 +166,21 @@ const NavStack = (props) => {
         headerOptions.headerLeft = () => headerIcons;
     }
 
-
     return(
         <Stack.Navigator
             initialRouteName = {`${name}Page`}
             screenOptions = {headerOptions}
         >
             <Stack.Screen 
+                name = 'feedPage' 
+                component = {FutureEventsPage} //provisório
+            />
+
+            <Stack.Screen 
                 name = 'invitationsPage' 
                 component = {InvitationsPage} //provisório
             />
+
             <Stack.Screen 
                 name = 'newEventPage'
                 component = {NewEventPage} 
@@ -244,7 +250,7 @@ const AppRoute = () => {
             />
 
             <Tabs.Screen 
-                name = 'event' 
+                name = 'newEvent' 
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {

@@ -4,6 +4,7 @@ const Styles = StyleSheet.create({
     center: {
         justifyContent: 'center',
         alignItems: 'center',
+        
     },
 
     container: {
@@ -166,6 +167,22 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         padding: 18,
         height: 50,
+    },
+
+    halfRowTab: {
+        alignItems: 'center',
+        padding: 18,
+        height: 50,
+        width: '50%'
+    },
+
+    selectedHalfRowTab:{
+        alignItems: 'center',
+        padding: 18,
+        height: 50,
+        width: '50%',
+        borderBottomWidth: 2,
+        borderBottomColor: '#3F2058',
     },
 
     purpleText: {
