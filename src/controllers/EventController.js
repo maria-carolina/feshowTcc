@@ -26,6 +26,15 @@ function searchEquipment(equipmentId, array) {
     return false;
 }
 
+function verifyEvent(eventId, array) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i].id === eventId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 module.exports = {
     async store(req, res) {
         try {
@@ -469,7 +478,6 @@ module.exports = {
     },
 
     async getFutureEvents(req, res) {
-
         try {
 
             const { page } = req.params
@@ -553,7 +561,10 @@ module.exports = {
                     where: { user_id: user.id }
                 });
 
-                let venueEvents = await Event.findAll({
+                let venueEvents = [];
+                let result;
+
+                let venueEvts = await Event.findAll({
                     attributes: ['id', 'name', 'start_date', 'status'],
                     include: {
                         association: 'venue',
@@ -567,6 +578,12 @@ module.exports = {
                     order: [
                         ['start_date', 'ASC']
                     ]
+                });
+
+                venueEvts.forEach((event) => {
+                    result = verifyEvent(event.id, events)
+                    if (!result)
+                        venueEvents.push(event);
                 });
 
                 return res.send({ events, venueEvents });
