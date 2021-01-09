@@ -6,7 +6,8 @@ import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import PageBody from '../event/EventPageBody';
 import ImageChangeModal from '../utils/ImageChange';
-import InvitationModal from '../event/EventPageInvitation'
+import InvitationModal from '../event/EventPageInvitation';
+import SolicitationModal from '../event/SolicitationModal'
 
 function blobTo64data(imageBlob) {
     return new Promise((resolve) => {
@@ -72,6 +73,7 @@ class EventPage extends Component{
                 selectedTab: TABS[0],
                 imageChangeVisible: false,
                 invitationVisible: false,
+                solicitationVisible: false,
                 currentAvatar: null
             }
 
@@ -279,7 +281,24 @@ class EventPage extends Component{
 
     }
 
-    sendSolicitation = () => {}
+    openSolicitationModal = async () => {
+        try{
+            let limitsResult = await api.get(`/event/getDateTime/${this.state.event.id}`,
+                {headers: {
+                    Authorization: `Bearer ${this.context.token}`,
+                }}
+            )
+
+            this.setState({
+                solicitationVisible: true,
+                limits: limitsResult.data, 
+            })
+
+        }catch(e){
+            console.log(e);
+        }
+        
+    }
 
     cancelParticipation = () => {}
 
@@ -317,14 +336,49 @@ class EventPage extends Component{
         }
     }
 
-    closeInvitationModal = () =>{
+    closeInvitationModal = () => {
         this.setState({
             invitationVisible: false
         })
     }
 
+    closeSolicitationModal = () => {
+        this.loadEventData();
+    }
+
 
     render(){
+        let mainButton;
+        if(this.context.user.type === 0){
+            if('event' in this.state && this.state.event.artistStatus === 0){
+                mainButton = (
+                    <TouchableOpacity
+                        onPress = {() => this.openSolicitationModal()}
+                        style = {{
+                            ...styles.outlineButton,
+                            marginTop: 15
+                        }}
+                    >
+                        <Text
+                            style = {{
+                                ...styles.outlineButtonLabel
+                            }}
+                        >
+                            Solicitar participação
+                        </Text>
+                    </TouchableOpacity>
+                )
+            }
+        }else if(this.context.user.type === 2 &&
+             this.context.user.id == this.state.event.id){
+            mainButton = (
+                <TouchableOpacity>
+                    <Text>Fechar Evento</Text>
+                </TouchableOpacity>
+            )
+            
+        }
+
         return(
             <View style = {styles.container}>
                 {('event' in this.state && 
@@ -408,6 +462,7 @@ class EventPage extends Component{
                                 <Text>das {this.state.event.start_time} às {this.state.event.end_time}</Text>
                             </View>
                             
+                            {this.context.user.type !== 1 && mainButton}            
 
                         </View> 
                     </View>
@@ -497,13 +552,21 @@ class EventPage extends Component{
                         }
                     />
 
-                    <InvitationModal 
+                    <InvitationModal
                         visible = {this.state.invitationVisible} 
                         suggestions = {this.state.suggestions}
                         limits = {this.state.limits}
                         eventId = {this.state.event.id}
                         token = {this.context.token}
                         closeModal = {() => this.closeInvitationModal()}         
+                    />
+
+                    <SolicitationModal
+                        visible = {this.state.solicitationVisible}
+                        limits = {this.state.limits}
+                        eventId = {this.state.event.id}
+                        token = {this.context.token}
+                        closeModal = {() => this.closeSolicitationModal()} 
                     />
 
                 </ScrollView>

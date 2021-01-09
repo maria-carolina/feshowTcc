@@ -250,7 +250,7 @@ const AppRoute = () => {
             />
 
             <Tabs.Screen 
-                name = 'newEvent' 
+                name = 'event' 
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {
