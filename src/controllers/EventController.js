@@ -213,6 +213,25 @@ module.exports = {
             event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
             event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 
+            //pegar status do artista
+            const user = await User.findByPk(req.userId);
+            if (user.type === 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                const artistEvents = await ArtistEvent.findOne({
+                    where: {
+                        artist_id: artist.id,
+                        event_id: id
+                    }
+                });
+
+                let artistStatus = artistEvents ? artistEvents.status : 0;
+
+                event.dataValues.artistStatus = artistStatus;
+            }
+
 
             return res.send(event);
         } catch (err) {
