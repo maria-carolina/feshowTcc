@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {View, Text, TouchableOpacity, Modal, FlatList, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Modal, Alert} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -110,6 +110,7 @@ const InvitationModal = (props) => {
                 
 
                 {(showtime == null &&
+
                 <TouchableOpacity
                     onPress = {() => setTimePickerVisible(true)}
                     style = {{
@@ -121,7 +122,9 @@ const InvitationModal = (props) => {
                     }}
                 >
                     <Text>Escolher horário</Text>
-                </TouchableOpacity>) ||
+                </TouchableOpacity>) 
+
+                ||
                 <View 
                     style = {{...styles.center,
                         width: '50%'
@@ -169,6 +172,7 @@ const InvitationModal = (props) => {
                     display = "default"
                     onChange = {(event, date) => verifyChoosenTime(date)}
                 />}
+                
             </View>}
         </Modal>
         

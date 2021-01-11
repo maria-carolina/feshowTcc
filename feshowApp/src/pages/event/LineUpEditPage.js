@@ -57,7 +57,7 @@ class LineUpEditPage extends Component{
 
         try{
             let result = await api.post(
-                '/removeArtist',
+                '/removeAssociation',
                 {
                     artistId,
                     eventId: this.state.eventId

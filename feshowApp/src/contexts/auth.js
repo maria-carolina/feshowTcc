@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         
     }, [])
 
-
+    
     signIn = async (data) => {
         let result = await Auth.signIn(data);
         

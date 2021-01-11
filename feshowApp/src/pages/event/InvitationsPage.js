@@ -45,14 +45,13 @@ class InvitationsPage extends Component{
         }catch(e){
             console.log(e)
         }
-
         
     } 
 
     cancelInvitation = async (artistId, eventId) => {
         try{
             let result = await api.post(
-                '/cancelInvitation', 
+                '/removeAssociation', 
                 {artistId, eventId},
                 {  
                     headers: {
@@ -104,7 +103,7 @@ class InvitationsPage extends Component{
     }
 
     respondInvitation = async (artistId, eventId, accepted) => {
-        var url = accepted ? '/acceptParticipation' : '/refuseInvitation';
+        var url = accepted ? '/acceptParticipation' : '/removeAssociation';
         try{
             let result = await api.post(
                 url, 
@@ -200,7 +199,8 @@ class InvitationsPage extends Component{
                                 style = {{
                                     position: 'absolute',
                                     right: '5%',
-                                    top: '100%',
+                                    top: '75%',
+                                    height: 100,
                                     flexDirection: 'row'
                                 }}
                             >
@@ -212,7 +212,8 @@ class InvitationsPage extends Component{
                                             fontWeight: 'bold'
                                         }}
                                         onPress = {() =>
-                                                this.confirmCancellation(item.artists.id, item.events.id)}
+                                                this.confirmCancellation(item.artists.id, item.events.id)
+                                            }
                                     >
                                         Cancelar
                                     </Text>
@@ -283,7 +284,7 @@ class InvitationsPage extends Component{
                                 position: 'relative',
                                 flexDirection: 'row'
                             }}
-                            key = {item.id}
+                            key = {this.state.invitations[this.state.selectedTab.value].indexOf(item)}
                         > 
                             <Text
                                 style ={{
@@ -297,12 +298,17 @@ class InvitationsPage extends Component{
                             
                         </View>
                     )
-                    }
+                    } //renderiza a lista quando carregada.
+                
                 )) ||
-                <ActivityIndicator
-                    size = 'large'
-                    color = '#000'
-                />
+                <View
+                    style = {{...styles.center, flex: 1}}
+                >
+                    <ActivityIndicator
+                        size = 'large'
+                        color = '#000'
+                    />
+                </View>
                 }
             </View>
         )

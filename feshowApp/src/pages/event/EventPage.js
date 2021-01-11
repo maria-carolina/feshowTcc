@@ -64,34 +64,41 @@ class EventPage extends Component{
                 }
             });
             
-            let splitted = result.data.start_date.split('-'); 
-            result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+            if(!('error' in result.data)){
+                console.log(result.data.organizer_id);
+                console.log(this.context.user)
+                let splitted = result.data.start_date.split('-'); 
+                result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
-            let newState = { 
-                event: result.data,
-                description: result.data.description,
-                selectedTab: TABS[0],
-                imageChangeVisible: false,
-                invitationVisible: false,
-                solicitationVisible: false,
-                currentAvatar: null
-            }
+                let newState = { 
+                    event: result.data,
+                    description: result.data.description,
+                    selectedTab: TABS[0],
+                    imageChangeVisible: false,
+                    invitationVisible: false,
+                    solicitationVisible: false,
+                    currentAvatar: null,
+                    lineup: undefined,
+                    posts: undefined,
+                    warnings: undefined,
+                }
 
-            if(result.data.image){
-                var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${this.context.token}`,
-                    },
-                    responseType: 'blob'
-                })
+                if(result.data.image){
+                    var imageBlob = await api.get(`/imageEvent/${result.data.id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.context.token}`,
+                        },
+                        responseType: 'blob'
+                    })
+                    
+                    var currentAvatar = await blobTo64data(imageBlob.data);
+                    newState.currentAvatar = currentAvatar;
+                }
+
                 
-                var currentAvatar = await blobTo64data(imageBlob.data);
-                newState.currentAvatar = currentAvatar;
+                this.setState(newState)
             }
-
-            
-            this.setState(newState)
 
         }catch(e){
             console.log(e)
@@ -300,7 +307,50 @@ class EventPage extends Component{
         
     }
 
-    cancelParticipation = () => {}
+    loadConfirmation = (label) => {
+        Alert.alert(
+            'Opa',
+            `Realmente quer cancelar ${label}?`,
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => this.removeAssociation(label)
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+
+    removeAssociation = async (label) => {
+        try{
+            let result = await api.post(
+                '/removeAssociation',
+                {
+                    artistId: this.context.user.artistId,
+                    eventId: this.state.event.id
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                } 
+
+            )
+            console.log(result.data)
+
+            if(result.data === 'ok'){
+                Alert.alert('Pronto', `A ${label} foi cancelada.`);
+                this.loadEventData();
+            }
+        }catch(e){
+            Alert.alert('Ops', 'Ocorreu um erro.')
+        }
+
+    }
 
     openPostModal = () => {}
 
@@ -349,8 +399,9 @@ class EventPage extends Component{
 
     render(){
         let mainButton;
-        if(this.context.user.type === 0){
-            if('event' in this.state && this.state.event.artistStatus === 0){
+        if('event' in this.state && 
+        this.context.user.id !== this.state.event.organizer_id){
+            if(this.state.event.artistStatus === 0){
                 mainButton = (
                     <TouchableOpacity
                         onPress = {() => this.openSolicitationModal()}
@@ -360,20 +411,74 @@ class EventPage extends Component{
                         }}
                     >
                         <Text
-                            style = {{
-                                ...styles.outlineButtonLabel
-                            }}
+                            style = {styles.outlineButtonLabel}
                         >
                             Solicitar participação
                         </Text>
                     </TouchableOpacity>
                 )
+            }else if(this.state.event.artistStatus === 1){
+                mainButton = (
+                    <TouchableOpacity
+                        style = {{
+                            ...styles.outlineButton,
+                            marginTop: 15
+                        }}
+                    >
+                        <Text
+                            style = {styles.outlineButtonLabel}
+                        >
+                            Aceitar convite
+                        </Text>
+                    </TouchableOpacity>
+                )
+            }else if(this.state.event.artistStatus === 2){
+                mainButton = (
+                    <TouchableOpacity
+                        onPress = {() => this.loadConfirmation('sua solicitação')}
+                        style = {{
+                            ...styles.outlineButton,
+                            marginTop: 15
+                        }}
+                    >
+                        <Text
+                            style = {styles.outlineButtonLabel}
+                        >
+                            Cancelar solicitação
+                        </Text>
+                    </TouchableOpacity>
+                )
+            }else{
+                mainButton = (
+                    <TouchableOpacity
+                        onPress = {() => this.loadConfirmation('sua participação')}
+                        style = {{
+                            ...styles.outlineButton,
+                            marginTop: 15
+                        }}
+                    >
+                        <Text
+                            style = {styles.outlineButtonLabel}
+                        >
+                            Cancelar participação
+                        </Text>
+                    </TouchableOpacity>
+                )
             }
-        }else if(this.context.user.type === 2 &&
-             this.context.user.id == this.state.event.id){
+        }else if('event' in this.state && 
+        this.context.user.id == this.state.event.organizer_id){
             mainButton = (
-                <TouchableOpacity>
-                    <Text>Fechar Evento</Text>
+                <TouchableOpacity
+                    style = {{
+                        ...styles.outlineButton,
+                        marginTop: 15
+                    }}
+                >
+                    <Text
+                        style = {styles.outlineButtonLabel}
+                    >
+                        Fechar Evento
+                    </Text>
                 </TouchableOpacity>
             )
             
@@ -391,7 +496,7 @@ class EventPage extends Component{
                         <TouchableOpacity
                             style = {{
                                 width: '37%',
-                                height: 175,
+                                height: 200,
                                 backgroundColor: '#D8D8D8',
                                 marginRight: 30,
                                 alignItems: 'center',
@@ -431,7 +536,11 @@ class EventPage extends Component{
                         </View>
                         }
 
-                        <View>
+                        <View
+                            style ={{
+                                width: '45%'
+                            }}
+                        >
 
                             <Text style = {{
                                 ...styles.title,
