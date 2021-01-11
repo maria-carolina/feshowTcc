@@ -84,6 +84,8 @@ module.exports = {
                 if (genres !== undefined) {
                     artist.setGenres(genres);
                 }
+
+                user.dataValues.artistId = artist.id;
             }
 
             else if (type == 1) {
@@ -229,6 +231,13 @@ module.exports = {
             }
 
             user.password = undefined; //nao retornar senha 
+
+            if (user.type == 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+                user.dataValues.artistId = artist.id;
+            }
 
             return res.send({
                 user,

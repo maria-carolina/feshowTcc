@@ -3,6 +3,7 @@ const Artist = require('../models/Artist');
 const Event = require('../models/Event');
 const Address = require('../models/Address');
 const GenreVenue = require('../models/GenreVenue');
+const User = require('../models/User');
 
 const { Op } = require('sequelize');
 
@@ -199,9 +200,48 @@ module.exports = {
         }
     },
 
-    async cancelInvitation(req, res) {
+    async removeAssociation(req, res) {
         try {
             const { artistId, eventId } = req.body;
+
+            const user = await User.findByPk(req.userId);
+
+            const artistEvent = await ArtistEvent.findOne({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
+
+            if (!artistEvent)
+                return res.send({ error: 'Relação não encontrada' });
+
+            const evento = await Event.findByPk(eventId);
+
+            if (user.type == 0 && artistEvent.status == 1) {
+                //artista recusa convite
+                console.log("saiuu")
+            } else if (user.type == 0 && artistEvent.status == 2) {
+                //artista cancelou solicitação
+
+            } else if (user.type == 0 && artistEvent.status == 3) {
+                //artista saiu do evento 
+                //verificar se ta fechado
+                if (evento.status == 0)
+                    return res.send({ error: 'Evento está fechado' })
+
+            } else if (user.type == 1 && artistEvent.status == 1) {
+                //organizador cancela convite
+
+            } else if (user.type == 0 && artistEvent.status == 2) {
+                //organizador recusa solicitação
+
+            } else if (user.type == 1 && artistEvent.status == 3) {
+                //remover artista
+                //verificar se ta fechado
+                if (evento.status == 0)
+                    return res.send({ error: 'Evento está fechado' })
+            }
 
             await ArtistEvent.destroy({
                 where: [
@@ -212,24 +252,7 @@ module.exports = {
 
             return res.status(200).send('ok');
         } catch (err) {
-            return res.send({ error: 'Erro ao cancelar convite' })
-        }
-    },
-
-    async refuseInvitation(req, res) {
-        try {
-            const { artistId, eventId } = req.body;
-
-            await ArtistEvent.destroy({
-                where: [
-                    { artist_id: artistId },
-                    { event_id: eventId }
-                ]
-            });
-
-            return res.status(200).send('ok');
-        } catch (err) {
-            return res.send({ error: 'Erro ao cancelar convite' })
+            return res.send({ error: 'Erro ao remover artista do evento' })
         }
     },
 
@@ -288,22 +311,6 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao editar line-up' })
         }
-    },
+    }
 
-    async removeArtist(req, res) {
-        try {
-            const { artistId, eventId } = req.body;
-
-            await ArtistEvent.destroy({
-                where: [
-                    { artist_id: artistId },
-                    { event_id: eventId }
-                ]
-            });
-
-            return res.status(200).send('ok');
-        } catch (err) {
-            return res.send({ error: 'Erro ao remover artista do evento' })
-        }
-    },
 };
