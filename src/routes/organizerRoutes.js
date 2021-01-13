@@ -8,5 +8,6 @@ organizerRoutes.post('/storeInvitation', OrganizerController.store);
 organizerRoutes.post('/removeAssociation', OrganizerController.removeAssociation);
 organizerRoutes.post('/acceptParticipation', OrganizerController.acceptParticipation);
 organizerRoutes.post('/updateLineup/:id', OrganizerController.updateLineup);
+organizerRoutes.get('/changeStatus/:id', OrganizerController.changeStatus);
 
 module.exports = organizerRoutes;

@@ -311,6 +311,39 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao editar line-up' })
         }
+    },
+
+    async changeStatus(req, res) {
+
+        const { id } = req.params;
+
+        let event = await Event.findByPk(id);
+
+        if (event.status == 0) {
+            await Event.update({ status: 1 }, {
+                where: { id }
+            });
+        } else {
+            //verificar se não tem convites em aberto
+            const verify = await ArtistEvent.findAll({
+                where: {
+                    event_id: id,
+                    status: { [Op.ne]: 3 }
+                }
+            });
+
+            if (verify.length > 0) {
+                return res.send({ error: 'Há convites em aberto, para proseguir no fechamendo do evento é preciso recusar ou cancelar convites ligados a este evento.' })
+            }
+
+            await Event.update({ status: 0 }, {
+                where: { id }
+            });
+
+        }
+        event = await Event.findByPk(id);
+        
+        return res.send(event);
     }
 
 };

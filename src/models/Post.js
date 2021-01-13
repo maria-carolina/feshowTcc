@@ -15,16 +15,21 @@ class Post extends Model {
                 type: DataTypes.STRING,
                 allowNull: false
             },
+            createdAt: {
+                type: DataTypes.DATE,
+                allowNull: false
+            },
             updatedAt: {
                 type: DataTypes.DATE,
                 allowNull: false
             }
-        },{
+        }, {
             sequelize,
+            timestamps: true,
             tableName: 'posts'
         })
     }
-    static associate(models){
+    static associate(models) {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'users' })
     }
 
