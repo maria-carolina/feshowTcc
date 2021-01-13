@@ -109,10 +109,13 @@ const PageBody = (props) => {
                         width: '100%',
                         marginTop: 5
                     }}
+                    onPress = {props.openPostModal}
                 >
                     <Text
                         style = {{color: '#8E8E8E'}} 
-                    >Insira um comentário...</Text>
+                    >
+                        Insira um comentário...
+                    </Text>
                 </TouchableOpacity>
             }
 

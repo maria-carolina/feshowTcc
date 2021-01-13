@@ -7,7 +7,8 @@ import AuthContext from '../../contexts/auth';
 import PageBody from '../event/EventPageBody';
 import ImageChangeModal from '../utils/ImageChange';
 import InvitationModal from '../event/EventPageInvitation';
-import SolicitationModal from '../event/SolicitationModal'
+import SolicitationModal from '../event/SolicitationModal';
+import PostModal from '../event/PostModal';
 
 function blobTo64data(imageBlob) {
     return new Promise((resolve) => {
@@ -65,8 +66,6 @@ class EventPage extends Component{
             });
             
             if(!('error' in result.data)){
-                console.log(result.data.organizer_id);
-                console.log(this.context.user)
                 let splitted = result.data.start_date.split('-'); 
                 result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
@@ -77,6 +76,7 @@ class EventPage extends Component{
                     imageChangeVisible: false,
                     invitationVisible: false,
                     solicitationVisible: false,
+                    postModalVisible: false,
                     currentAvatar: null,
                     lineup: undefined,
                     posts: undefined,
@@ -324,7 +324,6 @@ class EventPage extends Component{
         )
     }
 
-
     removeAssociation = async (label) => {
         try{
             let result = await api.post(
@@ -352,7 +351,11 @@ class EventPage extends Component{
 
     }
 
-    openPostModal = () => {}
+    openPostModal = () => {
+        this.setState({
+            postModalVisible: true
+        })
+    }
 
     deletePost = () => {}
 
@@ -393,6 +396,10 @@ class EventPage extends Component{
     }
 
     closeSolicitationModal = () => {
+        this.loadEventData();
+    }
+
+    closePostModal = () => {
         this.loadEventData();
     }
 
@@ -617,6 +624,7 @@ class EventPage extends Component{
                                 selectedTab = {this.state.selectedTab.id}
                                 openInvitation = {() => this.openInvitationModal()}
                                 openLineUpEdit = {() => this.openLineUpEditPage()}
+                                openPostModal = {() => this.openPostModal()}
                             />
                         ) || 
                         <ActivityIndicator
@@ -677,6 +685,14 @@ class EventPage extends Component{
                         token = {this.context.token}
                         closeModal = {() => this.closeSolicitationModal()} 
                     />
+
+                    <PostModal 
+                        visible = {this.state.postModalVisible}
+                        eventId = {this.state.event.id}
+                        token = {this.context.token}
+                        closeModal = {() => this.closePostModal()} 
+                    />    
+                    
 
                 </ScrollView>
                 ) ||

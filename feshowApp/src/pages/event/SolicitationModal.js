@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {View, Text, TouchableOpacity, Modal, Alert} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
