@@ -81,6 +81,7 @@ class EventPage extends Component{
                     lineup: undefined,
                     posts: undefined,
                     warnings: undefined,
+                    postToEdit: undefined
                 }
 
                 if(result.data.image){
@@ -357,9 +358,36 @@ class EventPage extends Component{
         })
     }
 
-    deletePost = () => {}
+    editPost = (post) => {
+        this.setState({
+            postModalVisible: true,
+            postToEdit: post
+        })
+    }
 
-    confirmPostDelete = () => {}
+    deletePost = async (id) => {
+        console.log(`id: ${id}`)
+        try{
+            let result = await api.delete(
+                `/deletePost/${id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            );
+            
+            console.log(result)
+            if(result.data == 'ok'){
+                Alert.alert('Pronto', 'Postagem excluída com sucesso');
+                this.loadEventData();
+            }else{
+                Alert.alert('Ops', 'Ocorreu um erro1.')
+            }
+        }catch(e){
+            Alert.alert('Ops', 'Ocorreu um erro2.')
+        }
+    }
 
     changeStatus = () => {}
     
@@ -620,11 +648,16 @@ class EventPage extends Component{
                         (  
                             this.state[this.state.selectedTab.value] != null &&
                             <PageBody
-                                loaded = {this.state[this.state.selectedTab.value]} 
+                                loaded = {this.state[this.state.selectedTab.value]}
+                                loggedUserId = {this.context.user.id} 
                                 selectedTab = {this.state.selectedTab.id}
                                 openInvitation = {() => this.openInvitationModal()}
                                 openLineUpEdit = {() => this.openLineUpEditPage()}
                                 openPostModal = {() => this.openPostModal()}
+                                editPost = {this.editPost}
+                                deletePost = {this.deletePost}
+                                isRelatedToEvent = {(this.state.event.artistId === 3||
+                                    this.context.user.id === this.state.event.organizer_id)}
                             />
                         ) || 
                         <ActivityIndicator
@@ -690,6 +723,7 @@ class EventPage extends Component{
                         visible = {this.state.postModalVisible}
                         eventId = {this.state.event.id}
                         token = {this.context.token}
+                        post = {this.state.postToEdit}
                         closeModal = {() => this.closePostModal()} 
                     />    
                     

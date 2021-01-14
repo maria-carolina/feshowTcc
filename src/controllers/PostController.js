@@ -37,6 +37,7 @@ module.exports = {
     },
 
     async delete(req, res) {
+        
         try {
             const { id } = req.params;
 
@@ -46,7 +47,7 @@ module.exports = {
 
             return res.status(200).send('ok');
 
-        } catch (err) {
+       } catch (err) {
             return res.send({ error: 'Erro ao deletar postagem' });
         }
     }

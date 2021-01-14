@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import styles from '../../styles';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const PageBody = (props) => {
     if(props.selectedTab == 0){
@@ -75,9 +76,45 @@ const PageBody = (props) => {
                         }}>
                         {item.name}
                     </Text>
+
                     <Text>
                         {item.post}
                     </Text>
+
+                    {   
+                        props.loggedUserId === item.userId &&
+                        <View style = {{
+                            ...styles.row,
+                            alignSelf: 'flex-end',
+                            position: 'absolute',
+                            top: '50%'
+                        }}>
+
+                            <TouchableOpacity
+                                onPress = {() => 
+                                    props.editPost({
+                                        id: item.postId,
+                                        text: item.post
+                                    })
+                                }
+                                style = {{marginRight: 10}}
+                            >
+                                <FontAwesome 
+                                    name = {'pencil'}
+                                    size = {25}
+                                />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity 
+                                onPress = {() => props.deletePost(item.postId)}
+                            >
+                                <FontAwesome
+                                    name = {'trash-o'}
+                                    size = {25} 
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    }
                 </View>
             )
         }
@@ -102,7 +139,9 @@ const PageBody = (props) => {
                 </TouchableOpacity>
             }
 
-            {props.selectedTab == 2 && 
+            {
+                props.selectedTab == 2 && 
+                props.isRelatedToEvent &&
                 <TouchableOpacity
                     style = {{...styles.textInput,
                         padding: 10,
