@@ -4,8 +4,10 @@ const Event = require('../models/Event');
 const Address = require('../models/Address');
 const GenreVenue = require('../models/GenreVenue');
 const User = require('../models/User');
+const EventImage = require('../models/EventImage');
 
 const { Op } = require('sequelize');
+const moment = require('moment');
 
 function verifyArtist(artistId, array) {
     for (var i = 0; i < array.length; i++) {
@@ -341,8 +343,47 @@ module.exports = {
             });
 
         }
-        event = await Event.findByPk(id);
-        
+
+        //retornar evento igual eventController.show
+
+        event = await Event.findByPk(id, {
+            include: {
+                association: 'venue',
+                attributes: ['id', 'name']
+            }
+        });
+
+        const eventImage = await EventImage.findOne({ where: { event_id: id } });
+
+        const imageStatus = eventImage ? true : false;
+
+        if (!event) {
+            return res.send({ error: 'Erro ao exibir evento' });
+        }
+
+        event.dataValues.image = imageStatus;
+        event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+        event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
+
+        //pegar status do artista
+        const user = await User.findByPk(req.userId);
+        if (user.type === 0) {
+            const artist = await Artist.findOne({
+                where: { user_id: user.id }
+            });
+
+            const artistEvents = await ArtistEvent.findOne({
+                where: {
+                    artist_id: artist.id,
+                    event_id: id
+                }
+            });
+
+            let artistStatus = artistEvents ? artistEvents.status : 0;
+
+            event.dataValues.artistStatus = artistStatus;
+        }
+
         return res.send(event);
     }
 
