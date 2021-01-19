@@ -66,6 +66,7 @@ class EventPage extends Component{
             });
             
             if(!('error' in result.data)){
+                console.log(result.data)
                 let splitted = result.data.start_date.split('-'); 
                 result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
@@ -389,7 +390,32 @@ class EventPage extends Component{
         }
     }
 
-    changeStatus = () => {}
+    changeStatus = async () => {
+
+        try{
+            let result = await api.get(
+                `/changeStatus/${this.state.event.id}`,
+                {
+                    headers:{
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            );
+
+            console.log(result.data);
+            if(!('error' in result.data)){
+                let splitted = result.data.start_date.split('-'); 
+                result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
+                this.setState({
+                    event: result.data
+                })
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+            console.log(e)
+        }
+    }
     
     openInvitationModal = async () => {
         try{
@@ -504,6 +530,7 @@ class EventPage extends Component{
         this.context.user.id == this.state.event.organizer_id){
             mainButton = (
                 <TouchableOpacity
+                    onPress = {() => this.changeStatus()}
                     style = {{
                         ...styles.outlineButton,
                         marginTop: 15
@@ -512,7 +539,7 @@ class EventPage extends Component{
                     <Text
                         style = {styles.outlineButtonLabel}
                     >
-                        Fechar Evento
+                        {`${this.state.event.status == 0 ? 'Abrir' : 'Fechar'} evento`}
                     </Text>
                 </TouchableOpacity>
             )
