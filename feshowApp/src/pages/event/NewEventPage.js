@@ -246,7 +246,7 @@ class NewEventPage extends Component{
                     this.setState({
                         event: null
                     });
-                    this.props.navigation.navigate('eventPage');
+                    this.props.navigation.navigate('eventPage', {eventId: result.data.id});
                     Alert.alert('Pronto!', 'Evento cadastrado com sucesso!')
                 }
             }catch(e){

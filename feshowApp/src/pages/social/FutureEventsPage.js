@@ -4,10 +4,17 @@ import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
 
 
 
 const ListItem = (props) => {
+    const navigation = useNavigation();
+
+    const openEventPage = () =>{
+        navigation.navigate('eventPage', {eventId: props.id})
+    }
+
     let splitted = props.startDate.split('-');
     let formattedDate = `${splitted[2]}/${splitted[1]}/${splitted[0]}`
     return(
@@ -22,16 +29,20 @@ const ListItem = (props) => {
             key = {props.id}
         >
             <Text>{formattedDate}</Text>
-            <Text
-                style = {{
-                    marginLeft: 20,
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                    color: '#3F2058',
-                }}
+            <TouchableOpacity
+                onPress = {() => openEventPage()}
             >
-                {props.name}
-            </Text>
+                <Text
+                    style = {{
+                        marginLeft: 20,
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: '#3F2058',
+                    }}
+                >
+                    {props.name}
+                </Text>
+            </TouchableOpacity>
             <Text 
                 style={{
                     position: 'absolute',

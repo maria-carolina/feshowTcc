@@ -59,7 +59,7 @@ class EventPage extends Component{
 
     loadEventData = async () => {
         try{
-            var result = await api.get('/event/show/2', {
+            var result = await api.get(`/event/show/${this.props.route.params.eventId}`, {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
                 }
@@ -402,7 +402,6 @@ class EventPage extends Component{
                 }
             );
 
-            console.log(result.data);
             if(!('error' in result.data)){
                 let splitted = result.data.start_date.split('-'); 
                 result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
@@ -460,12 +459,78 @@ class EventPage extends Component{
 
     render(){
         let mainButton;
-        if('event' in this.state && 
-        this.context.user.id !== this.state.event.organizer_id){
-            if(this.state.event.artistStatus === 0){
+        if('event' in this.state){  
+            if(this.context.user.id !== this.state.event.organizer_id &&
+                this.context.user.id !== this.state.event.venue.id &&
+                this.state.event.status === 1){
+                if(this.state.event.artistStatus === 0){
+                    mainButton = (
+                        <TouchableOpacity
+                            onPress = {() => this.openSolicitationModal()}
+                            style = {{
+                                ...styles.outlineButton,
+                                marginTop: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Solicitar participação
+                            </Text>
+                        </TouchableOpacity>
+                    )
+                }else if(this.state.event.artistStatus === 1){
+                    mainButton = (
+                        <TouchableOpacity
+                            style = {{
+                                ...styles.outlineButton,
+                                marginTop: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Aceitar convite
+                            </Text>
+                        </TouchableOpacity>
+                    )
+                }else if(this.state.event.artistStatus === 2){
+                    mainButton = (
+                        <TouchableOpacity
+                            onPress = {() => this.loadConfirmation('sua solicitação')}
+                            style = {{
+                                ...styles.outlineButton,
+                                marginTop: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Cancelar solicitação
+                            </Text>
+                        </TouchableOpacity>
+                    )
+                }else{
+                    mainButton = (
+                        <TouchableOpacity
+                            onPress = {() => this.loadConfirmation('sua participação')}
+                            style = {{
+                                ...styles.outlineButton,
+                                marginTop: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Cancelar participação
+                            </Text>
+                        </TouchableOpacity>
+                    )
+                }
+            }else if(this.context.user.id == this.state.event.organizer_id){
                 mainButton = (
                     <TouchableOpacity
-                        onPress = {() => this.openSolicitationModal()}
+                        onPress = {() => this.changeStatus()}
                         style = {{
                             ...styles.outlineButton,
                             marginTop: 15
@@ -474,78 +539,13 @@ class EventPage extends Component{
                         <Text
                             style = {styles.outlineButtonLabel}
                         >
-                            Solicitar participação
+                            {`${this.state.event.status == 0 ? 'Abrir' : 'Fechar'} evento`}
                         </Text>
                     </TouchableOpacity>
                 )
-            }else if(this.state.event.artistStatus === 1){
-                mainButton = (
-                    <TouchableOpacity
-                        style = {{
-                            ...styles.outlineButton,
-                            marginTop: 15
-                        }}
-                    >
-                        <Text
-                            style = {styles.outlineButtonLabel}
-                        >
-                            Aceitar convite
-                        </Text>
-                    </TouchableOpacity>
-                )
-            }else if(this.state.event.artistStatus === 2){
-                mainButton = (
-                    <TouchableOpacity
-                        onPress = {() => this.loadConfirmation('sua solicitação')}
-                        style = {{
-                            ...styles.outlineButton,
-                            marginTop: 15
-                        }}
-                    >
-                        <Text
-                            style = {styles.outlineButtonLabel}
-                        >
-                            Cancelar solicitação
-                        </Text>
-                    </TouchableOpacity>
-                )
-            }else{
-                mainButton = (
-                    <TouchableOpacity
-                        onPress = {() => this.loadConfirmation('sua participação')}
-                        style = {{
-                            ...styles.outlineButton,
-                            marginTop: 15
-                        }}
-                    >
-                        <Text
-                            style = {styles.outlineButtonLabel}
-                        >
-                            Cancelar participação
-                        </Text>
-                    </TouchableOpacity>
-                )
+                
             }
-        }else if('event' in this.state && 
-        this.context.user.id == this.state.event.organizer_id){
-            mainButton = (
-                <TouchableOpacity
-                    onPress = {() => this.changeStatus()}
-                    style = {{
-                        ...styles.outlineButton,
-                        marginTop: 15
-                    }}
-                >
-                    <Text
-                        style = {styles.outlineButtonLabel}
-                    >
-                        {`${this.state.event.status == 0 ? 'Abrir' : 'Fechar'} evento`}
-                    </Text>
-                </TouchableOpacity>
-            )
-            
         }
-
         return(
             <View style = {styles.container}>
                 {('event' in this.state && 
@@ -673,7 +673,7 @@ class EventPage extends Component{
 
                     {
                         (  
-                            this.state[this.state.selectedTab.value] != null &&
+                            this.state[this.state.selectedTab.value] !== undefined &&
                             <PageBody
                                 loaded = {this.state[this.state.selectedTab.value]}
                                 loggedUserId = {this.context.user.id} 

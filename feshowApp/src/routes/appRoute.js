@@ -206,10 +206,6 @@ const NavStack = (props) => {
 }
 
 
-
-
-
-
 const AppRoute = () => {
     return(
         <Tabs.Navigator
@@ -251,7 +247,7 @@ const AppRoute = () => {
             />
 
             <Tabs.Screen 
-                name = 'event' 
+                name = 'newEvent' 
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {

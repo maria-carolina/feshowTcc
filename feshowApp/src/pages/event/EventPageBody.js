@@ -7,8 +7,11 @@ const PageBody = (props) => {
     if(props.selectedTab == 0){
         return (
             <View style = {{width: '90%'}}>
-                <Text style = {{...styles.title, textAlign: 'left'}}>Sobre o evento...</Text>
-                <Text>{props.loaded}</Text>
+                {(props.loaded !== null &&
+                    <Text>{props.loaded}</Text>
+                ) || 
+                    <Text>Nenhuma descrição</Text>
+                }
             </View>
         )
     }

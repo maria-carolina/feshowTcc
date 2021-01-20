@@ -190,10 +190,36 @@ class InvitationsPage extends Component{
                     let tab = this.state.selectedTab.value;
                     let status = item.status;
 
+                    let eventName = (
+                        <Text 
+                            onPress = {() => 
+                                this.props.navigation.navigate(
+                                    'eventPage', 
+                                    {eventId: item.events.id}
+                                )}
+                            style = {{fontWeight: 'bold'}}
+                        >
+                            {item.events.name}
+                        </Text>
+                    );
+
                     if(tab === 'sent'){
-                        text = status == 1 ?
-                        `Você convidou ${item.artists.name} para o ${item.events.name}`:
-                        `Você solicitou participação no ${item.events.name}`
+                        text = (
+                        <Text
+                            style = {{width: '50%'}}
+                        >
+                            {(status == 1 &&
+                                <Text> 
+                                    Você convidou {item.artists.name} para o {eventName}
+                                </Text>
+                            )|| 
+                                <Text>
+                                    Você solicitou participação no ${eventName}`
+                                </Text>
+                            }
+                        </Text>
+                        
+                        )
                         options = (
                             <View
                                 style = {{
@@ -222,9 +248,22 @@ class InvitationsPage extends Component{
                             </View>
                         )
                     }else{
-                        text = status == 1 ?
-                        `Você foi convidado para tocar no ${item.events.name}`:
-                        `${item.artists.name} quer tocar no ${item.events.name}`
+                        text = (
+                        <Text
+                            style = {{width: '50%'}}
+                        >
+                            {(status == 1 &&
+                                <Text> 
+                                    Você foi convidado para tocar no {eventName}
+                                </Text>
+                            )|| 
+                                <Text>
+                                    {item.artists.name} quer tocar no {eventName}
+                                </Text>
+                            }
+                        </Text>
+                        )
+                        
                         options = (
                             <View
                                 style = {{
@@ -286,13 +325,7 @@ class InvitationsPage extends Component{
                             }}
                             key = {this.state.invitations[this.state.selectedTab.value].indexOf(item)}
                         > 
-                            <Text
-                                style ={{
-                                    width: '50%'
-                                }}
-                            >
-                                {text}
-                            </Text>
+                            {text}
 
                             {options}
                             
