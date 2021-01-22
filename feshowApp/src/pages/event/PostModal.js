@@ -32,6 +32,7 @@ const PostModal = (props) => {
                 );
 
                 if(result.data == 'ok'){
+                    Alert.alert('Pronto', 'Postagem realizada.')
                     props.closeModal()
                 }else{
                     Alert.alert('Ops', 'Ocorreu um erro.')

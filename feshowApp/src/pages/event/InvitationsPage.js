@@ -140,6 +140,17 @@ class InvitationsPage extends Component{
             <View
                 style = {{...styles.container, justifyContent: 'flex-start'}} 
             >
+                <Text
+                    style = {{
+                        fontSize: 18,
+                        fontWeight: 'bold',
+                        alignSelf: 'flex-start',
+                        marginLeft: 15,
+                        color: '#3F2058'
+                    }}
+                >
+                    Convites
+                </Text>
                 <View style = {styles.row}>
 
                     <TouchableOpacity
@@ -185,7 +196,6 @@ class InvitationsPage extends Component{
                 {('invitations' in this.state &&
                 this.state.invitations[this.state.selectedTab.value]
                 .map((item) => {
-                    console.log(item)
                     let text, options;
                     let tab = this.state.selectedTab.value;
                     let status = item.status;
@@ -206,7 +216,7 @@ class InvitationsPage extends Component{
                     if(tab === 'sent'){
                         text = (
                         <Text
-                            style = {{width: '50%'}}
+                            style = {{width: '60%'}}
                         >
                             {(status == 1 &&
                                 <Text> 
@@ -214,7 +224,7 @@ class InvitationsPage extends Component{
                                 </Text>
                             )|| 
                                 <Text>
-                                    Você solicitou participação no ${eventName}`
+                                    Você solicitou participação no {eventName}
                                 </Text>
                             }
                         </Text>

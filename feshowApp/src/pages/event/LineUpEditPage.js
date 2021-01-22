@@ -144,8 +144,15 @@ class LineUpEditPage extends Component{
 
     render(){
         return(
-            <View style = {styles.container}>
-                <Text style = {styles.title}>Altere os horários ou remova alguém</Text>
+            <View style = {{...styles.container, justifyContent: 'flex-start', marginTop: 15}}>
+                <Text 
+                    style = {
+                        {...styles.title, 
+                        fontSize: 18}
+                    }
+                >
+                        Altere os horários ou remova alguém
+                </Text>
                 {this.state.lineup.map(item => {
                     return(
                         <View 
@@ -188,7 +195,7 @@ class LineUpEditPage extends Component{
                             
                             <FontAwesome
                                 name = {'close'}
-                                size = {30}
+                                size = {25}
                                 color = {'#000'} 
                                 style = {{
                                     position: 'absolute',
@@ -205,7 +212,10 @@ class LineUpEditPage extends Component{
                     style = {styles.button}
                 >
                     <Text
-                        style = {styles.buttonLabel}
+                        style = {{
+                            ...styles.buttonLabel,
+                            fontSize: 18
+                        }}
                         onPress = {() => this.save()}
                     >
                         Salvar alterações

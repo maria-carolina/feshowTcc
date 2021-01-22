@@ -10,6 +10,7 @@ import InvitationModal from '../event/EventPageInvitation';
 import SolicitationModal from '../event/SolicitationModal';
 import PostModal from '../event/PostModal';
 
+
 function blobTo64data(imageBlob) {
     return new Promise((resolve) => {
         const fileReader = new FileReader();
@@ -46,14 +47,9 @@ class EventPage extends Component{
     static contextType = AuthContext;
 
     componentDidMount(){
-        this.loadEventData();
+        //this.loadEventData();
         this.reload = this.props.navigation.addListener('focus', () => {
             this.loadEventData();
-            this.setState({
-                lineup: undefined,
-                posts: undefined,
-                warnings: undefined
-            })
         })
     }
 
@@ -66,7 +62,7 @@ class EventPage extends Component{
             });
             
             if(!('error' in result.data)){
-                console.log(result.data)
+                console.log(this.context.token)
                 let splitted = result.data.start_date.split('-'); 
                 result.data.start_date = `${splitted[2]}/${splitted[1]}/${splitted[0]}`;
 
@@ -128,10 +124,14 @@ class EventPage extends Component{
 
     loadPosts = async () => {
         try{
-            var result = await api.get(`event/showPosts/${this.state.event.id}`, 
-            {headers: {
-                Authorization: `Bearer ${this.context.token}`
-            }});
+            var result = await api.get(
+                `event/showPosts/${this.state.event.id}`, 
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            );
         }catch(e){
             console.log(e)
         }
@@ -144,9 +144,14 @@ class EventPage extends Component{
 
     loadWarnings = async () => {
         try{
-            var result = await api.get('event/showEquipments/2', {headers: {
-                Authorization: `Bearer ${this.context.token}`
-            }}); 
+            var result = await api.get(
+                `event/showEquipments/${this.state.event.id}`, 
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            ); 
 
             this.setState({
                 warnings: result.data
@@ -341,7 +346,6 @@ class EventPage extends Component{
                 } 
 
             )
-            console.log(result.data)
 
             if(result.data === 'ok'){
                 Alert.alert('Pronto', `A ${label} foi cancelada.`);
@@ -367,7 +371,7 @@ class EventPage extends Component{
     }
 
     deletePost = async (id) => {
-        console.log(`id: ${id}`)
+        
         try{
             let result = await api.delete(
                 `/deletePost/${id}`,
@@ -378,16 +382,17 @@ class EventPage extends Component{
                 }
             );
             
-            console.log(result)
             if(result.data == 'ok'){
                 Alert.alert('Pronto', 'Postagem excluída com sucesso');
                 this.loadEventData();
             }else{
-                Alert.alert('Ops', 'Ocorreu um erro1.')
+                Alert.alert('Ops', 'Ocorreu um erro.')
             }
         }catch(e){
-            Alert.alert('Ops', 'Ocorreu um erro2.')
+            Alert.alert('Ops', 'Ocorreu um erro.')
         }
+                
+        
     }
 
     changeStatus = async () => {
@@ -603,21 +608,17 @@ class EventPage extends Component{
                                 width: '45%'
                             }}
                         >
-
-                            <Text style = {{
-                                ...styles.title,
-                                textAlign: 'left',
-                                marginBottom: 0 }}>
+                            
+                            <Text 
+                                style = {{
+                                    ...styles.title,
+                                    textAlign: 'left',
+                                    marginBottom: 0 
+                                }}>
                                     {'event' in this.state && this.state.event.name}
                             </Text>
 
-                            <TouchableOpacity
-                                onPress = {() => {
-                                    this.openEventEditPage();
-                                }}
-                            >
-                                <Text>Editar</Text>
-                            </TouchableOpacity>
+                            
 
                             <Text 
                                 style = {{
@@ -632,6 +633,24 @@ class EventPage extends Component{
                                 <Text>{this.state.event.start_date}</Text>
                                 <Text>das {this.state.event.start_time} às {this.state.event.end_time}</Text>
                             </View>
+
+                            {this.state.event.organizer_id === this.context.user.id &&
+                                <TouchableOpacity
+                                    onPress = {() => {
+                                        this.openEventEditPage();
+                                    }}
+                                    style = {{alignSelf: 'center', marginTop: 15}}
+                                >
+                                    <Text 
+                                        style = {{
+                                            color: '#3F2058', 
+                                            fontWeight: 'bold'
+                                        }
+                                    }>
+                                        Editar evento
+                                    </Text>
+                                </TouchableOpacity>
+                            }
                             
                             {this.context.user.type !== 1 && mainButton}            
 
@@ -683,8 +702,8 @@ class EventPage extends Component{
                                 openPostModal = {() => this.openPostModal()}
                                 editPost = {this.editPost}
                                 deletePost = {this.deletePost}
-                                isRelatedToEvent = {(this.state.event.artistId === 3||
-                                    this.context.user.id === this.state.event.organizer_id)}
+                                isRelatedToEvent = {this.state.event.artistStatus === 3}
+                                isOrganizer = {this.context.user.id === this.state.event.organizer_id}
                             />
                         ) || 
                         <ActivityIndicator

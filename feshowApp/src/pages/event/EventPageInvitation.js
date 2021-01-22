@@ -48,14 +48,36 @@ const InvitationModal = (props) => {
                     size = {25}
                     onPress = {props.closeModal}
                 />
-                    
-                <TextInput
-                    style = {{...styles.textInput,
-                        margin: 15
-                    }} 
-                    onChangeText = {(text) => search(text)}
-                />
-                {console.log(props.suggestions)}
+                <View style = {styles.row}>
+                    <TextInput
+                        style = {{...styles.textInput,
+                            margin: 15
+                        }} 
+                        onChangeText = {(text) => search(text)}
+                    />
+                    <FontAwesome
+                        style = {{
+                            position: 'absolute',
+                            top: '42%',
+                            right: 25
+                        }}
+                        name = {'search'}
+                        size = {25}
+                        color = {'#696969'}
+                        onPress = {props.closeModal}
+                    />
+                </View>
+                <Text
+                    style = {{
+                        fontSize: 18,
+                        fontWeight: 'bold',
+                        alignSelf: 'flex-start',
+                        marginLeft: 25,
+                        marginBottom: 15
+                    }}
+                >
+                    Sugestões de artistas
+                </Text>
                 {props.suggestions != null && 
                 (searchResult||props.suggestions).map((item) => 
                     (

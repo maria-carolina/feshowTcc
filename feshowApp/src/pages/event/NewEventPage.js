@@ -206,6 +206,7 @@ const Form = (props) => {
 class NewEventPage extends Component{
     constructor(props){
         super(props);
+        this.reload;
         this.state = {
             event: null
         }
@@ -214,8 +215,19 @@ class NewEventPage extends Component{
     static contextType = AuthContext;
 
     componentDidMount(){
+        this.loadStates();
+        this.reload = this.props.navigation.addListener('focus', () => {
+            this.loadStates();
+        })
+    }
+
+    loadStates = () => {
+        let isAEdition = this.props.route.params != undefined;
+        console.log('oi')
+
         this.setState({
-            event: this.props.route.params != undefined ? this.props.route.params.event : null
+            event: isAEdition ? this.props.route.params.event : null,
+            isAEdition
         })
     }
 
@@ -224,6 +236,7 @@ class NewEventPage extends Component{
         if((values.end_date < values.start_date) && values.end_date != ''){
             Alert.alert('Data inválida', 'A data final deve ser posterior a inicial');
         }else{
+            
             let splitted = values.start_date.split('/');
             values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
 
@@ -236,18 +249,22 @@ class NewEventPage extends Component{
             }
 
             try{
-                if(this.props.route.params == undefined){
+                let isANewEvent = this.props.route.params == undefined;
+                if(isANewEvent){
                     var result = await api.post('/event/store', values, config);
                 }else{
                     var result = await api.put(`/event/update/${this.props.route.params.event.id}`, values, config);
                 }
 
+                console.log(result.data)
+
                 if(!('error' in result.data)){
                     this.setState({
-                        event: null
+                        event: null,
+                        isAEdition: undefined
                     });
-                    this.props.navigation.navigate('eventPage', {eventId: result.data.id});
-                    Alert.alert('Pronto!', 'Evento cadastrado com sucesso!')
+                    this.props.navigation.navigate('eventPage', {eventId: isANewEvent ? result.data.id : this.props.route.params.event.id});
+                    Alert.alert('Pronto!', `Evento ${isANewEvent ? 'cadastrado':'editado'} com sucesso!`)
                 }
             }catch(e){
                 console.log(e);
@@ -256,14 +273,19 @@ class NewEventPage extends Component{
     }
 
     render(){
+        console.log('ised' +this.state.isAEdition);
+        console.log('state event'+this.state.event)
+
         return(
             <View style = {styles.container}>
-                
-                    <Form
-                        save = {(values) => this.save(values)}
-                        event = {this.state.event}
-                    />
-                
+                {((this.state.isAEdition && this.state.event !== null) || 
+                this.state.isAEdition === false)
+                &&
+                <Form
+                    save = {(values) => this.save(values)}
+                    event = {this.state.event}
+                />
+                }
             </View>
         )
     }

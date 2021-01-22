@@ -217,7 +217,7 @@ const AppRoute = () => {
             
             <Tabs.Screen 
                 name = 'feed' 
-                component = {ProfilePage}
+                component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {
                         return <Ionicon 

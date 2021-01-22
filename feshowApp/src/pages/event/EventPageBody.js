@@ -18,6 +18,7 @@ const PageBody = (props) => {
 
     //lista diferente de acordo com o usuário
     if(props.selectedTab == 3){
+        console.log(props.loaded)
         return (
             props.loaded.equipments.map((item) => {
                 var equipment = item.quantity > 1 ? 
@@ -53,9 +54,14 @@ const PageBody = (props) => {
                     }}
                     key = {props.loaded.indexOf(item)}
                 >
-                    <Text style = {{color: '#000'}}>{item.artists.name || null}</Text>
+                    <Text style = {{color: '#000', 
+                        fontWeight: 'bold',
+                        marginLeft: 25
+                        }}>
+                            {item.artists.name || null}
+                        </Text>
                     <Text style = {{
-                        right: 50,
+                        right: 80,
                         position: 'absolute'
                     }}>
                         {item.start_time} 
@@ -125,7 +131,9 @@ const PageBody = (props) => {
 
     return (
         <View style = {{width: '90%'}}>
-            {props.selectedTab == 1 && props.loaded.length > 0 &&
+            {props.selectedTab == 1 && 
+            props.isOrganizer &&
+            props.loaded.length > 0 &&
                 <TouchableOpacity
                     style = {
                         {
@@ -144,7 +152,7 @@ const PageBody = (props) => {
 
             {
                 props.selectedTab == 2 && 
-                props.isRelatedToEvent &&
+                (props.isRelatedToEvent || props.isOrganizer) &&
                 <TouchableOpacity
                     style = {{...styles.textInput,
                         padding: 10,
@@ -164,11 +172,12 @@ const PageBody = (props) => {
             {list}
 
             {props.selectedTab == 1 &&
+            props.isOrganizer &&
                 <TouchableOpacity
-                    style = {{...styles.button, alignSelf: 'center'}}
+                    style = {{...styles.button, alignSelf: 'center', width: '60%'}}
                     onPress = {props.openInvitation}
                 >
-                    <Text style = {styles.buttonLabel}>
+                    <Text style = {{...styles.buttonLabel, fontSize: 18}}>
                         Convidar artistas
                     </Text>
                 </TouchableOpacity>

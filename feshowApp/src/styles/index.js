@@ -141,6 +141,7 @@ const Styles = StyleSheet.create({
     cardButton: {
         position: 'absolute',
         marginTop: 5,
+        top: '30%',
         right: 5,
         width: 100,
         height: 30,

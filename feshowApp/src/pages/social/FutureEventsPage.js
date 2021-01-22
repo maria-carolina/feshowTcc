@@ -11,11 +11,11 @@ import { useNavigation } from '@react-navigation/native';
 const ListItem = (props) => {
     const navigation = useNavigation();
 
-    const openEventPage = () =>{
-        navigation.navigate('eventPage', {eventId: props.id})
+    const openEventPage = () => {
+        navigation.navigate('eventPage', {eventId: props.item.id})
     }
 
-    let splitted = props.startDate.split('-');
+    let splitted = props.item.start_date.split('-');
     let formattedDate = `${splitted[2]}/${splitted[1]}/${splitted[0]}`
     return(
         <View 
@@ -26,7 +26,7 @@ const ListItem = (props) => {
                 height: 60,
                 position: 'relative'
             }}
-            key = {props.id}
+            key = {props.item.id}
         >
             <Text>{formattedDate}</Text>
             <TouchableOpacity
@@ -40,19 +40,19 @@ const ListItem = (props) => {
                         color: '#3F2058',
                     }}
                 >
-                    {props.name}
+                    {props.item.name}
                 </Text>
             </TouchableOpacity>
             <Text 
                 style={{
                     position: 'absolute',
-                    top: 10,
+                    top: 20,
                     right: 10,
                     fontWeight: 'bold',
                     color: '#3F2058',
                 }}
             >
-                {props.status == 1 ? 'aberto' : 'feshow!'}
+                {props.item.status == 1 ? 'aberto' : 'feshow!'}
             </Text>
         </View>
     )
@@ -155,6 +155,7 @@ class FutureEventsPage extends Component{
             )
 
             if(!('error' in result.data)){
+                console.log(result.data)
                 let events = this.state.events
                 let newEvents = events[(tab.value||'events')].concat(result.data[(tab.value||'events')])
                 //events.concat(DATA1);
@@ -211,6 +212,7 @@ class FutureEventsPage extends Component{
 
         return(
             <View style = {{...styles.container, justifyContent: 'flex-start'}}>
+                <Text style = {{...styles.title, alignSelf: 'flex-start', marginLeft: 15}}>Eventos futuros</Text>
                 {this.state.tabs && !isProducer &&
                     <View style = {styles.row}>
 
@@ -246,16 +248,11 @@ class FutureEventsPage extends Component{
                             width: '90%'
                         }}>
                             <ScrollView
-                                onScrollEndDrag = {() => {this.loadMoreEvents(selectedTab)}}
+                                onScrollEndDrag = {() => this.loadMoreEvents(selectedTab)}
                                 contentContainerStyle = {styles.center}
                             >
                                 {this.state.events[(selectedTab.value||'events')].map(item => {
-                                    return <ListItem 
-                                        name = {item.name}
-                                        startDate = {item.start_date}
-                                        status = {item.status}
-                                        key = {item.id}
-                                    />
+                                    return <ListItem item = {item} />
                                 })}
                             </ScrollView>
                         </View>
