@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, SwipeableListView, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, ActivityIndicator} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
@@ -62,22 +62,28 @@ class FutureEventsPage extends Component{
     constructor(props){
         super(props)
         this.reload;
-        this.state = {}
+        this.state = {
+            isFirstTabSelected: true
+        }
     }
 
     static contextType = AuthContext;
     
     componentDidMount(){
-        this.loadEvents();
+        this.loadEvents(true);
         this.reload = this.props.navigation.addListener('focus', () => {
             this.loadEvents();
         })
+        
     }
 
-    loadEvents = async () => {
+    loadEvents = async (isEventsToOrganize) => {
+        var url = isEventsToOrganize ? 
+        '/futureEventsOrganizer/1':'/futureEventsParticipation/1';
+
         try{
             let result = await api.get(
-                'futureEvents/1',
+                url, 
                 {
                     headers: {
                         Authorization: `Bearer ${this.context.token}`
@@ -86,187 +92,157 @@ class FutureEventsPage extends Component{
             )
             
             if(!('error' in result.data)){
-                let events = result.data;
-                let tabs;
-                if(this.context.user.type == 0){
-
-                    tabs = [
-                        {
-                            label: 'Participação', 
-                            value: 'artistEvents', 
-                            selected: true,
-                            pagesLoaded: 1
-                        },
-                        {
-                            label: 'Organização', 
-                            value: 'events', 
-                            selected: false,
-                            pagesLoaded: 1
-                        },
-                    ]
-                }else if (this.context.user.type == 1){
-                    tabs = [
-                        {
-                            label: 'Acontecerão no espaço', 
-                            value: 'venueEvents', 
-                            selected: true,
-                            pagesLoaded: 1
-                        },
-                        {
-                            label: 'Organização', 
-                            value: 'events', 
-                            selected: false,
-                            pagesLoaded: 1
-                        },
-                    ]
-                }else{
-                    events = {
-                        events: result.data
-                    };
-                    tabs = {
-                        pagesLoaded: 1
-                    };
+                let newState = isEventsToOrganize ?
+                {
+                    eventsToOrganize: result.data,
+                    pagesLoaded: [1, 0]
+                }:
+                {
+                    eventsToParticipate: result.data,
+                    pagesLoaded: [1, 1]
                 }
 
-            
-                this.setState({
-                    tabs: tabs,
-                    events: events,
-                })
+                this.setState(newState);
             }
+
         }catch(e){
             console.log(e)
         }
-
-        
     }
 
-    loadMoreEvents = async (tab) => {
-        let index = tab.pagesLoaded;
+    loadMoreEvents = async (isEventsToOrganize, page) => {
+        var url = isEventsToOrganize ? 
+        '/futureEventsOrganizer':'/futureEventsParticipation';
 
         try{
             let result = await api.get(
-                `futureEvents/${index+1}`,
+                `${url}/${page}`, 
                 {
                     headers: {
                         Authorization: `Bearer ${this.context.token}`
                     }
                 }
             )
-
+            
             if(!('error' in result.data)){
                 console.log(result.data)
-                let events = this.state.events
-                let newEvents = events[(tab.value||'events')].concat(result.data[(tab.value||'events')])
-                //events.concat(DATA1);
-                events[(tab.value||'events')] = newEvents;
-                tab.pagesLoaded++;
-    
-                let newTabs;
-                if(this.context.user.type != 2){
-                    newTabs = this.state.tabs;
-                    newTabs[this.state.tabs.indexOf(tab)] = tab;
+                let newData;
+                let newState;
+                let pagesLoaded = this.state.pagesLoaded;
+
+                if(isEventsToOrganize){
+                    pagesLoaded[0]++
+                    newData = this.state.eventsToOrganize.concat(result.data);
+                    newState = {eventsToOrganize: newData, pagesLoaded}
                 }else{
-                    newTabs = tab;
+                    pagesLoaded[1]++
+                    newData = this.state.eventsToParticipate.concat(result.data);
+                    newState = {eventsToParticipate: newData}
                 }
-                
-                this.setState({
-                    events,
-                    tabs: newTabs
-                })
+
+                this.setState(newState);
             }
 
         }catch(e){
             console.log(e)
         }
-        
     }
 
-    handleClick = () => {}
-
-    changeTab = (index) => {
-        let tabs = this.state.tabs.map(item => {
-                if(this.state.tabs.indexOf(item) == index){
-                    item.selected = true
-                }else{
-                    item.selected = false
-                }
-
-                return item;
-            }
-        );
-        
+    changeTab = () => {
         this.setState({
-            tabs: tabs
+            isFirstTabSelected: !this.state.isFirstTabSelected
         })
+
+        if(!this.state.eventsToParticipate){
+            this.loadEvents(false);
+        } 
+        
+        console.log(this.state.eventsToOrganize)
     }
 
     render(){
-        var isProducer = this.context.user.type == 2;
-        var selectedTab;
-        if(this.state.tabs && !isProducer){
-            selectedTab = this.state.tabs.filter(item => item.selected == true)[0];
-        }else if (isProducer){
-            selectedTab = this.state.tabs
-        } 
+        var { isFirstTabSelected } = this.state;
 
+        var isProducer = this.context.user.type === 2;
+
+        var isDataReady = isFirstTabSelected ? 
+        !!this.state.eventsToOrganize : !!this.state.eventsToParticipate;
+
+        var listToRender = isFirstTabSelected ? 
+        this.state.eventsToOrganize : this.state.eventsToParticipate;
+
+        if(!!this.state.pagesLoaded){
+            var nextPage = isFirstTabSelected ? 
+            this.state.pagesLoaded[0]+1 : this.state.pagesLoaded[1]+1;
+        }
+        
         return(
-            <View style = {{...styles.container, justifyContent: 'flex-start'}}>
-                <Text style = {{...styles.title, alignSelf: 'flex-start', marginLeft: 15}}>Eventos futuros</Text>
-                {this.state.tabs && !isProducer &&
-                    <View style = {styles.row}>
+            <View
+                style ={{
+                    ...styles.container,
+                    justifyContent: 'flex-start'
+                }}
+            >
 
+                <Text 
+                    style = {{
+                        ...styles.title,
+                        alignSelf: 'flex-start', 
+                        marginLeft: 15
+                    }}
+                >
+                    Eventos futuros
+                </Text>
+                
+                {!isProducer &&
+                    <View style = {styles.row}>
                         <TouchableOpacity
                             style = {
-                                this.state.tabs[0].selected ?
-                                styles.selectedHalfRowTab : styles.halfRowTab
+                                isFirstTabSelected ?
+                                styles.selectedHalfRowTab : styles.halfRowTab 
                             }
-                            onPress = {() => this.changeTab(0)}
+                            onPress = {() => !isFirstTabSelected && this.changeTab()}
                         >
-                            <Text>{this.state.tabs[0].label}</Text>
+                            <Text>Organização</Text>
                         </TouchableOpacity>
-
                         
                         <TouchableOpacity
                             style = {
-                                this.state.tabs[1].selected ?
-                                styles.selectedHalfRowTab : styles.halfRowTab
+                                isFirstTabSelected ?
+                                styles.halfRowTab : styles.selectedHalfRowTab
                             }
-                            onPress = {() => this.changeTab(1)}
+                            onPress = {() => isFirstTabSelected && this.changeTab()}
                         >
-                            <Text>{this.state.tabs[1].label}</Text>
+                            <Text>Participação</Text>
                         </TouchableOpacity>
-                    
-
+                        
                     </View>
                 }
 
-                {   
-                    (   
-                        this.state.events && 
-                        <View style ={{
-                            width: '90%'
-                        }}>
-                            <ScrollView
-                                onScrollEndDrag = {() => this.loadMoreEvents(selectedTab)}
-                                contentContainerStyle = {styles.center}
-                            >
-                                {this.state.events[(selectedTab.value||'events')].map(item => {
-                                    return <ListItem item = {item} />
-                                })}
-                            </ScrollView>
-                        </View>
-                    )
-                    ||
+                {(
+                    isDataReady && 
+                    <View style ={{
+                        width: '90%'
+                    }}>
+                        <ScrollView
+                            contentContainerStyle = {styles.center}
+                            onScrollEndDrag = {() => this.loadMoreEvents(isFirstTabSelected, nextPage)}
+                        >
+                            {listToRender.map(item => {
+                                return <ListItem item = {item} />
+                            })}
+                        </ScrollView>
+                    </View>
+                ) ||
                     <ActivityIndicator 
-                        size = 'large'
                         color = '#000'
+                        size = 'large'
                     />
                 }
-                
+
             </View>
         )
     }
-}
 
+}
 export default FutureEventsPage;

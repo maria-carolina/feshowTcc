@@ -19,6 +19,7 @@ const InvitationModal = (props) => {
                     Authorization: `Bearer ${props.token}`
                 }
             })
+            console.log(result.data)
             setSearchResult(result.data);
         }catch(e){
             console.log(e)
@@ -79,6 +80,7 @@ const InvitationModal = (props) => {
                     Sugestões de artistas
                 </Text>
                 {props.suggestions != null && 
+                console.log(props.suggestions) &&
                 (searchResult||props.suggestions).map((item) => 
                     (
                         <View 
