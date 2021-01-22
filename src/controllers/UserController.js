@@ -481,7 +481,7 @@ module.exports = {
             }
 
             received.sort(function (a, b) {
-                var dateA = new Date(a.updatedAt),
+                let dateA = new Date(a.updatedAt),
                     dateB = new Date(b.updatedAt);
                 //maior para menor
                 if (dateA > dateB) return -1;
@@ -490,7 +490,7 @@ module.exports = {
             });
 
             sent.sort(function (a, b) {
-                var dateA = new Date(a.updatedAt),
+                let dateA = new Date(a.updatedAt),
                     dateB = new Date(b.updatedAt);
                 //maior para menor
                 if (dateA > dateB) return -1;

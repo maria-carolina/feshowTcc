@@ -17,7 +17,7 @@ const moment = require('moment');
 
 function searchEquipment(equipmentId, array) {
     let qtd;
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
         if (array[i].equipment_id === equipmentId) {
             qtd = array[i].quantity;
             return qtd;
@@ -27,12 +27,39 @@ function searchEquipment(equipmentId, array) {
 }
 
 function verifyEvent(eventId, array) {
-    for (var i = 0; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
         if (array[i].id === eventId) {
             return true;
         }
     }
     return false;
+}
+
+function getTime(datatime) {
+
+    datatime = moment.utc(datatime).format('YYYY-MM-DDTHH:mm:ss');
+   
+    let difference = moment().diff(datatime, 'seconds');
+
+    if (difference <= 59) //segundos
+        return "há alguns segundos atrás"
+    else {
+        difference = moment().diff(datatime, 'minutes');
+        if (difference == 1) {
+            return `há 1 minuto atrás`
+        } else if (difference <= 59) { //horas
+            return `há ${difference} minutos atrás`
+        } else {
+            difference = moment().diff(datatime, 'hours');
+            if (difference == 1) {
+                return `há 1 hora atrás`
+            } else if (difference <= 4) { //até 4 horas
+                return `há ${difference} horas atrás`
+            } else {
+                return moment.utc(datatime, 'YYYY-MM-DDTHH:mm:ssZ').format("HH:mm");
+            }
+        }
+    }
 }
 
 module.exports = {
@@ -297,10 +324,14 @@ module.exports = {
                     user = await Producer.findOne({ where: { user_id: post.users.id } });
                 }
 
+                //ajustar horário
+                let time = getTime(post.updatedAt);
+
                 posts.push({
                     postId: post.id,
                     name: user.name,
                     post: post.post,
+                    time: time,
                     userId: post.user_id,
                     updatedAt: post.updatedAt
                 });
@@ -308,7 +339,7 @@ module.exports = {
             };
 
             posts.sort(function (a, b) {
-                var dateA = new Date(a.updatedAt),
+                let dateA = new Date(a.updatedAt),
                     dateB = new Date(b.updatedAt);
                 //maior para menor
                 if (dateA > dateB) return -1;
@@ -483,7 +514,7 @@ module.exports = {
 
             const event = await Event.findByPk(id);
 
-            var limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
+            let limitTime = moment(event.end_time, 'kk:mm').subtract(30, 'minutes').format('kk:mm:ss')
 
             const eventDate = {
                 id: event.id,
@@ -564,7 +595,7 @@ module.exports = {
 
                 //ordenar menor para maior
                 artistEvents.sort(function (a, b) {
-                    var dateA = new Date(a.start_date),
+                    let dateA = new Date(a.start_date),
                         dateB = new Date(b.start_date);
 
                     if (dateA > dateB) return 1;
