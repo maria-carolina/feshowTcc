@@ -330,7 +330,7 @@ module.exports = {
             const artistsLineup = await ArtistEvent.findAll({
                 attributes: [],
                 where: {
-                    [Op.and]: [{ event_id: id }, { status: 1 }]
+                    [Op.and]: [{ event_id: id }, { status: 3 }]
                 },
                 include: {
                     association: 'artists',
