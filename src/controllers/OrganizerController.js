@@ -174,6 +174,9 @@ module.exports = {
 
             const artists = await Artist.findAll({
                 attributes: ['id', 'name'],
+                include: {
+                    association: 'genres'
+                },
                 where: {
                     name: {
                         [Op.like]: '%' + name + '%'
@@ -192,6 +195,7 @@ module.exports = {
                 artistVerified.push({
                     id: artist.id,
                     name: artist.name,
+                    genres: artist.genres,
                     status: status
                 });
             });
