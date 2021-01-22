@@ -15,6 +15,8 @@ eventRoutes.get('/event/showPosts/:id', EventController.showPosts);
 eventRoutes.get('/event/showEquipments/:id', EventController.showEquipments);
 eventRoutes.get('/imageEvent/:id', EventController.getImage);
 eventRoutes.get('/event/getDateTime/:id', EventController.getDateTime);
-eventRoutes.get('/futureEvents/:page', EventController.getFutureEvents);
+eventRoutes.get('/futureEventsOrganizer/:page', EventController.getFutureEventsOrganizer);
+eventRoutes.get('/futureEventsParticipation/:page', EventController.getFutureEventsParticipation);
+
 
 module.exports = eventRoutes;

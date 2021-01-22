@@ -38,7 +38,7 @@ function verifyEvent(eventId, array) {
 function getTime(datatime) {
 
     datatime = moment.utc(datatime).format('YYYY-MM-DDTHH:mm:ss');
-   
+
     let difference = moment().diff(datatime, 'seconds');
 
     if (difference <= 59) //segundos
@@ -530,7 +530,7 @@ module.exports = {
 
     },
 
-    async getFutureEvents(req, res) {
+    async getFutureEventsOrganizer(req, res) {
         try {
 
             const { page } = req.params
@@ -540,6 +540,7 @@ module.exports = {
 
             const user = await User.findByPk(req.userId);
 
+            //eventos do orgnizador
             let events = await Event.findAll({
                 attributes: ['id', 'name', 'start_date', 'status'],
                 include: {
@@ -554,6 +555,29 @@ module.exports = {
                 order: [
                     ['start_date', 'ASC']
                 ]
+            });
+
+
+            return res.send(events);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir eventos futuros' })
+        }
+    },
+
+    async getFutureEventsParticipation(req, res) {
+        try {
+
+            const { page } = req.params
+
+            let limit = 10;
+            let offset = limit * (page - 1);
+
+            const user = await User.findByPk(req.userId);
+
+            //para verificar se evento já não sera puxado em getFutureEventsOrganizer
+            let events = await Event.findAll({
+                where: { organizer_id: user.id }
             });
 
             if (user.type == 0) {
@@ -607,7 +631,7 @@ module.exports = {
                 artistEvents = artistEvents.slice(offset).slice(0, limit),
                     total_pages = Math.ceil(artistEvents.length / limit);
 
-                return res.send({ events, artistEvents });
+                return res.send(artistEvents);
 
             } else if (user.type == 1) {
                 const venue = await Venue.findOne({
@@ -639,7 +663,7 @@ module.exports = {
                         venueEvents.push(event);
                 });
 
-                return res.send({ events, venueEvents });
+                return res.send(venueEvents);
 
             } else {
                 return res.send(events);
