@@ -56,7 +56,7 @@ function getTime(datatime) {
             } else if (difference <= 4) { //até 4 horas
                 return `há ${difference} horas atrás`
             } else {
-                return moment.utc(datatime, 'YYYY-MM-DDTHH:mm:ssZ').format("HH:mm");
+                return moment.utc(datatime, 'YYYY-MM-DDTHH:mm:ssZ').format("DD/MM/YY HH:mm");
             }
         }
     }
