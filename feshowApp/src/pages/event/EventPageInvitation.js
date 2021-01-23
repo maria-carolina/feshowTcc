@@ -80,7 +80,6 @@ const InvitationModal = (props) => {
                     Sugestões de artistas
                 </Text>
                 {props.suggestions != null && 
-                console.log(props.suggestions) &&
                 (searchResult||props.suggestions).map((item) => 
                     (
                         <View 

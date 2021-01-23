@@ -78,13 +78,25 @@ const PageBody = (props) => {
                     }}
                     key = {props.loaded.indexOf(item)}
                 >
-                    <Text 
-                        style = {{
-                            fontWeight: 'bold', 
-                            color: '#3F2058'
-                        }}>
-                        {item.name}
-                    </Text>
+                    <View style = {styles.row}>
+                        <Text 
+                            style = {{
+                                fontWeight: 'bold', 
+                                color: '#3F2058'
+                            }}
+                        >
+                            {item.name}
+                        </Text>
+
+                        <Text
+                            style = {{
+                                color: '#696969',
+                                marginLeft: 5
+                            }}
+                        >
+                            {item.time}
+                        </Text>
+                    </View>
 
                     <Text>
                         {item.post}
