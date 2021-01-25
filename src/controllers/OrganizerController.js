@@ -173,7 +173,7 @@ module.exports = {
             });
 
             const artists = await Artist.findAll({
-                attributes: ['id', 'name'],
+                attributes: ['id', 'name', 'city'],
                 include: {
                     association: 'genres'
                 },
@@ -192,9 +192,11 @@ module.exports = {
                     status = 1  //dentro do evento
                 }
 
+
                 artistVerified.push({
                     id: artist.id,
                     name: artist.name,
+                    city: artist.city,
                     genres: artist.genres,
                     status: status
                 });
