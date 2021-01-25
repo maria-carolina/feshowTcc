@@ -149,14 +149,23 @@ const InvitationModal = (props) => {
                     </Text>
 
                     <TouchableOpacity
+                        onPress = {() => sendInvitation()}
                         style = {{
                             ...styles.button, 
                             width:'100%',
                         }}
-                        onPress = {() => sendInvitation()}
                     >
                         <Text style = {styles.buttonLabel}>
                             Enviar convite
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress = {() => setTimePickerVisible(true)}
+                        style = {styles.outlineButton}
+                    >
+                        <Text style = {{...styles.outlineButtonLabel}}>
+                            Trocar horário
                         </Text>
                     </TouchableOpacity>
 
