@@ -17,7 +17,7 @@ class Event extends Model {
                 allowNull: true
             },
             start_date: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
                 allowNull: false,
                 validate: {
                     notEmpty: {
