@@ -76,13 +76,22 @@ module.exports = {
 
             let descript;
 
-            console.log(name);
-            console.log(start_date);
-
             if (description !== "") {
                 descript = description;
             } else {
                 descript = null;
+            }
+
+            //se tem evento na mesma data
+            const verifyEvent = await Event.findAll({
+                where: {
+                    start_date,
+                    venue_id
+                }
+            });
+
+            if (verifyEvent.length > 0) {
+                return res.send({ error: 'Já existe um evento nesta data' });
             }
 
             const event = await Event.create({
@@ -164,6 +173,21 @@ module.exports = {
                 descript = description;
             } else {
                 descript = null;
+            }
+
+            //se tem evento na mesma data
+            const verifyEvent = await Event.findAll({
+                where: {
+                    start_date,
+                    venue_id,
+                    id: {
+                        [Op.ne]: id
+                    }
+                }
+            });
+
+            if (verifyEvent.length > 0) {
+                return res.send({ error: 'Já existe um evento nesta data' });
             }
 
             const event = await Event.update({
