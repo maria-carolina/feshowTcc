@@ -5,17 +5,15 @@ import api from '../../services/api';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-
-
-const InvitationModal = (props) => {
+const InvitationTimePick = (props) => {
     const [timePickerVisible, setTimePickerVisible] = useState(false);
     const [showtime, setShowtime] = useState(null)
 
     const sendInvitation = async () => {
         let values = {
-            artistId: props.artist.id,
-            eventId: props.eventId,
-            date: props.limits.start_date,
+            artistId: props.artist.artistId,
+            eventId: props.event.id,
+            date: props.event.start_date,
             time: showtime
         }
 
@@ -30,6 +28,9 @@ const InvitationModal = (props) => {
                 props.closeModal();
                 props.finishInvitation();
                 Alert.alert('Pronto!', 'O artista foi convidado para o evento. Aguarde a resposta.') 
+            }else{
+                console.log(result.data)
+                Alert.alert('Ops.', 'Já há um artista encaixado nesse horário.')
             }
         }catch(e){
             console.log(e)
@@ -66,7 +67,7 @@ const InvitationModal = (props) => {
 
     return(
         <Modal
-            visible = {!!props.artist}
+            visible = {props.visible}
             transparent = {true}
             animationType = 'fade'
             onRequestClose = {() => { 
@@ -75,7 +76,7 @@ const InvitationModal = (props) => {
             }}
         >
 
-            {props.artist != null &&
+            {props.artist != null && props.event != null &&
             <View style = {styles.container}>
                 <FontAwesome
                     style = {{
@@ -93,20 +94,22 @@ const InvitationModal = (props) => {
                 <Text 
                     style = {{
                         ...styles.title, 
-                        fontSize: 30,
+                        fontSize: 20,
                         marginBottom: 5
                     }
                     }>
-                        {props.artist.name}
+                        Artista: {props.artist.name}
                 </Text>
 
-                <Text>{props.artist.city}</Text>
-
-                <View style = {styles.row}>
-                    {props.artist.genres.map((item) =>
-                        <Text key = {item.id}>{item.name} </Text>
-                    )}
-                </View>
+                <Text 
+                    style = {{
+                        ...styles.title, 
+                        fontSize: 20,
+                        marginBottom: 5
+                    }
+                    }>
+                        Evento: {props.event.name}
+                </Text>
                 
 
                 {(showtime == null &&
@@ -188,4 +191,4 @@ const InvitationModal = (props) => {
     )
 }
 
-export default InvitationModal;
+export default InvitationTimePick;

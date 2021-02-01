@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, Modal, TextInput} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
-import ConfirmationModal from '../event/EventPageInvitation2';
+import ConfirmationModal from './InvitationTimePick';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
@@ -13,7 +13,7 @@ const InvitationModal = (props) => {
 
     const search = async (text) => {
         try{
-            let result = await api.post(`/searchArtist/${props.eventId}`, 
+            let result = await api.post(`/searchArtist/${props.event.id}`, 
             {name: text}, {
                 headers: {
                     Authorization: `Bearer ${props.token}`
@@ -114,9 +114,10 @@ const InvitationModal = (props) => {
             </View>
 
             <ConfirmationModal
+                visible = {!!choosenArtist}
                 artist = {choosenArtist} 
                 limits = {props.limits}
-                eventId = {props.eventId}
+                event = {props.event}
                 token = {props.token}
                 closeModal = {() => cancelChoice()}
                 finishInvitation = {props.closeModal}

@@ -26,7 +26,7 @@ const ListItem = (props) => {
                 height: 60,
                 position: 'relative'
             }}
-            key = {props.item.id}
+            key = {props.item.id.toString()}
         >
             <Text>{formattedDate}</Text>
             <TouchableOpacity
@@ -72,7 +72,7 @@ class FutureEventsPage extends Component{
     componentDidMount(){
         this.loadEvents(true);
         this.reload = this.props.navigation.addListener('focus', () => {
-            this.loadEvents();
+            this.loadEvents(true);
         })
         
     }
@@ -137,7 +137,7 @@ class FutureEventsPage extends Component{
                 }else{
                     pagesLoaded[1]++
                     newData = this.state.eventsToParticipate.concat(result.data);
-                    newState = {eventsToParticipate: newData}
+                    newState = {eventsToParticipate: newData, pagesLoaded}
                 }
 
                 this.setState(newState);
@@ -229,7 +229,10 @@ class FutureEventsPage extends Component{
                             onScrollEndDrag = {() => this.loadMoreEvents(isFirstTabSelected, nextPage)}
                         >
                             {listToRender.map(item => {
-                                return <ListItem item = {item} />
+                                return <ListItem 
+                                    item = {item} 
+                                    key = {item.id}
+                                />
                             })}
                         </ScrollView>
                     </View>

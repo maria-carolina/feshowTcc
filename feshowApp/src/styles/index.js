@@ -4,7 +4,6 @@ const Styles = StyleSheet.create({
     center: {
         justifyContent: 'center',
         alignItems: 'center',
-        
     },
 
     container: {
@@ -196,6 +195,10 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1
+    },
+
+    profileHeadInfos: {
+        fontSize: 16
     }
 
 })
