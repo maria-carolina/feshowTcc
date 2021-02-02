@@ -558,6 +558,9 @@ module.exports = {
                 user.dataValues.city = producer.city;
 
             }
+            const userImage = await ImageUser.findOne({ where: { user_id: id } });
+            user.dataValues.imageStatus = userImage ? true : false;
+
             return res.send(user);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir perfil do usuário' })
