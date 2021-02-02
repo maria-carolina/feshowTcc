@@ -23,6 +23,7 @@ userRoutes.use(authMiddleware);
 userRoutes.post('/storeImage', multer(multerImage).single('file'), UserController.storeImage);
 userRoutes.post('/storeRider', multer(multerRider).single('file'), UserController.storeRider);
 
+userRoutes.get('/showUser/:id', UserController.show);
 userRoutes.get('/invitations', UserController.getInvitations);
 
 module.exports = userRoutes;

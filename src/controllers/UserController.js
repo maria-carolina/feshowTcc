@@ -502,5 +502,65 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao exibir convites' })
         }
+    },
+
+    async show(req, res) {
+        try {
+            const { id } = req.params;
+
+            let user = await User.findByPk(id);
+            user.password = undefined;
+
+            if (user.type == 0) {
+
+                const artist = await Artist.findOne({
+                    include: {
+                        association: 'genres'
+                    },
+                    where: { user_id: user.id }
+                });
+
+                //organizando objeto
+                user.dataValues.name = artist.name;
+                user.dataValues.description = artist.description;
+                user.dataValues.city = artist.city;
+                user.dataValues.members = artist.members;
+                user.dataValues.cache = artist.cache;
+                user.dataValues.genres = artist.genres;
+
+            } else if (user.type == 1) {
+
+                const venue = await Venue.findOne({
+                    include: [
+                        { association: 'address' },
+                        { association: 'genres' }
+                    ],
+                    where: { user_id: user.id }
+                });
+
+                 //organizando objeto
+                 user.dataValues.name = venue.name;
+                 user.dataValues.description = venue.description;
+                 user.dataValues.initialHour = venue.initialHour;
+                 user.dataValues.finalHour = venue.finalHour;
+                 user.dataValues.initialDay = venue.initialDay;
+                 user.dataValues.finalDay = venue.finalDay;
+                 user.dataValues.capacity = venue.capacity;
+                 user.dataValues.genres = venue.genres;
+                 user.dataValues.address = venue.address;
+
+            } else {
+                const producer = await Producer.findOne({
+                    where: { user_id: user.id }
+                });
+                user.dataValues.name = producer.name;
+                user.dataValues.description = producer.description;
+                user.dataValues.city = producer.city;
+
+            }
+            return res.send(user);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir perfil do usuário' })
+        }
     }
 };
