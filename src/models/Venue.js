@@ -49,6 +49,7 @@ class Venue extends Model {
     static associate(models) {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
         this.belongsToMany(models.Genre, { foreignKey: 'venue_id', through: 'genre_venues', as: 'genres' });
+        this.hasOne(models.Address, { foreignKey: 'venue_id', as: 'address' });
     }
 
 }

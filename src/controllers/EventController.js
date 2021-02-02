@@ -697,6 +697,216 @@ module.exports = {
             return res.send({ error: 'Erro ao exibir eventos futuros' })
         }
 
-    }
+    },
 
+    async getPastEvents(req, res) {
+        try {
+            const { id, page } = req.params;
+            let limit = 10;
+            let offset = limit * (page - 1);
+            let events;
+            let now = moment().format('YYYY-MM-DD');
+
+            const user = await User.findByPk(id);
+
+            if (user.type == 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                const artistEvents = await ArtistEvent.findAll({
+                    include: [
+                        {
+                            association: 'artists',
+                        }, {
+                            association: 'events',
+                            where: {
+                                status: 0,
+                                start_date: {
+                                    [Op.lte]: now
+                                }
+                            },
+                            include: {
+                                association: 'venue',
+                            },
+                            order: [
+                                ['start_date', 'DESC']
+                            ]
+                        },
+                    ],
+                    where: {
+                        artist_id: artist.id,
+                        status: 3
+                    }
+                });
+
+                events = [];
+                artistEvents.forEach((event) => {
+                    events.push({
+                        id: event.events.id,
+                        name: event.events.name,
+                        start_date: event.events.start_date,
+                        status: event.events.status,
+                        venue: {
+                            id: event.events.venue.id,
+                            name: event.events.venue.name
+                        }
+                    });
+                });
+
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                events = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    offset,
+                    where: {
+                        venue_id: venue.id,
+                        status: 0,
+                        start_date: {
+                            [Op.lte]: now
+                        }
+                    },
+                    order: [
+                        ['start_date', 'DESC']
+                    ]
+                });
+            } else {
+                events = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    offset,
+                    where: {
+                        organizer_id: id,
+                        status: 0,
+                        start_date: {
+                            [Op.lte]: now
+                        }
+                    },
+                    order: [
+                        ['start_date', 'DESC']
+                    ]
+                });
+            }
+
+            return res.send(events);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir histórico' })
+        }
+
+    },
+
+    async previewPastEvents(req, res) {
+        try {
+            const { id } = req.params;
+            let limit = 5;
+            let events;
+            let now = moment().format('YYYY-MM-DD');
+
+            const user = await User.findByPk(id);
+
+            if (user.type == 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                const artistEvents = await ArtistEvent.findAll({
+                    include: [
+                        { association: 'artists' },
+                        {
+                            association: 'events',
+                            where: {
+                                status: 0,
+                                start_date: {
+                                    [Op.lte]: now
+                                }
+                            },
+                            include: { association: 'venue' },
+                            order: [
+                                ['start_date', 'DESC']
+                            ]
+                        },
+                    ],
+                    limit,
+                    where: {
+                        artist_id: artist.id,
+                        status: 3
+                    }
+                });
+
+                events = [];
+                artistEvents.forEach((event) => {
+                    events.push({
+                        id: event.events.id,
+                        name: event.events.name,
+                        start_date: event.events.start_date,
+                        status: event.events.status,
+                        venue: {
+                            id: event.events.venue.id,
+                            name: event.events.venue.name
+                        }
+                    });
+                });
+
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                events = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    where: {
+                        venue_id: venue.id,
+                        status: 0,
+                        start_date: {
+                            [Op.lte]: now
+                        }
+                    },
+                    order: [
+                        ['start_date', 'DESC']
+                    ]
+                });
+            } else {
+                events = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date', 'status'],
+                    include: {
+                        association: 'venue',
+                        attributes: ['id', 'name']
+                    },
+                    limit,
+                    where: {
+                        organizer_id: id,
+                        status: 0,
+                        start_date: {
+                            [Op.lte]: now
+                        }
+                    },
+                    order: [
+                        ['start_date', 'DESC']
+                    ]
+                });
+            }
+
+            return res.send(events);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir histórico' })
+        }
+
+    }
 };

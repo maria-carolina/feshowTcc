@@ -326,6 +326,10 @@ module.exports = {
         const { id } = req.params;
 
         let event = await Event.findByPk(id);
+        /**
+         * status = 0 fechado
+         * status = 1 aberto
+        **/ 
 
         if (event.status == 0) {
             await Event.update({ status: 1 }, {
@@ -391,6 +395,34 @@ module.exports = {
         }
 
         return res.send(event);
-    }
+    },
+
+    async getEventsOrganizer(req, res) {
+        try {
+            //usado para retornar eventos do orgnizador para convidar artista em seu perfil
+           
+            const user = await User.findByPk(req.userId);
+
+            let events = await Event.findAll({
+                attributes: ['id', 'name', 'start_date', 'status'],
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name']
+                },
+                where: {
+                    organizer_id: user.id,
+                    status: 1
+                },
+                order: [
+                    ['start_date', 'DESC']
+                ]
+            });
+
+            return res.send(events);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir eventos futuros' })
+        }
+    },
 
 };
