@@ -14,7 +14,7 @@ class ArtistEvent extends Model {
                 primaryKey: true
             },
             date: {
-                type: DataTypes.DATE,
+                type: DataTypes.DATEONLY,
                 allowNull: false
             },
             start_time: {

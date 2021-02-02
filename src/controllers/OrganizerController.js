@@ -51,7 +51,7 @@ module.exports = {
 
             const event = await Event.findByPk(eventId);
 
-            //verificar artista no evento
+            //verificar se artista está neste evento
             const artist = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
@@ -63,7 +63,7 @@ module.exports = {
                 return res.send({ error: 'Artista já está no evento' });
             }
 
-            //verificar se não há show acontecendo
+            //verificar se não há artista encaixado no mesmo horário 
             const verifyLineup = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
@@ -73,6 +73,20 @@ module.exports = {
 
             if (verifyLineup.length > 0) {
                 return res.send({ error: 'Há um artista encaixado neste horário' });
+            }
+
+            /*verificar se artista já não ta tocando nesse mesmo horário,
+             mas em outro evento*/
+
+            const verifyArtist = await ArtistEvent.findAll({
+                where: {
+                    artist_id: artistId,
+                    date
+                }
+            });
+
+            if (verifyArtist.length > 0) {
+                return res.send({ error: 'Este artista está em outro evento nesta data' });
             }
 
             await ArtistEvent.create({
@@ -329,7 +343,7 @@ module.exports = {
         /**
          * status = 0 fechado
          * status = 1 aberto
-        **/ 
+        **/
 
         if (event.status == 0) {
             await Event.update({ status: 1 }, {
@@ -400,7 +414,7 @@ module.exports = {
     async getEventsOrganizer(req, res) {
         try {
             //usado para retornar eventos do orgnizador para convidar artista em seu perfil
-           
+
             const user = await User.findByPk(req.userId);
 
             let events = await Event.findAll({
