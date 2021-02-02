@@ -12,7 +12,7 @@ const ListItem = (props) => {
     const navigation = useNavigation();
 
     const openEventPage = () => {
-        navigation.navigate('eventPage', {eventId: props.item.id})
+        navigation.navigate('eventPage', {id: props.item.id})
     }
 
     let splitted = props.item.start_date.split('-');

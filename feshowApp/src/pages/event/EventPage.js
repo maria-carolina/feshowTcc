@@ -55,7 +55,7 @@ class EventPage extends Component{
 
     loadEventData = async () => {
         try{
-            var result = await api.get(`/event/show/${this.props.route.params.eventId}`, {
+            var result = await api.get(`/event/show/${this.props.route.params.id}`, {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
                 }

@@ -1,7 +1,9 @@
 import React, { Component, useContext } from 'react';
-import {View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, Dimensions} from 'react-native';
+import {View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, Dimensions, Alert} from 'react-native';
 import styles from '../../styles';
 import AuthContext from '../../contexts/auth';
+import api from '../../services/api';
+
 
 const LogoutForTest = () => {
     const { signOut } = useContext(AuthContext)
@@ -12,6 +14,57 @@ const LogoutForTest = () => {
         >
             <Text style = {styles.buttonLabel}> Sair </Text>
         </TouchableOpacity>
+    )
+}
+
+const HistoricPreviewItem = (props) => {
+    let splitted = props.item.start_date.split('-');
+    let formattedDate = `${splitted[2]}/${splitted[1]}`
+    return (
+        <View
+            style = {{
+                padding: 15,
+                borderBottomWidth: .5,
+                borderBottomColor: '#cecece',
+                flexDirection: 'row'
+            }}
+        >
+            <Text
+                style = {{
+                    color: '#3f2058',
+                    fontWeight: 'bold'
+                }}
+            > 
+            {formattedDate} 
+            </Text>
+            <Text> - </Text>
+
+            <TouchableOpacity
+                onPress = {props.handleEventClick}
+            >
+                <Text
+                    style = {{
+                        fontWeight: 'bold'
+                    }}
+                >
+                    {props.item.name} 
+                </Text>
+            </TouchableOpacity>
+
+            <Text> @ </Text>
+
+            <TouchableOpacity
+                onPress = {props.handleVenueClick}
+            >
+                <Text
+                    style = {{
+                        fontWeight: 'bold'
+                    }}
+                >
+                    {props.item.venue.name}
+                </Text>
+            </TouchableOpacity>
+        </View>
     )
 }
 
@@ -28,25 +81,84 @@ class ProfilePage extends Component{
     constructor(props){
         super(props)
         this.state = {
-            profile: {
-                id: 2,
-                artistId: 1,
-                image: null,
-                type: 1,
-                name: 'Metá Metá',
-                members: 3,
-                city: 'São Paulo',
-                genres: ['mpb', 'samba', 'jazz'],
-                description: "xxxxxxx",
-            },
             isFirstTabSelected: true
         }
     }
 
     static contextType = AuthContext;
 
-    componentDidMount(){}
-    loadProfileData = () => {}
+    componentDidMount(){
+        let id = this.props.route.params ? this.props.route.params.id : this.context.user.id
+        this.loadProfileData(id);
+    }
+
+    loadProfileData = async (id) => {
+        let config = {
+            headers: {
+                Authorization: `Bearer ${this.context.token}`
+            }
+        }
+        try{
+            let result = await api.get(
+                `/showUser/${id}`,
+                config
+            );
+            
+            console.log(result.data)
+
+            if(!('error' in result.data)){
+                if(result.data.imageStatus){
+                    let imageResult = await api.get(
+                        `/getUserImage/${id}`,
+                        config
+                    )
+
+                    if(!('error' in imageResult.data)){
+                        result.data.image = imageResult.data;
+                    }else{
+                        Alert.alert('Ops', result.data.error);
+                    }
+                }else{
+                    result.data.image = null;
+                }
+
+                this.setState({
+                    profile: result.data
+                })
+                
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+
+
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    loadHistoricPreview = async () => {
+        try{
+            let result = await api.get(
+                `previewPastEvents/2`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            if(!('error' in result.data)){
+                this.setState({
+                    historicPreview: result.data
+                })
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+
+        }catch(e){
+            console.log(e)
+        }
+    }
 
     openProfileEditPage = () => {}
     openCalendarPage = () => {}
@@ -69,68 +181,90 @@ class ProfilePage extends Component{
         this.setState({
             isFirstTabSelected: !this.state.isFirstTabSelected
         })
+
+        if(!this.state.historicPreview){
+            this.loadHistoricPreview();
+        }
+    }
+
+    handleLinkClick = (isAProfilePage, id) => {
+
+        if(isAProfilePage){
+            this.setState({
+                isFirstTabSelected: true,
+                profile: undefined,
+                historicPreview: undefined
+            })
+
+            this.loadProfileData(id);
+        }else{
+            this.props.navigation.navigate(route, { id });
+        }
     }
     
     render(){
-        var { profile, isFirstTabSelected } = this.state;
+        var { profile, isFirstTabSelected, historicPreview } = this.state;
 
-        console.log(this.context.user.id);
-
-        var profileImage = (
-            <TouchableOpacity
-                style = {{
-                    width: '50%',
-                    height: '45%',
-                }}
-
-                activeOpacity = { 
-                    this.context.user.id === profile.id ?
-                    0.2 : 1
-                }
-            >
-                <Image
-                    source = { 
-                        profile.image === null ? 
-                        require('../../assets/defaultProfileImage.jpeg'):{uri: this.profile.image}}
+        if(profile){
+            var profileImage = (
+                <TouchableOpacity
                     style = {{
-                        width: '100%',
-                        height: '100%', 
-                        borderRadius: Dimensions.get('window').width / 2
+                        width: '50%',
+                        height: '45%',
                     }}
-                    
-                />
 
-            </TouchableOpacity>
-        );
+                    activeOpacity = { 
+                        this.context.user.id === profile.id ?
+                        0.2 : 1
+                    }
+                >
+                    <Image
+                        source = { 
+                            profile.image === null ? 
+                            require('../../assets/defaultProfileImage.jpeg'):{uri: this.state.profile.image}}
+                        style = {{
+                            width: '100%',
+                            height: '100%', 
+                            borderRadius: Dimensions.get('window').width / 2
+                        }}
+                        
+                    />
 
-        var genreList = "";
+                </TouchableOpacity>
+            );
 
-        for(var item of profile.genres){
-            genreList += profile.genres.indexOf(item) == 0 ?
-            item : ` | ${item}`
+            if(profile.type !== 2){
+                var genreList = "";
+
+                for(var item of profile.genres){
+                    genreList += profile.genres.indexOf(item) == 0 ?
+                    item.name : ` | ${item.name}`
+                }
+            }
+
+            var firstButton;
+
+            if(this.context.user.id === profile.id){
+                firstButton = {
+                    label: 'Editar perfil'
+                }
+            }else if(profile.type === 1){
+                firstButton = {
+                    label: 'Convidar para evento',
+                    handleClick: () => this.openInvitation()
+                }
+            }else if(profile.type === 2){
+                firstButton = {
+                    label: 'Solicitar organização'
+                }
+            }else if(profile.type === 3){
+                firstButton = {
+                    label: 'Abrir chat'
+                }
+            }
         }
 
-        var firstButton;
 
-        if(this.context.user.id === profile.id){
-            firstButton = {
-                label: 'Editar perfil'
-            }
-        }else if(profile.type === 1){
-            firstButton = {
-                label: 'Convidar para evento',
-                handleClick: () => this.openInvitation()
-            }
-        }else if(profile.type === 2){
-            firstButton = {
-                label: 'Solicitar organização'
-            }
-        }else if(profile.type === 3){
-            firstButton = {
-                label: 'Abrir chat'
-            }
-        }
-       
         return(
             <View style = {styles.container}>
                 {(profile &&
@@ -150,7 +284,7 @@ class ProfilePage extends Component{
                             }}
                         >
                             {profileImage}
-
+                            
                             <Text style = {{
                                 fontSize: 22,
                                 fontWeight: 'bold'
@@ -158,10 +292,10 @@ class ProfilePage extends Component{
                                 {profile.name}
                             </Text>
 
-                            {profile.type !== 3 &&
+                            {profile.type !== 2 &&
                                 <Text style = {styles.profileHeadInfos}>
                                     {(
-                                        profile.type == 1?
+                                        profile.type == 0 ?
                                         `${profile.members} membros`: 
                                         `${profile.capacity} pessoas`
                                     )} 
@@ -169,7 +303,7 @@ class ProfilePage extends Component{
                             }
 
                             <Text style = {styles.profileHeadInfos}> 
-                                {profile.city} 
+                                {(profile.city||profile.address.city)} 
                             </Text>
 
                             <Text
@@ -180,7 +314,7 @@ class ProfilePage extends Component{
 
                             
                             <TouchableOpacity
-                                style = {{...styles.outlineButton, marginTop: 5}}
+                                style = {{...styles.outlineButton, marginTop: 3}}
                                 onPress = {firstButton.handleClick}
                             >
                                 <Text
@@ -246,7 +380,7 @@ class ProfilePage extends Component{
                             </View>
                         )}
 
-                        {isFirstTabSelected && profile.type === 2 && (
+                        {isFirstTabSelected && profile.type === 1 && (
                             <View style = {{marginTop: 15}}>
                                 <Text
                                     style = {{
@@ -265,6 +399,27 @@ class ProfilePage extends Component{
 
                             </View>
                         )}
+
+                        {!isFirstTabSelected && 
+                        (
+                            (historicPreview &&
+                                
+                                historicPreview.map(item => {
+                                    return (
+                                        <HistoricPreviewItem 
+                                            item = {item}
+                                            handleVenueClick = {() => this.handleLinkClick(true, item.venue.id)}
+                                            handleEventClick = {() => this.handleLinkClick(false, item.id)}
+                                        />
+                                    )
+                                })
+                            ) || 
+                            <ActivityIndicator
+                                size = 'large'
+                                color = '#000'
+                            />
+                        )
+                        }
                             
                         </View>
 
