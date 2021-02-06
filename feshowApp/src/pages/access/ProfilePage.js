@@ -26,7 +26,8 @@ const HistoricPreviewItem = (props) => {
                 padding: 15,
                 borderBottomWidth: .5,
                 borderBottomColor: '#cecece',
-                flexDirection: 'row'
+                flexDirection: 'row',
+                alignSelf: 'flex-start'
             }}
         >
             <Text
@@ -188,7 +189,6 @@ class ProfilePage extends Component{
     }
 
     handleLinkClick = (isAProfilePage, id) => {
-
         if(isAProfilePage){
             this.setState({
                 isFirstTabSelected: true,
@@ -403,16 +403,39 @@ class ProfilePage extends Component{
                         {!isFirstTabSelected && 
                         (
                             (historicPreview &&
-                                
-                                historicPreview.map(item => {
+                                <View style = {styles.center}>
+                                {historicPreview.map(item => {
                                     return (
                                         <HistoricPreviewItem 
                                             item = {item}
-                                            handleVenueClick = {() => this.handleLinkClick(true, item.venue.id)}
-                                            handleEventClick = {() => this.handleLinkClick(false, item.id)}
+                                            handleVenueClick = {() => 
+                                                this.handleLinkClick(true, item.venue.id)
+                                            }
+                                            handleEventClick = {() => 
+                                                this.handleLinkClick(false, item.id)
+                                            }
                                         />
                                     )
-                                })
+                                })}
+
+                                <TouchableOpacity
+                                    style = {styles.button}
+                                    onPress = {() => 
+                                        this.props.navigation.navigate('historicPage', 
+                                        {
+                                            id: profile.id, 
+                                            name: profile.name,
+                                            type: profile.type
+                                        })
+                                    }
+                                >
+                                    <Text
+                                        style = {styles.buttonLabel}
+                                    >
+                                        Ver mais
+                                    </Text>
+                                </TouchableOpacity>
+                                </View> 
                             ) || 
                             <ActivityIndicator
                                 size = 'large'

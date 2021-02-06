@@ -21,6 +21,7 @@ import { DrawerActions, useNavigation } from '@react-navigation/native';
 import LineUpEditPage from '../pages/event/LineUpEditPage';
 import FutureEventsPage from '../pages/social/FutureEventsPage';
 import ProfilePageInvitation from '../pages/event/ProfilePageInvitation';
+import HistoricPage from '../pages/social/HistoricPage';
 
 
 const Stack = createStackNavigator();
@@ -195,9 +196,14 @@ const NavStack = (props) => {
                 component = {LineUpEditPage} //provisório
             />
 
-             <Stack.Screen 
+            <Stack.Screen 
                 name = 'profilePage'
                 component = {ProfilePage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'historicPage'
+                component = {HistoricPage} //provisório
             />
 
             <Stack.Screen 

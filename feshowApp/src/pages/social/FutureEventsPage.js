@@ -1,83 +1,38 @@
 import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, ActivityIndicator} from 'react-native';
+import ListItem from '../event/EventListItem';
 import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
 
-
-
-const ListItem = (props) => {
-    const navigation = useNavigation();
-
-    const openEventPage = () => {
-        navigation.navigate('eventPage', {id: props.item.id})
-    }
-
-    let splitted = props.item.start_date.split('-');
-    let formattedDate = `${splitted[2]}/${splitted[1]}/${splitted[0]}`
-    return(
-        <View 
-            style = {{
-                ...styles.listItem,
-                alignItems: 'center',
-                flexDirection: 'row',
-                height: 60,
-                position: 'relative'
-            }}
-            key = {props.item.id.toString()}
-        >
-            <Text>{formattedDate}</Text>
-            <TouchableOpacity
-                onPress = {() => openEventPage()}
-            >
-                <Text
-                    style = {{
-                        marginLeft: 20,
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        color: '#3F2058',
-                    }}
-                >
-                    {props.item.name}
-                </Text>
-            </TouchableOpacity>
-            <Text 
-                style={{
-                    position: 'absolute',
-                    top: 20,
-                    right: 10,
-                    fontWeight: 'bold',
-                    color: '#3F2058',
-                }}
-            >
-                {props.item.status == 1 ? 'aberto' : 'feshow!'}
-            </Text>
-        </View>
-    )
-}
 
 class FutureEventsPage extends Component{
     constructor(props){
         super(props)
-        this.reload;
+        this.onfocus;
         this.state = {
-            isFirstTabSelected: true
+            isFirstTabSelected: true,
+            isAllPagesLoaded: [false, false]
         }
     }
 
     static contextType = AuthContext;
     
     componentDidMount(){
-        this.loadEvents(true);
-        this.reload = this.props.navigation.addListener('focus', () => {
+        this.onfocus = this.props.navigation.addListener('focus', () => {
             this.loadEvents(true);
         })
         
     }
 
     loadEvents = async (isEventsToOrganize) => {
+
+        this.setState({
+            eventsToOrganize: undefined,
+            eventsToParticipate: undefined
+        })
+
         var url = isEventsToOrganize ? 
         '/futureEventsOrganizer/1':'/futureEventsParticipation/1';
 
@@ -113,8 +68,13 @@ class FutureEventsPage extends Component{
     loadMoreEvents = async (isEventsToOrganize, page) => {
         var url = isEventsToOrganize ? 
         '/futureEventsOrganizer':'/futureEventsParticipation';
-
+        console.log(page);
         try{
+
+            this.setState({
+                isLoadingAPage: true
+            })
+
             let result = await api.get(
                 `${url}/${page}`, 
                 {
@@ -125,7 +85,6 @@ class FutureEventsPage extends Component{
             )
             
             if(!('error' in result.data)){
-                console.log(result.data)
                 let newData;
                 let newState;
                 let pagesLoaded = this.state.pagesLoaded;
@@ -139,6 +98,8 @@ class FutureEventsPage extends Component{
                     newData = this.state.eventsToParticipate.concat(result.data);
                     newState = {eventsToParticipate: newData, pagesLoaded}
                 }
+
+                newState.isLoadingAPage = false;
 
                 this.setState(newState);
             }
@@ -157,11 +118,10 @@ class FutureEventsPage extends Component{
             this.loadEvents(false);
         } 
         
-        console.log(this.state.eventsToOrganize)
     }
 
     render(){
-        var { isFirstTabSelected } = this.state;
+        var { isFirstTabSelected, isLoadingAPage } = this.state;
 
         var isProducer = this.context.user.type === 2;
 
@@ -221,21 +181,39 @@ class FutureEventsPage extends Component{
 
                 {(
                     isDataReady && 
-                    <View style ={{
-                        width: '90%'
-                    }}>
+                    
                         <ScrollView
+                            style = {{width: '100%'}}
                             contentContainerStyle = {styles.center}
-                            onScrollEndDrag = {() => this.loadMoreEvents(isFirstTabSelected, nextPage)}
                         >
                             {listToRender.map(item => {
                                 return <ListItem 
                                     item = {item} 
                                     key = {item.id}
+                                    showStatus = {true}
                                 />
                             })}
-                        </ScrollView>
-                    </View>
+
+                            <TouchableOpacity
+                                style = {{
+                                    ...styles.outlineButton,
+                                    width:'50%',
+                                    margin: 5
+                                }}
+                                onPress = {() => 
+                                    this.loadMoreEvents(isFirstTabSelected, nextPage)
+                                }
+                            >
+                                {(isLoadingAPage && 
+                                <ActivityIndicator 
+                                    size = 'small'
+                                    color = '#000'
+                                />)
+                                || <Text style = {styles.outlineButtonLabel}> Carregar mais </Text>
+                                }
+                            </TouchableOpacity>
+                        </ScrollView> 
+                    
                 ) ||
                     <ActivityIndicator 
                         color = '#000'
