@@ -100,8 +100,8 @@ module.exports = {
             return res.status(200).send('ok');
 
 
-        } catch (err) {
-            return res.send({ error: 'Erro ao enviar convite a artista' })
+       } catch (err) {
+           return res.send({ error: 'Erro ao enviar convite a artista' })
         }
     },
 

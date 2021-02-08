@@ -4,15 +4,13 @@ const Styles = StyleSheet.create({
     center: {
         justifyContent: 'center',
         alignItems: 'center',
-        
     },
 
     container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F2F2F2',
-        
+        backgroundColor: '#F2F2F2'
     },
 
     button: {
@@ -42,7 +40,6 @@ const Styles = StyleSheet.create({
         color: '#3F2058',
         fontWeight: 'bold',
         fontFamily: 'roboto',
-        marginBottom: 20
     },
 
     buttonLabel: {
@@ -76,7 +73,7 @@ const Styles = StyleSheet.create({
     listItem: {
         width: '100%',
         borderBottomWidth: .5,
-        borderBottomColor: 'grey',
+        borderBottomColor: '#cecece',
         padding: 10,
         
     },
@@ -196,6 +193,10 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1
+    },
+
+    profileHeadInfos: {
+        fontSize: 16
     }
 
 })

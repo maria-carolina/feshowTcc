@@ -55,7 +55,7 @@ class EventPage extends Component{
 
     loadEventData = async () => {
         try{
-            var result = await api.get(`/event/show/${this.props.route.params.eventId}`, {
+            var result = await api.get(`/event/show/${this.props.route.params.id}`, {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
                 }
@@ -554,10 +554,12 @@ class EventPage extends Component{
         return(
             <View style = {styles.container}>
                 {('event' in this.state && 
-                <ScrollView contentContainerStyle = {
-                    {...styles.center, 
-                    justifyContent: 'flex-start'}
-                }>
+                <ScrollView 
+                    contentContainerStyle = {{
+                        ...styles.center, 
+                        justifyContent: 'flex-start'
+                    }}
+                >
                     <View style = {styles.row}>
                         {(this.state.currentAvatar == null &&
                         <TouchableOpacity
@@ -752,7 +754,7 @@ class EventPage extends Component{
                         visible = {this.state.invitationVisible} 
                         suggestions = {this.state.suggestions}
                         limits = {this.state.limits}
-                        eventId = {this.state.event.id}
+                        event = {this.state.event}
                         token = {this.context.token}
                         closeModal = {() => this.closeInvitationModal()}         
                     />

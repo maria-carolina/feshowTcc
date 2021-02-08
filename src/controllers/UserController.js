@@ -558,9 +558,34 @@ module.exports = {
                 user.dataValues.city = producer.city;
 
             }
+            const userImage = await ImageUser.findOne({ where: { user_id: id } });
+            user.dataValues.imageStatus = userImage ? true : false;
+
             return res.send(user);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir perfil do usuário' })
         }
-    }
+    },
+
+    async getImage(req, res) {
+        try {
+            const { id } = req.params;
+
+            const userImage = await ImageUser.findOne({ where: { user_id: id } });
+
+            if (userImage) {
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', userImage.name);
+                if (fs.existsSync(file)) {
+                    return res.sendFile(file);
+                } else {
+                    return res.send({ msg: 'Usuário não possui imagem' })
+                }
+            } else {
+                return res.send({ msg: 'Usuário não possui imagem' })
+            }
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir imagem' })
+        }
+
+    },
 };

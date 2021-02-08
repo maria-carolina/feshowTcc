@@ -702,6 +702,7 @@ module.exports = {
     async getPastEvents(req, res) {
         try {
             const { id, page } = req.params;
+            console.log(`${id} e ${page}`)
             let limit = 10;
             let offset = limit * (page - 1);
             let events;

@@ -20,6 +20,8 @@ import { View } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import LineUpEditPage from '../pages/event/LineUpEditPage';
 import FutureEventsPage from '../pages/social/FutureEventsPage';
+import ProfilePageInvitation from '../pages/event/ProfilePageInvitation';
+import HistoricPage from '../pages/social/HistoricPage';
 
 
 const Stack = createStackNavigator();
@@ -80,8 +82,6 @@ const SearchOpener = (props) => {
     return icon;
 }
 
-
-
 const NavDrawer = () => {  
     return(
         <Drawer.Navigator
@@ -90,9 +90,9 @@ const NavDrawer = () => {
             
         >
             <Drawer.Screen
-                 name = 'drawerTest'
+                 name = 'profile'
                  component = {NavStack}
-                 options = {{title: 'Provisório'}}
+                 options = {{title: 'Primeiro'}}
             />
 
             <Drawer.Screen
@@ -104,7 +104,6 @@ const NavDrawer = () => {
         </Drawer.Navigator>
     )
 }
-
 
 const NavStack = (props) => {
 
@@ -133,7 +132,7 @@ const NavStack = (props) => {
 
             </View>
         )
-    }else if (name === 'drawerTest'){
+    }else if (name === 'profile'){
         headerIcons = (
             <View style = {styles.row}>
 
@@ -166,6 +165,7 @@ const NavStack = (props) => {
         headerOptions.headerLeft = () => headerIcons;
     }
 
+
     return(
         <Stack.Navigator
             initialRouteName = {`${name}Page`}
@@ -196,15 +196,24 @@ const NavStack = (props) => {
                 component = {LineUpEditPage} //provisório
             />
 
-             <Stack.Screen 
-                name = 'drawerTestPage'
-                component = {EventPage} //provisório
+            <Stack.Screen 
+                name = 'profilePage'
+                component = {ProfilePage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'historicPage'
+                component = {HistoricPage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'profilePageInvitation' 
+                component = {ProfilePageInvitation} //provisório
             />
             
         </Stack.Navigator>
     )
 }
-
 
 const AppRoute = () => {
     return(
@@ -262,8 +271,8 @@ const AppRoute = () => {
             />
 
             <Tabs.Screen 
-                name = 'Chat' 
-                component = {ProfilePage}
+                name = 'chat' 
+                component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {
                         return <Ionicon 
