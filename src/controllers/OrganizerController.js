@@ -5,6 +5,7 @@ const Address = require('../models/Address');
 const GenreVenue = require('../models/GenreVenue');
 const User = require('../models/User');
 const EventImage = require('../models/EventImage');
+const Notification = require('../models/Notification');
 
 const { Op } = require('sequelize');
 const moment = require('moment');
@@ -100,8 +101,8 @@ module.exports = {
             return res.status(200).send('ok');
 
 
-       } catch (err) {
-           return res.send({ error: 'Erro ao enviar convite a artista' })
+        } catch (err) {
+            return res.send({ error: 'Erro ao enviar convite a artista' })
         }
     },
 
@@ -283,6 +284,29 @@ module.exports = {
         try {
             const { artistId, eventId } = req.body;
 
+            const artistEvent = await ArtistEvent.findOne({
+                where: [
+                    { artist_id: artistId },
+                    { event_id: eventId }
+                ]
+            });
+
+            if (!artistEvent)
+                return res.send({ error: 'Relação não encontrada' });
+
+            /**
+                 * status convites/line-up
+                 *  1 - organizador convida artista
+                 *  2 - artista solicita participação
+                 *  3 - artista confirmado no line-up
+                 */
+
+            if (artistEvent.status == 1) {
+                //artista aceitou solicitação
+            } else if (artistEvent.status == 2) {
+                //organizador aceitou solicitação
+            }
+
             await ArtistEvent.update({
                 status: 3
             }, {
@@ -425,10 +449,13 @@ module.exports = {
                 },
                 where: {
                     organizer_id: user.id,
-                    status: 1
+                    status: 1,
+                    start_date: {
+                        [Op.gte]: now
+                    }
                 },
                 order: [
-                    ['start_date', 'DESC']
+                    ['start_date', 'ASC']
                 ]
             });
 
