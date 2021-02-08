@@ -3,9 +3,17 @@ const { Model, DataTypes } = require('sequelize');
 class Notification extends Model {
     static init(sequelize) {
         super.init({
-            text: {
+            user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: false,
+            },
+            message: {
                 type: DataTypes.STRING,
                 allowNull: false,
+            },
+            auxiliary_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
             },
             status: {
                 type: DataTypes.INTEGER,
@@ -26,7 +34,7 @@ class Notification extends Model {
         })
     }
     static associate(models) {
-        //
+        
     }
 
 }

@@ -314,11 +314,12 @@ DEFAULT CHARACTER SET = utf8;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`notifications` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
-  `text` VARCHAR(45) NOT NULL,
+  `user_id` INT(11) NOT NULL,
+  `message` VARCHAR(100) NOT NULL,
+  `auxiliary_id` INT NULL,
   `status` TINYINT(1) NOT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
-  `user_id` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_notifications_users1_idx` (`user_id` ASC),
   CONSTRAINT `fk_notifications_users1`

@@ -591,11 +591,11 @@ module.exports = {
 
     async getFutureEventsParticipation(req, res) {
         try {
-
             const { page } = req.params
 
             let limit = 10;
             let offset = limit * (page - 1);
+            let now = moment().format('YYYY-MM-DD');
 
             const user = await User.findByPk(req.userId);
 
@@ -605,7 +605,12 @@ module.exports = {
                     association: 'venue',
                     attributes: ['id', 'name']
                 },
-                where: { organizer_id: user.id }
+                where: {
+                    start_date: {
+                        [Op.gte]: now
+                    },
+                    organizer_id: user.id
+                }
             });
 
             if (user.type == 0) {
@@ -621,6 +626,11 @@ module.exports = {
                         { association: 'artists' },
                         {
                             association: 'events',
+                            where: {
+                                start_date: {
+                                    [Op.gte]: now
+                                }
+                            },
                             include: {
                                 association: 'venue'
                             },
