@@ -428,7 +428,7 @@ module.exports = {
                     status: 1
                 },
                 order: [
-                    ['start_date', 'DESC']
+                    ['start_date', 'ASC']
                 ]
             });
 

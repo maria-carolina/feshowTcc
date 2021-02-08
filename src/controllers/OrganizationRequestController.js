@@ -1,4 +1,5 @@
 const Solicitation = require('../models/Solicitation');
+const Event = require('../models/Event');
 
 module.exports = {
 
@@ -8,6 +9,17 @@ module.exports = {
 
             if (note === undefined) {
                 note = null;
+            }
+
+            const verifyEvent = await Event.findAll({
+                where: {
+                    start_date,
+                    venue_id
+                }
+            });
+
+            if (verifyEvent.length > 0) {
+                return res.send({ error: 'Há um evento acontecendo nesta mesma data' });
             }
 
             await Solicitation.create({

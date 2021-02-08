@@ -521,6 +521,7 @@ module.exports = {
                 });
 
                 //organizando objeto
+                user.dataValues.artistId = artist.id;
                 user.dataValues.name = artist.name;
                 user.dataValues.description = artist.description;
                 user.dataValues.zipcode = artist.zipcode;
@@ -539,21 +540,24 @@ module.exports = {
                     where: { user_id: user.id }
                 });
 
-                 //organizando objeto
-                 user.dataValues.name = venue.name;
-                 user.dataValues.description = venue.description;
-                 user.dataValues.initialHour = venue.initialHour;
-                 user.dataValues.finalHour = venue.finalHour;
-                 user.dataValues.initialDay = venue.initialDay;
-                 user.dataValues.finalDay = venue.finalDay;
-                 user.dataValues.capacity = venue.capacity;
-                 user.dataValues.genres = venue.genres;
-                 user.dataValues.address = venue.address;
+                //organizando objeto
+                user.dataValues.venueId = venue.id;
+                user.dataValues.name = venue.name;
+                user.dataValues.description = venue.description;
+                user.dataValues.initialHour = venue.initialHour;
+                user.dataValues.finalHour = venue.finalHour;
+                user.dataValues.initialDay = venue.initialDay;
+                user.dataValues.finalDay = venue.finalDay;
+                user.dataValues.capacity = venue.capacity;
+                user.dataValues.genres = venue.genres;
+                user.dataValues.address = venue.address;
 
             } else {
                 const producer = await Producer.findOne({
                     where: { user_id: user.id }
                 });
+
+                user.dataValues.producerId = producer.id;
                 user.dataValues.name = producer.name;
                 user.dataValues.description = producer.description;
                 user.dataValues.zipcode = producer.zipcode;

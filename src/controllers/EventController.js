@@ -601,6 +601,10 @@ module.exports = {
 
             //para verificar se evento já não sera puxado em getFutureEventsOrganizer para user do tipo venue
             let events = await Event.findAll({
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name']
+                },
                 where: { organizer_id: user.id }
             });
 
@@ -640,6 +644,12 @@ module.exports = {
                         }
                     });
                 });
+
+                //adicionando id de usuario do venue
+                for (let event of artistEvents) {
+                    let findVenue = await Venue.findByPk(event.venue.id);
+                    event.venue.userId = findVenue.user_id;
+                }
 
                 //ordenar menor para maior
                 artistEvents.sort(function (a, b) {
@@ -681,15 +691,28 @@ module.exports = {
                     ]
                 });
 
+                //verificar se evento ja não ta na lista de eventos do organizador
                 venueEvts.forEach((event) => {
                     result = verifyEvent(event.id, events)
                     if (!result)
                         venueEvents.push(event);
                 });
 
+                //adicionando id de usuario do venue
+                for (let event of venueEvents) {
+                    let findVenue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = findVenue.user_id;
+                }
+
                 return res.send(venueEvents);
 
             } else {
+                //adicionando id de usuario do venue
+                console.log(events)
+                for (let event of events) {
+                    let findVenue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = findVenue.user_id;
+                }
                 return res.send(events);
             }
 
