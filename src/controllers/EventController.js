@@ -756,6 +756,12 @@ module.exports = {
                     });
                 });
 
+                //adicionar id do user do espaço
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.userId = venue.user_id;
+                }
+
             } else if (user.type == 1) {
                 const venue = await Venue.findOne({
                     where: { user_id: user.id }
@@ -780,6 +786,11 @@ module.exports = {
                         ['start_date', 'DESC']
                     ]
                 });
+
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = venue.user_id;
+                }
             } else {
                 events = await Event.findAll({
                     attributes: ['id', 'name', 'start_date', 'status'],
@@ -800,6 +811,11 @@ module.exports = {
                         ['start_date', 'DESC']
                     ]
                 });
+
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = venue.user_id;
+                }
             }
 
             return res.send(events);
@@ -856,10 +872,15 @@ module.exports = {
                         status: event.events.status,
                         venue: {
                             id: event.events.venue.id,
-                            name: event.events.venue.name
+                            name: event.events.venue.name,
                         }
                     });
                 });
+
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.userId = venue.user_id;
+                }
 
             } else if (user.type == 1) {
                 const venue = await Venue.findOne({
@@ -884,6 +905,12 @@ module.exports = {
                         ['start_date', 'DESC']
                     ]
                 });
+
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = venue.user_id;
+                }
+
             } else {
                 events = await Event.findAll({
                     attributes: ['id', 'name', 'start_date', 'status'],
@@ -903,11 +930,17 @@ module.exports = {
                         ['start_date', 'DESC']
                     ]
                 });
+
+                for (let event of events) {
+                    let venue = await Venue.findByPk(event.venue.id);
+                    event.venue.dataValues.userId = venue.user_id;
+                }
+
             }
 
             return res.send(events);
         } catch (err) {
-            return res.send({ error: 'Erro ao exibir histórico' })
+            return res.send({ error: 'Erro ao exibir prévia de histórico' })
         }
 
     }
