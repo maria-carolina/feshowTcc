@@ -24,6 +24,10 @@ class Artist extends Model {
                 type: DataTypes.FLOAT,
                 allowNull: true
             },
+            zipcode: {
+                type: DataTypes.STRING,
+                allowNull: true
+            },
             city: {
                 type: DataTypes.STRING,
                 allowNull: true

@@ -599,7 +599,7 @@ module.exports = {
 
             const user = await User.findByPk(req.userId);
 
-            //para verificar se evento já não sera puxado em getFutureEventsOrganizer
+            //para verificar se evento já não sera puxado em getFutureEventsOrganizer para user do tipo venue
             let events = await Event.findAll({
                 where: { organizer_id: user.id }
             });
@@ -750,7 +750,8 @@ module.exports = {
                         status: event.events.status,
                         venue: {
                             id: event.events.venue.id,
-                            name: event.events.venue.name
+                            name: event.events.venue.name,
+                            userId: user.id
                         }
                     });
                 });
