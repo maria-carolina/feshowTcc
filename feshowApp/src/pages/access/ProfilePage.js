@@ -81,6 +81,7 @@ const noticeModal = () => {
 class ProfilePage extends Component{
     constructor(props){
         super(props)
+        this.focus;
         this.state = {
             isFirstTabSelected: true
         }
@@ -90,10 +91,17 @@ class ProfilePage extends Component{
 
     componentDidMount(){
         let id = this.props.route.params ? this.props.route.params.id : this.context.user.id
-        this.loadProfileData(id);
+        this.focus = this.props.navigation.addListener('focus', () => {
+            this.loadProfileData(id);
+        })
     }
 
     loadProfileData = async (id) => {
+
+        this.setState({
+            profile: undefined
+        })
+
         let config = {
             headers: {
                 Authorization: `Bearer ${this.context.token}`
@@ -104,8 +112,6 @@ class ProfilePage extends Component{
                 `/showUser/${id}`,
                 config
             );
-            
-            console.log(result.data)
 
             if(!('error' in result.data)){
                 if(result.data.imageStatus){
@@ -122,6 +128,8 @@ class ProfilePage extends Component{
                 }else{
                     result.data.image = null;
                 }
+
+                console.log(result.data)
 
                 this.setState({
                     profile: result.data
@@ -165,11 +173,20 @@ class ProfilePage extends Component{
     openCalendarPage = () => {}
     openHistoricPage = () => {}
     openChatPage = () => {}
-    openRequestPage = () => {}
+
+    openRequestPage = () => {
+        this.props.navigation.navigate(
+            'requestPage',
+            {
+                venue: this.state.profile
+            }
+        )
+    }
+
     openNoticeModal = () => {}
     deleteNotice = () => {}
 
-    openInvitation = () => {
+    openInvitationPage = () => {
         this.props.navigation.navigate(
             'profilePageInvitation',
             {
@@ -196,9 +213,9 @@ class ProfilePage extends Component{
                 historicPreview: undefined
             })
 
-            this.loadProfileData(id);
+            this.props.navigation.navigate('profilePage', { id });
         }else{
-            this.props.navigation.navigate(route, { id });
+            this.props.navigation.navigate('eventPage', { id });
         }
     }
     
@@ -248,16 +265,17 @@ class ProfilePage extends Component{
                 firstButton = {
                     label: 'Editar perfil'
                 }
-            }else if(profile.type === 1){
+            }else if(profile.type === 0){
                 firstButton = {
                     label: 'Convidar para evento',
-                    handleClick: () => this.openInvitation()
+                    handleClick: () => this.openInvitationPage()
+                }
+            }else if(profile.type === 1){
+                firstButton = {
+                    label: 'Marcar show',
+                    handleClick: () => this.openRequestPage()
                 }
             }else if(profile.type === 2){
-                firstButton = {
-                    label: 'Solicitar organização'
-                }
-            }else if(profile.type === 3){
                 firstButton = {
                     label: 'Abrir chat'
                 }
@@ -409,7 +427,7 @@ class ProfilePage extends Component{
                                         <HistoricPreviewItem 
                                             item = {item}
                                             handleVenueClick = {() => 
-                                                this.handleLinkClick(true, item.venue.id)
+                                                this.handleLinkClick(true, item.venue.userId)
                                             }
                                             handleEventClick = {() => 
                                                 this.handleLinkClick(false, item.id)
@@ -453,7 +471,7 @@ class ProfilePage extends Component{
                     color = '#000'
                 />
             }
-              
+            <LogoutForTest />
             </View>
             
         )

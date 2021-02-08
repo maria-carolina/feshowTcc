@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer'
+import styles from '../styles'
+import AuthContext from '../contexts/auth';
+
+
 import NewEventPage from '../pages/event/NewEventPage';
 import InvitationsPage from '../pages/event/InvitationsPage';
 
 import EventPage from '../pages/event/EventPage';
 import ProfilePage from '../pages/access/ProfilePage';
-import styles from '../styles'
+
 
 //só para teste
 import InitialPage from '../pages/access/InitialPage';
@@ -22,6 +26,8 @@ import LineUpEditPage from '../pages/event/LineUpEditPage';
 import FutureEventsPage from '../pages/social/FutureEventsPage';
 import ProfilePageInvitation from '../pages/event/ProfilePageInvitation';
 import HistoricPage from '../pages/social/HistoricPage';
+import RequestPage from '../pages/event/RequestPage';
+import RequestListPage from '../pages/event/RequestListPage';
 
 
 const Stack = createStackNavigator();
@@ -82,7 +88,8 @@ const SearchOpener = (props) => {
     return icon;
 }
 
-const NavDrawer = () => {  
+const NavDrawer = () => {
+    const context = useContext(AuthContext);
     return(
         <Drawer.Navigator
             initialRouteName = 'drawerTest'
@@ -90,15 +97,22 @@ const NavDrawer = () => {
             
         >
             <Drawer.Screen
-                 name = 'profile'
-                 component = {NavStack}
-                 options = {{title: 'Primeiro'}}
+                name = 'ownProfile'
+                component = {NavStack}
+                options = {{title: 'Primeiro'}}
             />
+            {context.user.type === 1 &&
+                <Drawer.Screen
+                    name = 'requestList'
+                    component = {NavStack}
+                    options = {{title: 'Requisições de show'}} 
+                />
+            }
 
             <Drawer.Screen
-                 name = 'initial'
-                 component = {InitialPage}
-                 options = {{title: 'Provisório'}}
+                name = 'initial'
+                component = {InitialPage}
+                options = {{title: 'Provisório'}}
             />
             
         </Drawer.Navigator>
@@ -197,6 +211,11 @@ const NavStack = (props) => {
             />
 
             <Stack.Screen 
+                name = 'ownProfilePage'
+                component = {ProfilePage} //provisório
+            />
+
+            <Stack.Screen 
                 name = 'profilePage'
                 component = {ProfilePage} //provisório
             />
@@ -204,6 +223,16 @@ const NavStack = (props) => {
             <Stack.Screen 
                 name = 'historicPage'
                 component = {HistoricPage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'requestPage'
+                component = {RequestPage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'requestListPage'
+                component = {RequestListPage} //provisório
             />
 
             <Stack.Screen 

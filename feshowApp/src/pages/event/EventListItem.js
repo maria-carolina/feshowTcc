@@ -10,6 +10,10 @@ const ListItem = (props) => {
         navigation.navigate('eventPage', {id: props.item.id})
     }
 
+    const openVenuePage = () => {
+        navigation.navigate('profilePage', {id: props.item.venue.userId})
+    }
+
     let splitted = props.item.start_date.split('-');
     let formattedDate = `${splitted[2]}/${splitted[1]}/${splitted[0]}`
     return(
@@ -42,7 +46,9 @@ const ListItem = (props) => {
 
             <Text> @ </Text>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress = {() => openVenuePage()}
+            >
                 <Text
                     style = {{
                         fontSize: 16,

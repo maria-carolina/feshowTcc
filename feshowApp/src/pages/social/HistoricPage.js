@@ -7,14 +7,11 @@ import styles from '../../styles';
 import { ScrollView } from 'react-native-gesture-handler';
 
 
-
 class HistoricPage extends Component{
     constructor(props){
         super(props)
         this.onfocus;
-        this.state = {
-            pagesLoaded: 0
-        }
+        this.state = {}
     }
 
     static contextType = AuthContext;
@@ -88,7 +85,7 @@ class HistoricPage extends Component{
                 ...styles.container,
                 justifyContent: 'flex-start'
             }}>
-                {(this.state.events && 
+                {(events && 
                 <ScrollView
                     style = {{
                         width: '100%'

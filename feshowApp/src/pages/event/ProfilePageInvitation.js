@@ -22,7 +22,6 @@ const ProfilePageInvitation = (props) => {
                     }
                 )
                 
-                console.log(result.data);
                 if(!('error' in result.data)){
                     setEventList(result.data)
                 }else{

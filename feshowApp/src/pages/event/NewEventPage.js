@@ -70,33 +70,31 @@ const Form = (props) => {
                             onChangeText = {handleChange('name')}
                         />
 
-                        <View style = {styles.row}>
 
+                        <TouchableOpacity 
+                            style = {{
+                                ...styles.rowInput, 
+                                width: '90%',
+                                alignItems: 'flex-start'
+                            }}
+                            onPress = {() => {
+                                setSelectedPicker('start_date');
+                                setDatePickerVisible(true);
+                            }}
+                        >
+                            {values.start_date != '' ? 
+                            <Text style = {{ color: '#000' }}>
+                                {values.start_date}
+                            </Text> :
+                            <Text style = {{
+                                color: '#8E8E8E',
+                                fontSize: 16,
+                            }}>
+                                Data do evento
+                            </Text>}
 
-                            <TouchableOpacity 
-                                style = {{
-                                    ...styles.rowInput, 
-                                    width: '90%',
-                                    alignItems: 'flex-start'
-                                }}
-                                onPress = {() => {
-                                    setSelectedPicker('start_date');
-                                    setDatePickerVisible(true);
-                                }}
-                            >
-                                {values.start_date != '' ? 
-                                <Text style = {{ color: '#000' }}>
-                                    {values.start_date}</Text> :
-                                <Text style = {{
-                                    color: '#8E8E8E',
-                                    fontSize: 16,
-                                }}>
-                                    Data do evento
-                                </Text>}
+                        </TouchableOpacity>
 
-                            </TouchableOpacity>
-
-                        </View>
 
                         <View style = {styles.row}>
 
@@ -273,8 +271,6 @@ class NewEventPage extends Component{
     }
 
     render(){
-        console.log('ised' +this.state.isAEdition);
-        console.log('state event'+this.state.event)
 
         return(
             <View style = {styles.container}>

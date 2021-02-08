@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import AccessRoute from './accessRoute';
 import AppRoute from './appRoute';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import Auth from '../contexts/auth';
 
 
@@ -10,14 +10,10 @@ const Root = () => {
 
     if (loading) {
         return (
-          <View 
-            style = {{ 
-                flex: 1, 
-                justifyContent: 'center', 
-                alignItem: 'center',
-            }}>
-            
-          </View>
+          <ActivityIndicator
+              size = 'large'
+              color = '#000'
+          />
         )
     }
 
