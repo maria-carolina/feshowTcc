@@ -45,46 +45,46 @@ module.exports = {
     },
 
     async index(req, res) {
-        //try{
-        const venue = await Venue.findOne({
-            where: { user_id: req.userId }
-        });
+        try {
+            const venue = await Venue.findOne({
+                where: { user_id: req.userId }
+            });
 
-        const solicitations = await Solicitation.findAll({
-            where: { venue_id: venue.id },
-            order: [
-                ['createdAt', 'DESC']
-            ]
-        });
-        let teste = [];
+            const solicitationRequests = await Solicitation.findAll({
+                where: { venue_id: venue.id },
+                order: [
+                    ['createdAt', 'DESC']
+                ]
+            });
+            let solicitations = [];
 
-        for (let solicitation of solicitations) {
-            let organizer;
-            let user = await User.findByPk(solicitation.user_id);
+            for (let solicitation of solicitationRequests) {
+                let organizer;
+                let user = await User.findByPk(solicitation.user_id);
 
-            if (user.type === 0) {
-                organizer = await Artist.findOne({
-                    where: { user_id: user.id }
-                });
-            } else if (user.type === 1) {
-                organizer = await Venue.findOne({
-                    where: { user_id: user.id }
-                });
-            } else {
-                organizer = await Producer.findOne({
-                    where: { user_id: user.id }
+                if (user.type === 0) {
+                    organizer = await Artist.findOne({
+                        where: { user_id: user.id }
+                    });
+                } else if (user.type === 1) {
+                    organizer = await Venue.findOne({
+                        where: { user_id: user.id }
+                    });
+                } else {
+                    organizer = await Producer.findOne({
+                        where: { user_id: user.id }
+                    });
+                }
+                organizer.dataValues.userId = user.id;
+
+                solicitations.push({
+                    solicitation,
+                    organizer
                 });
             }
-            organizer.dataValues.userId = user.id;
-
-            teste.push({
-                solicitation,
-                organizer
-            });
+            return res.send(solicitations);
+        } catch (err) {
+            return res.send({ error: 'Erro ao listar requisições de solicitação de evento' })
         }
-        return res.send(teste);
-        //} catch (err) {
-        //     return res.send({ error: 'Erro ao enviar solicitação de evento' })
-        // }
     }
 };
