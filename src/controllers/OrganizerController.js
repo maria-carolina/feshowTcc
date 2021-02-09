@@ -52,15 +52,15 @@ module.exports = {
 
             const event = await Event.findByPk(eventId);
 
-            //verificar se artista está neste evento
-            const artist = await ArtistEvent.findAll({
+            //verificar se artista já está neste evento
+            const artistEvent = await ArtistEvent.findAll({
                 where: {
                     event_id: eventId,
                     artist_id: artistId
                 }
             })
 
-            if (artist.length > 0) {
+            if (artistEvent.length > 0) {
                 return res.send({ error: 'Artista já está no evento' });
             }
 
@@ -89,6 +89,16 @@ module.exports = {
             if (verifyArtist.length > 0) {
                 return res.send({ error: 'Este artista está em outro evento nesta data' });
             }
+
+            const artist = await Artist.findOne({
+                where: { id: artistId }
+            });
+
+            await Notification.create({
+                user_id: artist.user_id,
+                message: `Você foi convidado para participar do ${event.name}`,
+                status: 1
+            });
 
             await ArtistEvent.create({
                 event_id: eventId,
@@ -239,31 +249,62 @@ module.exports = {
             if (!artistEvent)
                 return res.send({ error: 'Relação não encontrada' });
 
-            const evento = await Event.findByPk(eventId);
+            const event = await Event.findByPk(eventId);
 
-            if (user.type == 0 && artistEvent.status == 1) {
+            const artist = await Artist.findOne({
+                where: { id: artistId }
+            }); 1
+
+            if ((user.type == 0 && artistEvent.status == 1) && req.userId != event.organizer_id) {
+
                 //artista recusa convite
-                console.log("saiuu")
-            } else if (user.type == 0 && artistEvent.status == 2) {
+                await Notification.create({
+                    user_id: event.organizer_id,
+                    message: `${artist.name} recusou convite para o ${event.name}`,
+                    status: 0
+                });
+
+            } else if ((user.type == 0 && artistEvent.status == 2) && req.userId != event.organizer_id) {
                 //artista cancelou solicitação
 
-            } else if (user.type == 0 && artistEvent.status == 3) {
-                //artista saiu do evento 
-                //verificar se ta fechado
-                if (evento.status == 0)
-                    return res.send({ error: 'Evento está fechado' })
+            } else if ((user.type == 0 && artistEvent.status == 3) && req.userId != event.organizer_id) {
 
-            } else if (user.type == 1 && artistEvent.status == 1) {
+                //artista saiu do evento 
+                if (event.status == 0) { //verificar se ta fechado
+                    return res.send({ error: 'Evento está fechado' })
+                }
+
+                await Notification.create({
+                    user_id: event.organizer_id,
+                    message: `${artist.name} saiu do line-up do ${event.name}`,
+                    status: 2,
+                    auxiliary_id: event.id,
+                });
+
+
+            } else if ((user.type == 1 || req.userId == event.organizer_id) && artistEvent.status == 1) {
                 //organizador cancela convite
 
-            } else if (user.type == 0 && artistEvent.status == 2) {
-                //organizador recusa solicitação
+            } else if ((user.type == 1 || req.userId == event.organizer_id) && artistEvent.status == 2) {
 
-            } else if (user.type == 1 && artistEvent.status == 3) {
+                //organizador recusa solicitação
+                await Notification.create({
+                    user_id: artist.user_id,
+                    message: `Sua solicitação para o ${event.name} não foi aceita`,
+                    status: 0
+                });
+
+            } else if ((user.type == 1 || req.userId == event.organizer_id) && artistEvent.status == 3) {
                 //remover artista
-                //verificar se ta fechado
-                if (evento.status == 0)
+                if (event.status == 0) {//verificar se ta fechado
                     return res.send({ error: 'Evento está fechado' })
+                }
+
+                await Notification.create({
+                    user_id: artist.user_id,
+                    message: `Você foi removido do line-up do ${event.name}`,
+                    status: 0
+                });
             }
 
             await ArtistEvent.destroy({
@@ -294,17 +335,31 @@ module.exports = {
             if (!artistEvent)
                 return res.send({ error: 'Relação não encontrada' });
 
-            /**
-                 * status convites/line-up
-                 *  1 - organizador convida artista
-                 *  2 - artista solicita participação
-                 *  3 - artista confirmado no line-up
-                 */
+            const artist = await Artist.findOne({
+                where: { id: artistId }
+            });
+
+            const event = await Event.findByPk(eventId);
 
             if (artistEvent.status == 1) {
                 //artista aceitou solicitação
+                await Notification.create({
+                    user_id: event.organizer_id,
+                    message: `Agora ${artist.name} está no line-up do ${event.name}`,
+                    auxiliary_id: event.id,
+                    status: 2
+                });
+
             } else if (artistEvent.status == 2) {
+
                 //organizador aceitou solicitação
+                await Notification.create({
+                    user_id: artist.user_id,
+                    message: `Agora você está no line-up do ${event.name}`,
+                    auxiliary_id: event.id,
+                    status: 2
+                });
+
             }
 
             await ArtistEvent.update({

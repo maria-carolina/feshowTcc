@@ -1,5 +1,12 @@
 const { Model, DataTypes } = require('sequelize');
 
+/*
+    status
+    0 - nada
+    1 - abrir convites
+    2 - abrir eventos
+*/
+
 class Notification extends Model {
     static init(sequelize) {
         super.init({

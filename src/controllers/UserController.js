@@ -22,6 +22,7 @@ const EquipmentVenue = require('../models/EquipmentVenue');
 const Address = require('../models/Address');
 const Event = require('../models/Event');
 const ArtistEvent = require('../models/ArtistEvent');
+const Notification = require('../models/Notification');
 
 function generateToken(params = {}) {
     //expirar em 1 ano 
@@ -594,4 +595,19 @@ module.exports = {
         }
 
     },
+
+    async getNotifications(req, res) {
+        try {
+            let notifications = await Notification.findAll({
+                where: { user_id: req.userId },
+                order: [
+                    ['createdAt', 'DESC']
+                ]
+            });
+            return res.send(notifications);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir notificações' })
+        }
+    }
 };

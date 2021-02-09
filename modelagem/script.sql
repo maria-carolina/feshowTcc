@@ -316,7 +316,7 @@ CREATE TABLE IF NOT EXISTS `feshow`.`notifications` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_id` INT(11) NOT NULL,
   `message` VARCHAR(100) NOT NULL,
-  `auxiliary_id` INT NULL,
+  `auxiliary_id` INT NULL DEFAULT NULL,
   `status` TINYINT(1) NOT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
