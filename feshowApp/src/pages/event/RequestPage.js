@@ -196,10 +196,11 @@ class RequestPage extends Component{
     static contextType = AuthContext;
     
     sendRequest = async (values) => {
-        console.log(values.start_date)
         let splitted = values.start_date.split('/');
         values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
-        values.venue_id = 1 /*this.props.route.params.venue */
+
+        values.venue_id = this.props.route.params.venue.venueId;
+        
         try{
             let result = await api.post(
                 '/sendOrganizationRequest', 
@@ -212,7 +213,6 @@ class RequestPage extends Component{
             )
 
             
-
             if(result.data === 'ok'){
                 Alert.alert('Pronto', 'Aguarde a aprovação do espaço');
                 this.props.navigation.navigate('profilePage', {id: 2});
@@ -225,6 +225,7 @@ class RequestPage extends Component{
     }
 
     render(){
+
         return(
             <View
                 style = {styles.container}

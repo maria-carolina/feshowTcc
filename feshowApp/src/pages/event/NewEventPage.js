@@ -261,7 +261,7 @@ class NewEventPage extends Component{
                         event: null,
                         isAEdition: undefined
                     });
-                    this.props.navigation.navigate('eventPage', {eventId: isANewEvent ? result.data.id : this.props.route.params.event.id});
+                    this.props.navigation.navigate('eventPage', {id: isANewEvent ? result.data.id : this.props.route.params.event.id});
                     Alert.alert('Pronto!', `Evento ${isANewEvent ? 'cadastrado':'editado'} com sucesso!`)
                 }
             }catch(e){

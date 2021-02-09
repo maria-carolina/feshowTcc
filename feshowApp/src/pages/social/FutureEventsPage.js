@@ -5,6 +5,7 @@ import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import { ScrollView } from 'react-native-gesture-handler';
+import { color } from 'react-native-reanimated';
 
 
 class FutureEventsPage extends Component{
@@ -30,7 +31,7 @@ class FutureEventsPage extends Component{
 
         this.setState({
             eventsToOrganize: undefined,
-            eventsToParticipate: undefined
+            eventsToParticipate: undefined,
         })
 
         var url = isEventsToOrganize ? 
@@ -110,14 +111,19 @@ class FutureEventsPage extends Component{
     }
 
     changeTab = () => {
+        
+        console.log(this.state.isFirstTabSelected);
+
+        if(this.state.isFirstTabSelected && !this.state.eventsToParticipate){
+            this.loadEvents(false);
+        }else if(!this.state.isFirstTabSelected && !this.state.eventsToOrganize){
+            this.loadEvents(true);
+        }
+
         this.setState({
             isFirstTabSelected: !this.state.isFirstTabSelected
         })
 
-        if(!this.state.eventsToParticipate){
-            this.loadEvents(false);
-        } 
-        
     }
 
     render(){
@@ -163,7 +169,20 @@ class FutureEventsPage extends Component{
                             }
                             onPress = {() => !isFirstTabSelected && this.changeTab()}
                         >
-                            <Text>Organização</Text>
+                            <Text style = {
+                                isFirstTabSelected ? 
+                                {
+                                    fontWeight:'bold',
+                                    color: '#3F2058'
+                                }:
+                                {
+                                    fontWeight: 'normal',
+                                    color: '#000'
+                                }
+                            } 
+                            >
+                                Organização
+                            </Text>
                         </TouchableOpacity>
                         
                         <TouchableOpacity
@@ -173,7 +192,20 @@ class FutureEventsPage extends Component{
                             }
                             onPress = {() => isFirstTabSelected && this.changeTab()}
                         >
-                            <Text>Participação</Text>
+                            <Text style = {
+                                !isFirstTabSelected ? 
+                                {
+                                    fontWeight:'bold',
+                                    color: '#3F2058'
+                                }:
+                                {
+                                    fontWeight: 'normal',
+                                    color: '#000'
+                                }
+                            } 
+                            >
+                                Participação
+                            </Text>
                         </TouchableOpacity>
                         
                     </View>
@@ -194,24 +226,31 @@ class FutureEventsPage extends Component{
                                 />
                             })}
 
-                            <TouchableOpacity
-                                style = {{
-                                    ...styles.outlineButton,
-                                    width:'50%',
-                                    margin: 5
-                                }}
-                                onPress = {() => 
-                                    this.loadMoreEvents(isFirstTabSelected, nextPage)
-                                }
-                            >
-                                {(isLoadingAPage && 
-                                <ActivityIndicator 
-                                    size = 'small'
-                                    color = '#000'
-                                />)
-                                || <Text style = {styles.outlineButtonLabel}> Carregar mais </Text>
-                                }
-                            </TouchableOpacity>
+                            {(listToRender.length > 0 &&
+                                <TouchableOpacity
+                                    style = {{
+                                        ...styles.outlineButton,
+                                        width:'50%',
+                                        margin: 5
+                                    }}
+                                    onPress = {() => 
+                                        this.loadMoreEvents(isFirstTabSelected, nextPage)
+                                    }
+                                >
+                                    {(isLoadingAPage && 
+                                    <ActivityIndicator 
+                                        size = 'small'
+                                        color = '#000'
+                                    />)
+                                    || <Text style = {styles.outlineButtonLabel}> Carregar mais </Text>
+                                    }
+                                </TouchableOpacity>) ||
+                                <Text
+                                    style = {{ marginTop: 15}}
+                                >
+                                    Nenhum evento
+                                </Text>
+                            }
                         </ScrollView> 
                     
                 ) ||

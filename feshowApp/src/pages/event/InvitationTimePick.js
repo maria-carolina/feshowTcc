@@ -10,10 +10,12 @@ const InvitationTimePick = (props) => {
     const [showtime, setShowtime] = useState(null)
 
     const sendInvitation = async () => {
+        let splitted = props.event.start_date.split('/');
+        let formattedDate = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
         let values = {
-            artistId: props.artist.artistId,
+            artistId: (props.artist.artistId||props.artist.id),
             eventId: props.event.id,
-            date: props.event.start_date,
+            date: formattedDate,
             time: showtime
         }
 

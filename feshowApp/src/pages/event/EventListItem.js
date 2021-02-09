@@ -23,11 +23,17 @@ const ListItem = (props) => {
                 alignItems: 'center',
                 flexDirection: 'row',
                 height: 60,
-                position: 'relative'
+                position: 'relative',
             }}
             key = {props.item.id.toString()}
         >
-            <Text>{formattedDate}</Text>
+            <Text
+                style = {{
+                    fontWeight: 'bold'
+                }}
+            >
+                {formattedDate}
+            </Text>
 
             <TouchableOpacity
                 onPress = {() => openEventPage()}
@@ -36,7 +42,6 @@ const ListItem = (props) => {
                     style = {{
                         marginLeft: 20,
                         fontSize: 16,
-                        fontWeight: 'bold',
                         color: '#3F2058',
                     }}
                 >
@@ -52,7 +57,6 @@ const ListItem = (props) => {
                 <Text
                     style = {{
                         fontSize: 16,
-                        fontWeight: 'bold',
                         color: '#3F2058',
                     }}
                 >

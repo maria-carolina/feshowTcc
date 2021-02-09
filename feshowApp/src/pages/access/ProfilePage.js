@@ -99,7 +99,8 @@ class ProfilePage extends Component{
     loadProfileData = async (id) => {
 
         this.setState({
-            profile: undefined
+            profile: undefined,
+            historicPreview: undefined
         })
 
         let config = {

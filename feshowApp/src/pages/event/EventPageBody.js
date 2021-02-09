@@ -2,8 +2,11 @@ import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
 import styles from '../../styles';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 const PageBody = (props) => {
+    const navigation = useNavigation();
+
     var content;
     if(props.selectedTab == 0){
         content = props.loaded !== null ?
@@ -38,12 +41,19 @@ const PageBody = (props) => {
                             }}
                             key = {props.loaded.indexOf(item)}
                         >
-                            <Text style = {{color: '#000', 
-                                fontWeight: 'bold',
-                                marginLeft: 25
-                                }}>
+                            <TouchableOpacity
+                                onPress = {() => navigation.navigate('profilePage', {id: 3 /* tochange */})}
+                            >
+                                <Text style = {{
+                                        color: '#000', 
+                                        fontWeight: 'bold',
+                                        marginLeft: 25
+                                    }}
+                                >
                                     {item.artists.name || null}
                                 </Text>
+                            </TouchableOpacity>
+
                             <Text style = {{
                                 right: 80,
                                 position: 'absolute'

@@ -4,10 +4,18 @@ import api from '../../services/api';
 import styles from '../../styles';
 import AuthContext from '../../contexts/auth';
 import { ScrollView } from 'react-native-gesture-handler';
+import Format from '../utils/Format';
 
 
 
 const DetailModal = (props) => {
+
+    if(props.details){
+        var date = Format.formatDate(props.details.solicitation.start_date);
+        var start_time = Format.formatTime(props.details.solicitation.start_time);
+        var end_time = Format.formatTime(props.details.solicitation.end_time);
+    }
+    
     return(
         <Modal
             visible = {props.visible}
@@ -19,7 +27,8 @@ const DetailModal = (props) => {
                 style = {{
                     flex: 1,
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
                 }}
             >
                 {props.details &&
@@ -27,9 +36,8 @@ const DetailModal = (props) => {
                     style = {{
                         width: '80%',
                         backgroundColor: '#FFF',
-                        borderRadius: 5,
                         borderColor: '#cecece',
-                        padding: 15
+                        padding: 15,
                     }}
                 >
                     
@@ -37,18 +45,20 @@ const DetailModal = (props) => {
                         style = {{
                             fontWeight: 'bold',
                             color: '#3F2058',
-                            fontSize: 16
+                            fontSize: 18
                         }}
                     >
-                        {props.details.name}
+                        {props.details.solicitation.name}
                     </Text>
 
                     <Text
                         style = {{
-                            marginBottom: 15
+                            marginBottom: 15,
+                            fontWeight: 'bold',
+                            fontSize: 16
                         }}
                     >
-                        Organizado por: {props.details.organizer_name}
+                        Organizado por: {props.details.organizer.name}
                     </Text>
 
                     <View style = {styles.row}>
@@ -58,11 +68,11 @@ const DetailModal = (props) => {
                                 marginRight: 25
                             }}
                         >
-                            {props.details.start_date}
+                            {date}
                         </Text>
 
                         <Text>
-                            {props.details.start_time} as {props.details.end_time}
+                            {start_time} as {end_time}
                         </Text>
 
                     </View>
@@ -82,6 +92,8 @@ const DetailModal = (props) => {
 }
 
 const RequestListItem = (props) => {
+
+    var date = Format.formatDate(props.item.solicitation.start_date)
     return(
         <View
             style = {{
@@ -91,7 +103,7 @@ const RequestListItem = (props) => {
                 borderBottomColor: '#cecece',
                 height: 110,
             }}
-            key = {props.item.id}
+            key = {props.item.solicitation.id}
         >
             <View
                 style = {{
@@ -104,8 +116,8 @@ const RequestListItem = (props) => {
                         marginTop: 25
                     }}
                 >
-                    {`${props.item.organizer_name} ` +
-                    `quer marcar um show aí dia ${props.item.start_date}`
+                    {`${props.item.organizer.name} ` +
+                    `quer marcar um show aí dia ${date}`
                     } 
                 </Text>
 
@@ -116,8 +128,17 @@ const RequestListItem = (props) => {
                     }}
                     onPress = {() => props.showModal(props.item)}
                 >
-                    <Text>Ver mais</Text>
+                    <Text
+                        style = {{
+                            color: '#3F2058',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Ver mais
+                    </Text>
                 </TouchableOpacity>
+
+
             </View>
 
             <View 
@@ -160,25 +181,39 @@ class RequestListPage extends Component{
     constructor(props){
         super(props)
         this.state = {
-            requests: [
-                {
-                    id: '0',
-                    organizer_name: 'Diego Freitas',
-                    name: 'Evento X',
-                    start_date: '26/02/2021',
-                    start_time: '18h30',
-                    end_time: '23h30',
-                },
-                {
-                    id: '1',
-                    organizer_name: 'Maria Carolina',
-                    name: 'Evento Y',
-                    start_date: '19/02/2021',
-                    start_time: '17h30',
-                    end_time: '22h30',
-                }
-            ],
             isModalVisible: false
+        }
+    }
+
+    static contextType = AuthContext;
+
+    componentDidMount(){
+        this.loadRequests();
+    }
+
+    loadRequests = async () => {
+        try{
+            let result = await api.get(
+                'indexRequests',
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            if(!('error' in result.data)){
+                
+                
+                
+                this.setState({
+                    requests: result.data
+                })
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+
         }
     }
     
@@ -207,6 +242,7 @@ class RequestListPage extends Component{
                 >
                     {(requests && 
                         requests.map(item => {
+                            
                             return(
                                 <RequestListItem
                                     item = {item} 
@@ -219,6 +255,7 @@ class RequestListPage extends Component{
                         size = 'large'
                         color = '#000'
                     />}
+
 
                 </ScrollView>
 
