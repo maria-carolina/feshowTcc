@@ -1,5 +1,6 @@
 const ArtistEvent = require('../models/ArtistEvent');
 const Artist = require('../models/Artist');
+
 const { Op } = require('sequelize');
 
 module.exports = {

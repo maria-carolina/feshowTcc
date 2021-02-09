@@ -26,5 +26,6 @@ userRoutes.post('/storeRider', multer(multerRider).single('file'), UserControlle
 userRoutes.get('/showUser/:id', UserController.show);
 userRoutes.get('/getUserImage/:id', UserController.getImage);
 userRoutes.get('/invitations', UserController.getInvitations);
+userRoutes.get('/notifications', UserController.getNotifications);
 
 module.exports = userRoutes;
