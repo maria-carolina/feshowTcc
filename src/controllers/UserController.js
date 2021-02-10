@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
 const authConfig = require('../config/auth.json');
+const moment = require('moment');
 
 //models
 const User = require('../models/User');
@@ -30,6 +31,32 @@ function generateToken(params = {}) {
         expiresIn: '365d'
     });
 
+}
+function getTime(datatime) {
+
+    datatime = moment.utc(datatime).format('YYYY-MM-DDTHH:mm:ss');
+
+    let difference = moment().diff(datatime, 'seconds');
+
+    if (difference <= 59) //segundos
+        return "há alguns segundos atrás"
+    else {
+        difference = moment().diff(datatime, 'minutes');
+        if (difference == 1) {
+            return `há 1 minuto atrás`
+        } else if (difference <= 59) { //horas
+            return `há ${difference} minutos atrás`
+        } else {
+            difference = moment().diff(datatime, 'hours');
+            if (difference == 1) {
+                return `há 1 hora atrás`
+            } else if (difference <= 4) { //até 4 horas
+                return `há ${difference} horas atrás`
+            } else {
+                return moment.utc(datatime, 'YYYY-MM-DDTHH:mm:ssZ').format("DD/MM/YY HH:mm");
+            }
+        }
+    }
 }
 
 module.exports = {
@@ -604,6 +631,12 @@ module.exports = {
                     ['createdAt', 'DESC']
                 ]
             });
+
+            notifications.forEach((notification) => {
+                notification.dataValues.time = getTime(notification.createdAt);
+            });
+
+
             return res.send(notifications);
 
         } catch (err) {
