@@ -347,6 +347,7 @@ class ProfilePage extends Component{
                                 style = {{
                                     marginTop: 10
                                 }}
+                                onPress = {() => this.props.navigation.navigate('calendarPage')}
                             >
                                 <Text
                                     style = {styles.outlineButtonLabel}

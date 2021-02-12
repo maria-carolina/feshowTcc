@@ -28,6 +28,7 @@ import ProfilePageInvitation from '../pages/event/ProfilePageInvitation';
 import HistoricPage from '../pages/social/HistoricPage';
 import RequestPage from '../pages/event/RequestPage';
 import RequestListPage from '../pages/event/RequestListPage';
+import CalendarPage from '../pages/social/CalendarPage';
 
 
 const Stack = createStackNavigator();
@@ -101,6 +102,7 @@ const NavDrawer = () => {
                 component = {NavStack}
                 options = {{title: 'Primeiro'}}
             />
+
             {context.user.type === 1 &&
                 <Drawer.Screen
                     name = 'requestList'
@@ -233,6 +235,11 @@ const NavStack = (props) => {
             <Stack.Screen 
                 name = 'requestListPage'
                 component = {RequestListPage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'calendarPage'
+                component = {CalendarPage} //provisório
             />
 
             <Stack.Screen 
