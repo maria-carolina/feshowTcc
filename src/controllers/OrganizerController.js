@@ -176,6 +176,7 @@ module.exports = {
                 });
 
             });
+            
             artists = cityGenre.concat(artistsCity, artistsGenres, otherArtists);
 
             return res.send(artists);
