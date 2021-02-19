@@ -199,13 +199,13 @@ class InvitationsPage extends Component{
                     let text, options;
                     let tab = this.state.selectedTab.value;
                     let status = item.status;
-
+                    
                     let eventName = (
                         <Text 
                             onPress = {() => 
                                 this.props.navigation.navigate(
                                     'eventPage', 
-                                    {eventId: item.events.id}
+                                    {id: item.events.id}
                                 )}
                             style = {{fontWeight: 'bold'}}
                         >

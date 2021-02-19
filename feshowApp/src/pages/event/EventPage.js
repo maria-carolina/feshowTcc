@@ -620,8 +620,6 @@ class EventPage extends Component{
                                     {'event' in this.state && this.state.event.name}
                             </Text>
 
-                            
-
                             <Text 
                                 style = {{
                                     fontSize: 16, 
@@ -654,7 +652,9 @@ class EventPage extends Component{
                                 </TouchableOpacity>
                             }
                             
-                            {this.context.user.type !== 1 && mainButton}            
+                            {(this.context.user.type !== 1 || 
+                            this.context.user.id == this.state.event.organizer_id) 
+                            && mainButton}            
 
                         </View> 
                     </View>

@@ -5,7 +5,6 @@ import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import { ScrollView } from 'react-native-gesture-handler';
-import { color } from 'react-native-reanimated';
 
 
 class FutureEventsPage extends Component{

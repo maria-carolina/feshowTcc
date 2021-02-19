@@ -1,25 +1,29 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import styles from '../../styles';
+import api from '../../services/api';
+import AuthContext from '../../contexts/auth';
 
 
 const NotificationListItem = (props) => {
     return(
-        <View 
+        <TouchableOpacity 
             style = {{
                 borderBottomWidth: .5,
                 borderBottomColor: '#cecece',
-                height: 90,
+                height: 80,
                 padding: 15,
             }}
+            onPress = {props.onClick}
+            key = {props.item.id.toString()}
         >
             <Text
                 style = {{
                     marginBottom: 10
                 }}
             >
-                {props.item.text}
+                {props.item.message}
             </Text>
 
             <Text
@@ -28,40 +32,54 @@ const NotificationListItem = (props) => {
                     fontWeight: 'bold'
                 }} 
             >
-                {props.item.postedAt}
+                {props.item.time}
             </Text>
-        </View>
+        </TouchableOpacity>
     )
 }
 
 class NotificationsPage extends Component{
     constructor(props){
         super(props)
-        this.state = {
-            notifications:[
+        this.state = {}
+    }
+
+    static contextType = AuthContext
+    
+    componentDidMount(){
+        this.loadNotifications();
+    }
+
+    loadNotifications = async () => {
+        try{
+            let result = await api.get(
+                '/notifications',
                 {
-                    text: "Artista A aceitou o convite para participar do Evento x",
-                    postedAt: "há 3 minutos atrás"
-                },
-                {
-                    text: "Artista B aceitou o convite para participar do Evento x",
-                    postedAt: "há 4 minutos atrás"
-                },
-                {
-                    text: "Banda C recusou o convite para participar do Evento x",
-                    postedAt: "24/01/2021"
-                },
-                {
-                    text: "Artista D aceitou o convite para participar do Evento x",
-                    postedAt: "20/01/2021"
-                },
-            ]
+                    headers:{
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            if(!result.data.error){
+                this.setState({
+                    notifications: result.data
+                })
+            }else{
+                Alert.alert('ops', result.data.error)
+            }
+        }catch(e){
+
         }
     }
-    
-    componentDidMount(){}
 
-    loadNotifications = () => {}
+    handleItemClick = (status, id) => {
+        if(status !== 0){
+            let route = status === 1 ? 'invitationsPage' : 'eventPage';
+            let values = status === 1 ? {} : {id};
+            this.props.navigation.navigate(route, values);
+        }
+    }
 
     render(){
         var { notifications } = this.state;
@@ -84,7 +102,8 @@ class NotificationsPage extends Component{
 
                     {notifications && notifications.map(item => (
                         <NotificationListItem
-                            item = {item} 
+                            item = {item}
+                            onClick = {() => this.handleItemClick(item.status, item.auxiliary_id)}
                         />
                     ))}
 
