@@ -29,6 +29,7 @@ import HistoricPage from '../pages/social/HistoricPage';
 import RequestPage from '../pages/event/RequestPage';
 import RequestListPage from '../pages/event/RequestListPage';
 import CalendarPage from '../pages/social/CalendarPage';
+import NotificationsPage from '../pages/social/NotificationsPage';
 
 
 const Stack = createStackNavigator();
@@ -101,6 +102,12 @@ const NavDrawer = () => {
                 name = 'ownProfile'
                 component = {NavStack}
                 options = {{title: 'Primeiro'}}
+            />
+
+            <Drawer.Screen
+                name = 'notifications'
+                component = {NavStack}
+                options = {{title: 'Notificações'}}
             />
 
             {context.user.type === 1 &&
@@ -240,6 +247,11 @@ const NavStack = (props) => {
             <Stack.Screen 
                 name = 'calendarPage'
                 component = {CalendarPage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'notificationsPage'
+                component = {NotificationsPage} //provisório
             />
 
             <Stack.Screen 

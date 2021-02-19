@@ -14,7 +14,7 @@ const ProfilePageInvitation = (props) => {
         async function loadEvents(){
             try{
                 let result = await api.get(
-                    '/futureEventsOrganizer/1',
+                    '/eventsOrganizer/',
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
