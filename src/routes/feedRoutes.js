@@ -5,5 +5,6 @@ const FeedController = require('../controllers/FeedController');
 feedRoutes.get('/feedArtist', FeedController.feedArtist);
 feedRoutes.get('/feedEvent', FeedController.feedEvent);
 feedRoutes.get('/feedVenue', FeedController.feedVenue);
+feedRoutes.get('/feedProducer', FeedController.feedProducer);
 
 module.exports = feedRoutes;
