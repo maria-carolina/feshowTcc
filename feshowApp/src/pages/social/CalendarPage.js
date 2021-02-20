@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, Alert} from 'react-native';
 import {Calendar, LocaleConfig} from 'react-native-calendars';
 import api from '../../services/api';
 import styles from '../../styles';
 import Format from '../utils/Format';
+import AuthContext from '../../contexts/auth';
+
 
 LocaleConfig.locales['br'] = {
     monthNames: ['Janeiro','Fevereiro','Março','Abril',
@@ -28,37 +30,59 @@ LocaleConfig.defaultLocale = 'br';
 class CalendarPage extends Component{
     constructor(props){
         super(props)
-        this.state = {
-            markedDates: {
-                '2021-02-16': {
-                    marked: true,
-                },
-                '2021-02-18': {
-                    marked: true
-                },
-                '2021-02-20': {
-                    marked: true
-                },
+        this.state = {}
+    }
+
+    static contextType = AuthContext;
+    
+    componentDidMount(){
+        this.loadEvents();
+    }
+
+    loadEvents = async () => {
+        try{
+            let result = await api.get(
+                `/schedule/${this.props.route.params.id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            if(!result.data.error){
+                let markedDates = {};
+                for(let item of result.data){
+                    markedDates[item.start_date] = {marked: true}
+                }
+
+                this.setState({
+                    markedDates, 
+                    events: result.data
+                })
+
+            }else{
+                Alert.alert('Ops', result.data.error);
             }
+
+        }catch(e){
+            console.log(e)
         }
     }
-    
-    componentDidMount(){}
-
-    loadEvents = () => {}
 
     changeSelectedDay = (dateString) => {
+        let eventOnSelectedDay = this.state.events.filter(item => item.start_date === dateString)[0];
         this.setState({
-            selectedDay: dateString
+            selectedDay: dateString,
+            eventOnSelectedDay
         })
     }
 
-    render(){
-
-        if(this.state.selectedDay){
+    render(){   
+        var {selectedDay, eventOnSelectedDay, markedDates} = this.state;
+        if(selectedDay){
             const today = new Date()
             today.toLocaleString('default', { month: 'long' })
-            console.log(today)
         }
         
         return(
@@ -82,34 +106,24 @@ class CalendarPage extends Component{
                     }}
 
                     markedDates = {{
-                        
-                        '2021-02-16': {
-                            marked: true,
-
-                        },
-                        '2021-02-18': {
-                            marked: true
-                        },
-                        '2021-02-20': {
-                            marked: true
-                        },
-                        [this.state.selectedDay]:{
-                            selected: true,
-                        }, 
-                        
+                        ...markedDates,
+                        [selectedDay]:{
+                            selected: true
+                        }
                     }} 
 
                     onDayPress = {(day) => this.changeSelectedDay(day.dateString)}
                 />
 
-                {this.state.selectedDay && 
-                    <View
+                {eventOnSelectedDay && 
+                    <TouchableOpacity
                         style = {{
                             borderTopWidth: 1,
                             borderTopColor: '#cecece',
                             width: '100%',
                             padding: 15
                         }}
+                        onPress = {() => this.props.navigation.navigate('eventPage', {id: eventOnSelectedDay.id})}
                     >
                         <Text
                             style = {{
@@ -118,7 +132,7 @@ class CalendarPage extends Component{
                                 fontWeight: 'bold'
                             }}
                         >
-                            {Format.formatDate(this.state.selectedDay)}
+                            {Format.formatDate(selectedDay)}
                         </Text>
 
                         <Text
@@ -127,9 +141,9 @@ class CalendarPage extends Component{
                                 color: '#3F2058'
                             }}
                         >
-                            Show do Cleber @ Bar da Lu das 18h00 às 23h00
+                            {`${eventOnSelectedDay.name} @ ${eventOnSelectedDay.venue.name} das 18h00 às 23h00`}  
                         </Text>
-                    </View>
+                    </TouchableOpacity>
                 }
             </View>
         )

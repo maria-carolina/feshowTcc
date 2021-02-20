@@ -347,7 +347,7 @@ class ProfilePage extends Component{
                                 style = {{
                                     marginTop: 10
                                 }}
-                                onPress = {() => this.props.navigation.navigate('calendarPage')}
+                                onPress = {() => this.props.navigation.navigate('calendarPage', {id: profile.id})}
                             >
                                 <Text
                                     style = {styles.outlineButtonLabel}
