@@ -19,6 +19,7 @@ eventRoutes.get('/futureEventsOrganizer/:page', EventController.getFutureEventsO
 eventRoutes.get('/futureEventsParticipation/:page', EventController.getFutureEventsParticipation);
 eventRoutes.get('/pastEvents/:id/:page', EventController.getPastEvents)
 eventRoutes.get('/previewPastEvents/:id/', EventController.previewPastEvents)
+eventRoutes.get('/schedule/:id', EventController.getSchedule);
 
 
 

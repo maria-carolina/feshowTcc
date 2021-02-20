@@ -40,6 +40,7 @@ class Artist extends Model {
     static associate(models){
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' })
         this.belongsToMany(models.Genre, { foreignKey: 'artist_id', through: 'artist_genres', as: 'genres' });
+        this.hasMany(models.ArtistEvent, { foreignKey: 'artist_id', as: 'events' })
     }
 
 }
