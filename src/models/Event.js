@@ -65,6 +65,8 @@ class Event extends Model {
         this.belongsTo(models.User, { foreignKey: 'organizer_id', as: 'organizer' });
         this.belongsTo(models.Venue, { foreignKey: 'venue_id', as: 'venue' });
         this.hasMany(models.ArtistEvent, { foreignKey: 'event_id', as: 'invitations' });
+        this.hasMany(models.ArtistEvent, { foreignKey: 'event_id', as: 'lineup' });
+
 
     }
 
