@@ -943,5 +943,78 @@ module.exports = {
             return res.send({ error: 'Erro ao exibir histórico' })
         }
 
+    },
+
+    async getSchedule(req, res) {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findByPk(id);
+
+            let venue = {
+                id: ''
+            };
+
+            let events = [];
+
+            if (user.type === 1) {
+                venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+            }
+
+            events = await Event.findAll({
+                attributes: ['id', 'name', 'start_date'],
+                include: {
+                    association: 'venue',
+                    attributes: ['id', 'name', 'user_id'],
+                },
+                where: {
+                    [Op.or]: [{ organizer_id: id }, { venue_id: venue.id }],
+                },
+                order: [
+                    ['start_date', 'ASC']
+                ]
+            });
+
+            if (user.type === 0) {
+                let artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                artistEvents = await Event.findAll({
+                    attributes: ['id', 'name', 'start_date'],
+                    include: [
+                        {
+                            association: 'venue',
+                            attributes: ['id', 'name', 'user_id'],
+                        }, {
+                            association: 'invitations',
+                            where: {
+                                artist_id: artist.id,
+                                status: 3
+                            }
+                        }
+                    ],
+                    order: [
+                        ['start_date', 'ASC']
+                    ]
+                });
+
+                events = events.concat(artistEvents);
+                //ordenar da data menor para maior
+                events.sort(function (a, b) {
+                    let dateA = new Date(a.start_date),
+                        dateB = new Date(b.start_date);
+                    if (dateA > dateB) return 1;
+                    if (dateA < dateB) return -1;
+                    return 0;
+                });
+
+            }
+            return res.send(events);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir agenda' })
+        }
     }
 };
