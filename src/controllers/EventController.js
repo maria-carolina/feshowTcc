@@ -997,7 +997,7 @@ module.exports = {
             }
 
             events = await Event.findAll({
-                attributes: ['id', 'name', 'start_date'],
+                attributes: ['id', 'name', 'start_date', 'start_time', 'end_time'],
                 include: {
                     association: 'venue',
                     attributes: ['id', 'name', 'user_id'],
@@ -1016,7 +1016,7 @@ module.exports = {
                 });
 
                 artistEvents = await Event.findAll({
-                    attributes: ['id', 'name', 'start_date'],
+                    attributes: ['id', 'name', 'start_date', 'start_time', 'end_time'],
                     include: [
                         {
                             association: 'venue',
@@ -1035,6 +1035,7 @@ module.exports = {
                 });
 
                 events = events.concat(artistEvents);
+
                 //ordenar da data menor para maior
                 events.sort(function (a, b) {
                     let dateA = new Date(a.start_date),
@@ -1045,6 +1046,12 @@ module.exports = {
                 });
 
             }
+
+            events.forEach((event) => {
+                event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+                event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
+            });
+
             return res.send(events);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir agenda' })

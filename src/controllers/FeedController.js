@@ -309,7 +309,10 @@ module.exports = {
                     include: {
                         association: 'events',
                         attributes: [],
-                        where: { status: 3 }
+                        where: { 
+                            event_id: event.id,
+                            status: 3 
+                        }
                     }
                 });
                 event.dataValues.lineup = artists;
