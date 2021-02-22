@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, Dimensions, ScrollView, ActivityIndicator} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image} from 'react-native';
 import styles from '../../styles';
+import api from '../../services/api';
+
 import AuthContext from '../../contexts/auth';
+
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Format from '../utils/Format';
+
 
 
 const FeedEventItem = (props) => {
@@ -9,7 +15,7 @@ const FeedEventItem = (props) => {
         <TouchableOpacity
             style = {{
                 width: '90%',
-                height: 150,
+                height: props.loggedType === 0 ? 175 : 125,
                 backgroundColor: 'white',
                 marginBottom: 15,
                 padding: 10
@@ -20,43 +26,79 @@ const FeedEventItem = (props) => {
                 height: '50%',
                 flex: 1,
                 position: 'relative',
-                marginTop: 10
+                marginTop: 10, 
+                paddingLeft: 15
             }}>
                 <View style = {styles.row}>
                     <Text 
-                        style = {{color: '#3F2058', fontWeight: 'bold'}}
+                        style = {{
+                            color: '#3F2058', 
+                            fontSize: 22,
+                            fontWeight: 'bold'
+                        }}
                     >
                         {props.item.name}
                     </Text>
 
-                    <Text> @ </Text>
-                    <Text
-                        style = {{fontWeight: 'bold'}}
-                    >
-                        {props.item.venue}
-                    </Text>
                 </View>
-                <Text>por {props.item.organizer}</Text>
+                <Text>por {props.item.organizer.name}</Text>
 
                 <View style = {{position: 'absolute', alignSelf: 'flex-end'}}>
-                    <Text>{props.item.start_date}</Text>
-                    <Text>{props.item.start_time} as {props.item.end_time}</Text>
+
+                    <View style = {styles.row}>
+                        <FontAwesome
+                            name = {'home'}
+                            size = {15}
+                            color = {'#3f2058'} 
+                        />
+                        <Text> {props.item.venue.name}</Text>
+                    </View>
+
+                    <View style = {styles.row}>
+                        <FontAwesome
+                            name = {'calendar'}
+                            size = {15}
+                            color = {'#3f2058'} 
+                        />
+                        <Text> {props.item.start_date}</Text>
+                    </View>
+                    
+                    <View style = {styles.row}>
+                        <FontAwesome
+                            name = {'clock-o'}
+                            size = {15}
+                            color = {'#3f2058'} 
+                        />
+                        <Text> {props.item.start_time} às {props.item.end_time}</Text>
+                    </View>
                 </View>
             </View>
 
             <View style = {{
                 width: '100%',
                 height: '50%',
-                alignItems: 'center'
+                alignItems: 'center',
+                paddingTop: props.loggedType === 0 ? 10 : 30
             }}>
-                <View style={styles.row}>
-                    <Text>Lineup: </Text>
-                    {props.item.lineup.map((item, index) => {
-                        let artistName = index === 0 ? item : ` | ${item}`;
-                        return <Text>{artistName}</Text>;
-                    })}
-                </View>
 
+                {(props.item.lineup.length > 0 &&
+                    <View style = {styles.row}>
+                        <Text style = {{
+                            color: '#3F2058', 
+                            fontWeight: 'bold',
+                            fontSize: 16
+                        }}> 
+                            {'Lineup: '} 
+                        </Text>
+                        {props.item.lineup.map((item, index) => {
+                            let artistName = index === 0 ? item.name : ` | ${item.name}`;
+                            return <Text style = {{fontSize: 16}}>{artistName}</Text>;
+                        })}
+                    </View>) ||
+                    <Text>Ainda não há ninguém no line-up</Text>
+                }
+                
+                {props.loggedType === 0 && !props.item.inEvent &&
                 <TouchableOpacity
                     style = {{
                         ...styles.outlineButton,
@@ -64,13 +106,22 @@ const FeedEventItem = (props) => {
                         marginTop: 15
                     }}
                 >
+                    
                     <Text style = {{
                         ...styles.outlineButtonLabel,
                         fontSize: 14
                     }}>
                         Participar desse evento
                     </Text>
+                    
                 </TouchableOpacity>
+                }
+
+                {props.loggedType === 0 && props.item.inEvent &&
+                <Text>
+                    Você já está no line-up!
+                </Text>
+                }
             </View>
 
             
@@ -81,18 +132,18 @@ const FeedEventItem = (props) => {
 const FeedProfileItem = (props) => {
     var buttonLabel;
     if(props.type === 'artists'){
-        buttonLabel = 'Convidar para evento'
+        buttonLabel = 'Convidar para evento';
     }else if(props.type === 'venues'){
-        buttonLabel = 'Marcar show'
+        buttonLabel = 'Marcar show';
     }else{
-        buttonLabel = 'Enviar mensagem'
+        buttonLabel = 'Enviar mensagem';
     }
     
     return(
         <TouchableOpacity
             style = {{
                 width: '90%',
-                height: 155,
+                height: 160,
                 backgroundColor: 'white',
                 marginBottom: 15,
                 flexDirection: 'row'
@@ -106,15 +157,16 @@ const FeedProfileItem = (props) => {
                     alignItems: 'center'
                 }}
             >
-                <View
+
+                <Image
+                    source = {require('../../assets/defaultProfileImage.jpeg')}
                     style = {{
                         width: '80%',
-                        borderRadius: 100,
-                        backgroundColor: '#C4C4C4',
                         height: '80%',
+                        borderRadius: 100,
                     }}
-                >
-                </View>
+                    
+                />
 
             </View>
 
@@ -140,11 +192,11 @@ const FeedProfileItem = (props) => {
                         marginLeft: 17
                     }}
                 >
-                    <Text>{props.item.city}</Text>
+                    <Text>{(props.item.city || props.item.address.city)}</Text>
                     {props.type !== 'producers' && 
                     <View style = {styles.row}>
                         {props.item.genres.map((item, index) => {
-                            let genreName = index === 0 ? item : ` | ${item}`;
+                            let genreName = index === 0 ? item.name : ` | ${item.name}`;
                             return <Text>{genreName}</Text>;
                         })}
                     </View>}                
@@ -189,97 +241,14 @@ class FeedPage extends Component{
                 {label: 'Espaços', value: 'venues'}, 
                 {label: 'Produtores', value: 'producers'}
             ],
-            selectedTab: 'events',
-            events: [
-                {
-                    name: 'Evento X',
-                    venue: 'Bar do zé',
-                    organizer: 'Matheus Pereira',
-                    start_date: '24/01/2021',
-                    start_time: '19:30',
-                    end_time: '23:00',
-                    lineup: ['Tulipa Ruiz', 'Caramelows', 'Tassia Reis']
-                },
-                {
-                    name: 'Evento Z',
-                    venue: 'Mundo Pensante',
-                    organizer: 'Mundo Pensante',
-                    start_date: '25/01/2021',
-                    start_time: '19:30',
-                    end_time: '23:00',
-                    lineup: ['Maglore', 'Vanguart']
-                },
-                {
-                    name: 'Evento Y',
-                    venue: 'Bar Verde',
-                    organizer: 'Matheus Pereira',
-                    start_date: '26/01/2021',
-                    start_time: '19:30',
-                    end_time: '23:00',
-                    lineup: ['Paula Fernandes', 'Henrique & Diego']
-                }
-            ],
-            artists: [
-                {
-                    name: 'Boogarins',
-                    city: 'Goiânia',
-                    members: '4',
-                    genres: ['rock', 'indie']
-                },
-                {
-                    name: 'Metá Metá',
-                    city: 'São Paulo',
-                    members: '2',
-                    genres: ['jazz', 'mpb', 'samba']
-                },
-                {
-                    name: 'Rancore',
-                    city: 'São Paulo',
-                    members: '5',
-                    genres: ['rock', 'punk']
-                }
-            ],
-            venues: [
-                {
-                    name: 'Breve',
-                    city: 'São Paulo',
-                    capacity: '200',
-                    genres: ['rock', 'indie']
-                },
-                {
-                    name: 'Blue Note',
-                    city: 'São Paulo',
-                    capacity: '330',
-                    genres: ['jazz', 'mpb']
-                },
-                {
-                    name: 'Hangar 110',
-                    city: 'São Paulo',
-                    capacity: '600',
-                    genres: ['rock', 'punk', 'metal']
-                }
-
-            ], 
-            producers: [
-                {
-                    name: 'Matheus Pereira',
-                    city: 'Florianópolis'
-                },
-                {
-                    name: 'PWR',
-                    city: 'São Paulo'
-                },
-                {
-                    name: 'Boca Santana',
-                    city: 'São Paulo'
-                }
-            ]
+            selectedTab: 'artists',
         }
     }
     
     static contextType = AuthContext;
 
     componentDidMount(){
+        let tabToLoad = 'artists';
         if(this.context.user.type === 0){
             this.setState({
                 tabs: [
@@ -287,17 +256,58 @@ class FeedPage extends Component{
                     {label: 'Artistas', value: 'artists'}, 
                     {label: 'Espaços', value: 'venues'}, 
                     {label: 'Produtores', value: 'producers'}
-                ]
+                ],
+                selectedTab: 'events'
             })
+            tabToLoad = 'events';
         }
+
+        this.loadFeed(tabToLoad);
     }
 
-    loadFeed = () => {}
+    loadFeed = async (tab) => {
+        let route; ///= this.state.selectedTab === 'artists' ? '/feedArtist' : '/feedEvent';
+
+        if(tab === 'events'){
+            route = '/feedEvent';
+        }else if(tab === 'artists'){
+            route = '/feedArtist';
+        }else if (tab === 'venues'){
+            route = '/feedVenue';
+        }else{
+            route = '/feedProducer';
+        }
+
+        try{
+            let result = await api.get(route, {
+                    headers: { 
+                        Authorization: `Bearer ${this.context.token}`
+                    }
+                }
+            )
+
+            console.log(result.data);
+            
+            if(!result.data.error){
+                this.setState({
+                    [tab]: result.data
+                })
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+            console.log(e)
+        }
+    }
 
     selectTab = (value) => {
         this.setState({
             selectedTab: value
         })
+
+        if(!this.state[value]){
+            this.loadFeed(value);
+        }
     }
 
     search = () => {} 
@@ -355,6 +365,7 @@ class FeedPage extends Component{
                     events.map(item => (
                         <FeedEventItem
                             item = {item}
+                            loggedType = {this.context.user.type}
                         />
                     ))}
 
