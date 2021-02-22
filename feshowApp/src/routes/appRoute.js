@@ -30,6 +30,7 @@ import RequestPage from '../pages/event/RequestPage';
 import RequestListPage from '../pages/event/RequestListPage';
 import CalendarPage from '../pages/social/CalendarPage';
 import NotificationsPage from '../pages/social/NotificationsPage';
+import FeedPage from '../pages/social/FeedPage';
 
 
 const Stack = createStackNavigator();
@@ -196,7 +197,7 @@ const NavStack = (props) => {
         >
             <Stack.Screen 
                 name = 'feedPage' 
-                component = {FutureEventsPage} //provisório
+                component = {FeedPage} //provisório
             />
 
             <Stack.Screen 

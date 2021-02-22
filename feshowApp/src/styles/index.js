@@ -25,7 +25,7 @@ const Styles = StyleSheet.create({
     },
 
     outlineButton: {
-        borderWidth: .5,
+        borderWidth: 1,
         borderColor: '#3F2058',
         padding: 5,
         height: 40,
@@ -165,6 +165,13 @@ const Styles = StyleSheet.create({
         alignItems: 'center',
         padding: 18,
         height: 50,
+    },
+
+    quarterRowTab: {
+        alignItems: 'center',
+        padding: 10,
+        height: 45,
+        width: '25%'
     },
 
     halfRowTab: {
