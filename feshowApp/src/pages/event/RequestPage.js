@@ -47,8 +47,25 @@ const Form = (props) => {
                     style = {{width: '90%'}}
                     contentContainerStyle = {styles.center}
                 >
-                    <Text>Solicitar organização de evento</Text>
-                    <Text>{props.venue.name}</Text>
+                    <Text
+                        style = {{
+                            ...styles.title,
+                            alignSelf: 'flex-start',
+                            marginLeft: '5%'
+                        }}
+                    >
+                        Marcar evento
+                    </Text>
+
+                    <Text
+                        style = {{
+                            alignSelf: 'flex-start',
+                            marginLeft: '5%',
+                            fontSize: 16
+                        }}
+                    >
+                        @ {props.venue.name}
+                    </Text>
 
                     {Object.keys(errors).length > 0 && 
                          <Text style = {styles.error}>Preencha todos os campos</Text>}

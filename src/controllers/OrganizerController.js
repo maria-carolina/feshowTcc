@@ -496,6 +496,7 @@ module.exports = {
             //usado para retornar eventos do orgnizador para convidar artista em seu perfil
 
             const user = await User.findByPk(req.userId);
+            let now = moment().format('YYYY-MM-DD');
 
             let events = await Event.findAll({
                 attributes: ['id', 'name', 'start_date', 'status'],

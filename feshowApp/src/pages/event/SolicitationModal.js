@@ -10,9 +10,10 @@ const SolicitationModal = (props) => {
     const [choosenTime, setChoosenTime] = useState(null);
 
     const sendSolicitation = async () => {
+
         let values = {
             eventId: props.eventId,
-            date: props.limits.start_date,
+            date: '2021-02-19',
             time: choosenTime
         }
 
@@ -28,7 +29,7 @@ const SolicitationModal = (props) => {
             );
 
             if(result.data === 'ok'){
-                setChoosenTime(null)
+                setChoosenTime(null);
                 props.closeModal();
                 Alert.alert('Pronto!', 'Sua solicitação foi enviada. Aguarde a resposta.') 
             }else{
@@ -68,64 +69,129 @@ const SolicitationModal = (props) => {
         }
     }
 
-    
-
     return(
         <Modal
             visible = {props.visible}
-            onRequestClose = {() => props.closeModal()}
+            animationType = 'fade'
+            transparent = {true}
+            onRequestClose = {props.closeModal}
         >
-            <View style = {styles.container}>
-                <FontAwesome
+            <View style = {{
+                ...styles.container,
+                backgroundColor: 'rgba(0,0,0,0.5)'
+            }}>
+                <View
                     style = {{
-                        position: 'absolute',
-                        top: 15,
-                        right: 15
-                    }}
-                    name = {'close'}
-                    size = {25}
-                    onPress = {() => {
-                        props.closeModal();
-                        setChoosenTime(null);
-                    }}
-                />
-
-                {(choosenTime == null &&
-                <TouchableOpacity
-                    onPress = {() => setTimePickerVisible(true)}
-                    style = {{
-                        ...styles.outlineButton,
-                        width: '70%'
+                        width: '80%',
+                        height: 250,
+                        backgroundColor: '#FFF',
+                        borderColor: '#cecece',
+                        padding: 15,
+                        alignItems: 'center'
                     }}
                 >
-                    <Text
-                        style = {styles.outlineButtonLabel}
-                    >
-                        Escolher o horário
-                    </Text>
-                </TouchableOpacity>) ||
 
-                <View style = {{width: '100%'}}>
-                    <Text
-                        style = {styles.title}
-                    >
-                        {`Enviar solicitação para tocar ${choosenTime}?`}
-                    </Text>
-                    <TouchableOpacity
-                        onPress = {() => sendSolicitation()}
+                    {(choosenTime == null &&
+                    <View
                         style = {{
-                            ...styles.button, 
-                            alignSelf: 'center',
+                            alignItems: 'center'
                         }}
                     >
                         <Text
-                            style = {styles.buttonLabel}
+                            style = {{
+                                ...styles.title,
+                                fontSize: 18
+                            }}
                         >
-                            Enviar
+                            Escolha um horário de sua preferência
                         </Text>
-                    </TouchableOpacity>
-                </View>
+
+                        <Text style = {{
+                            ...styles.observationText,
+                            margin: 15
+                        }}> 
+                            Esse horário poderá ser reajustado futuramente caso necessário
+                        </Text>
+
+                        <TouchableOpacity
+                            onPress = {() => setTimePickerVisible(true)}
+                            style = {{
+                                ...styles.outlineButton,
+                                width: '70%',
+                                marginBottom: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Escolher o horário
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress = {props.closeModal}
+                        >
+                            <Text
+                                style = {{
+                                    color: '#3F2058',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Deixa quieto
+                            </Text>
+                        </TouchableOpacity>
+                    </View>) ||
+
+                    <View style = {{
+                        width: '100%',
+                        alignItems: 'center'
+                    }}>
+                        <Text
+                            style = {{
+                                ...styles.title,
+                                fontSize: 18,
+                            }}
+                        >
+                            {`Enviar solicitação para tocar ${choosenTime}?`}
+                        </Text>
+                        
+                        <Text style = {{
+                            ...styles.observationText,
+                            margin: 15
+                        }}> 
+                            Esse horário poderá ser reajustado futuramente caso necessário
+                        </Text>
+
+                        <TouchableOpacity
+                            onPress = {() => sendSolicitation()}
+                            style = {{
+                                ...styles.button, 
+                                marginTop: 0,
+                                marginBottom: 15
+                            }}
+                        >
+                            <Text
+                                style = {styles.buttonLabel}
+                            >
+                                Enviar
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress = {() => setChoosenTime(null)}
+                        >
+                            <Text
+                                style = {{
+                                    color: '#3F2058',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Trocar horário
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 }
+                </View>
                 {timePickerVisible && <DateTimePicker 
                     value = {new Date()}
                     mode = {'time'}

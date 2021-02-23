@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
-
 import AuthContext from '../../contexts/auth';
-
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Format from '../utils/Format';
+import SolicitationModal from '../event/SolicitationModal';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -20,15 +20,18 @@ const FeedEventItem = (props) => {
                 marginBottom: 15,
                 padding: 10
             }}
+            key = {props.item.id}
         >
-            <View style = {{
-                width: '100%',
-                height: '50%',
-                flex: 1,
-                position: 'relative',
-                marginTop: 10, 
-                paddingLeft: 15
-            }}>
+            <View 
+                style = {{
+                    width: '100%',
+                    height: '50%',
+                    flex: 1,
+                    position: 'relative',
+                    marginTop: 10, 
+                    paddingLeft: 15
+                }}
+            >
                 <View style = {styles.row}>
                     <Text 
                         style = {{
@@ -105,6 +108,7 @@ const FeedEventItem = (props) => {
                         height: '50%',
                         marginTop: 15
                     }}
+                    onPress = {props.showSolicitationModal}
                 >
                     
                     <Text style = {{
@@ -130,6 +134,7 @@ const FeedEventItem = (props) => {
 }
 
 const FeedProfileItem = (props) => {
+    
     var buttonLabel;
     if(props.type === 'artists'){
         buttonLabel = 'Convidar para evento';
@@ -137,6 +142,17 @@ const FeedProfileItem = (props) => {
         buttonLabel = 'Marcar show';
     }else{
         buttonLabel = 'Enviar mensagem';
+    }
+
+    const navigation = useNavigation();
+
+    handleButtonClick = () => {
+        console.log('entra')
+        if(props.type === 'artists'){
+            navigation.navigate('profilePageInvitation', {artist: props.item})
+        }else if(props.type == 'venues'){
+            navigation.navigate('requestPage', {venue: props.item})
+        }
     }
     
     return(
@@ -148,6 +164,7 @@ const FeedProfileItem = (props) => {
                 marginBottom: 15,
                 flexDirection: 'row'
             }}
+            key = {props.item.id}
         >
             <View
                 style = {{
@@ -215,6 +232,7 @@ const FeedProfileItem = (props) => {
                         width: '90%',
                         marginTop: 10
                     }}
+                    onPress = {handleButtonClick}
                 >
                     <Text
                         style = {{
@@ -234,6 +252,7 @@ const FeedProfileItem = (props) => {
 class FeedPage extends Component{
     constructor(props){
         super(props)
+        this.onfocus;
         this.state = {
             tabs: [
                 {label: 'Artistas', value: 'artists'}, 
@@ -242,6 +261,7 @@ class FeedPage extends Component{
                 {label: 'Produtores', value: 'producers'}
             ],
             selectedTab: 'artists',
+            solicitationVisible: false,
         }
     }
     
@@ -257,16 +277,26 @@ class FeedPage extends Component{
                     {label: 'Espaços', value: 'venues'}, 
                     {label: 'Produtores', value: 'producers'}
                 ],
-                selectedTab: 'events'
+                selectedTab: 'events',
+
             })
             tabToLoad = 'events';
+
         }
 
         this.loadFeed(tabToLoad);
+        this.reload = this.props.navigation.addListener('focus', () => {
+            this.loadFeed(tabToLoad);
+        })
     }
 
     loadFeed = async (tab) => {
-        let route; ///= this.state.selectedTab === 'artists' ? '/feedArtist' : '/feedEvent';
+
+        this.setState({
+            [tab]: null
+        })
+
+        let route; 
 
         if(tab === 'events'){
             route = '/feedEvent';
@@ -308,6 +338,26 @@ class FeedPage extends Component{
         if(!this.state[value]){
             this.loadFeed(value);
         }
+    }
+
+
+    showSolicitationModal = (event) => {
+        var {id, start_date, start_time, end_time} = event;
+        this.setState({
+            solicitationVisible: true,
+            limits: {start_date, start_time, end_time},
+            choosenId: id
+        })
+    }
+
+    closeSolicitationModal = () => {
+        this.setState({
+            solicitationVisible: false,
+            limits: null,
+            choosenId: null
+        })
+
+        this.loadFeed('events');
     }
 
     search = () => {} 
@@ -366,6 +416,7 @@ class FeedPage extends Component{
                         <FeedEventItem
                             item = {item}
                             loggedType = {this.context.user.type}
+                            showSolicitationModal = {() => this.showSolicitationModal(item)}
                         />
                     ))}
 
@@ -392,6 +443,14 @@ class FeedPage extends Component{
                     size = 'large'
                     color = '#000'
                 />}
+
+                <SolicitationModal
+                    visible = {this.state.solicitationVisible}
+                    limits = {this.state.limits}
+                    eventId = {this.state.choosenId}
+                    token = {this.context.token}
+                    closeModal = {() => this.closeSolicitationModal()} 
+                />
             </View>
         )
     }

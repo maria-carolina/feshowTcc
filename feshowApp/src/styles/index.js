@@ -105,7 +105,6 @@ const Styles = StyleSheet.create({
 
     justifiedText: {
         textAlign: 'center',
-        fontFamily: 'Roboto',
         color: '#3F2058',
         width: '70%',
         fontSize: 14,
@@ -204,6 +203,13 @@ const Styles = StyleSheet.create({
 
     profileHeadInfos: {
         fontSize: 16
+    },
+
+    observationText: {
+        fontSize: 15,
+        textAlign: 'center',
+        color: '#AAA',
+        letterSpacing: 1
     }
 
 })

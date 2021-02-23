@@ -19,7 +19,6 @@ const InvitationModal = (props) => {
                     Authorization: `Bearer ${props.token}`
                 }
             })
-            console.log(result.data)
             setSearchResult(result.data);
         }catch(e){
             console.log(e)

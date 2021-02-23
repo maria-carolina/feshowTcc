@@ -49,7 +49,7 @@ module.exports = {
 
 
         } catch (err) {
-            return res.send({ error: 'Erro ao solicitar participação em evento' })
+           return res.send({ error: 'Erro ao solicitar participação em evento' })
         }
     }
 };

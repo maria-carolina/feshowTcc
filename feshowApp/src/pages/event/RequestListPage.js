@@ -25,9 +25,7 @@ const DetailModal = (props) => {
         >
             <View
                 style = {{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    ...styles.container,
                     backgroundColor: 'rgba(0,0,0,0.5)',
                 }}
             >
@@ -82,7 +80,8 @@ const DetailModal = (props) => {
                             marginTop: 15
                         }}
                     >
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                        {props.details.solicitation.description}
+
                     </Text>
                 </View>
                 }
