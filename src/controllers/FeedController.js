@@ -354,7 +354,11 @@ module.exports = {
                     } else {
                         otherEvents.push(event);
                     }
-                    event.dataValues.inEvent = false;
+                    if (user.type === 0) {
+                        inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                    } else {
+                        event.dataValues.inEvent = false;
+                    }
                 });
 
                 events = eventsCity.concat(otherEvents);
@@ -392,16 +396,8 @@ module.exports = {
             //remover duplicidade
             eventsAll.forEach((event) => {
                 if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
-                    event.dataValues.lineup.forEach((lineup) => {
-                        if (artistAuth.id === lineup.id) {
-                            event.dataValues.inEvent = true;
-                        } else {
-                            event.dataValues.inEvent = false;
-                        }
-                    });
-                } else {
-                    event.dataValues.inEvent = false;
-                }
+                    inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                } 
                 !inArray(event.id, events) ? events.push(event) : ''
             });
 

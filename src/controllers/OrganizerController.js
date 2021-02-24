@@ -176,7 +176,7 @@ module.exports = {
                 });
 
             });
-            
+
             artists = cityGenre.concat(artistsCity, artistsGenres, otherArtists);
 
             return res.send(artists);
@@ -494,11 +494,11 @@ module.exports = {
     async getEventsOrganizer(req, res) {
         try {
             //usado para retornar eventos do orgnizador para convidar artista em seu perfil
-
+            const { artistId } = req.params;
             const user = await User.findByPk(req.userId);
             let now = moment().format('YYYY-MM-DD');
 
-            let events = await Event.findAll({
+            let eventsAll = await Event.findAll({
                 attributes: ['id', 'name', 'start_date', 'status'],
                 include: {
                     association: 'venue',
@@ -515,6 +515,20 @@ module.exports = {
                     ['start_date', 'ASC']
                 ]
             });
+
+            //remover eventos que artistas já esteja relacionado
+            let events = [];
+            for (let event of eventsAll) {
+                let artistEvent = await ArtistEvent.findOne({
+                    where: {
+                        artist_id: artistId,
+                        event_id: event.id
+                    }
+                });
+                if (!artistEvent) {
+                    events.push(event);
+                }
+            }
 
             return res.send(events);
 

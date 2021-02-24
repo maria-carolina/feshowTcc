@@ -9,6 +9,6 @@ organizerRoutes.post('/removeAssociation', OrganizerController.removeAssociation
 organizerRoutes.post('/acceptParticipation', OrganizerController.acceptParticipation);
 organizerRoutes.post('/updateLineup/:id', OrganizerController.updateLineup);
 organizerRoutes.get('/changeStatus/:id', OrganizerController.changeStatus);
-organizerRoutes.get('/eventsOrganizer', OrganizerController.getEventsOrganizer)
+organizerRoutes.get('/eventsOrganizer/:artistId', OrganizerController.getEventsOrganizer)
 
 module.exports = organizerRoutes;
