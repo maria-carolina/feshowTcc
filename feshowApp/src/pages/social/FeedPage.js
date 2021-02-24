@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
@@ -11,16 +11,17 @@ import { useNavigation } from '@react-navigation/native';
 
 
 const FeedEventItem = (props) => {
+    const { user } = useContext(AuthContext);
     return(
-        <TouchableOpacity
+        <View
             style = {{
-                width: '90%',
-                height: props.loggedType === 0 ? 175 : 125,
+                width: '100%',
+                height: user.type === 0 ? 175 : 125,
                 backgroundColor: 'white',
                 marginBottom: 15,
                 padding: 10
             }}
-            key = {props.item.id}
+            key = {props.item.id.toString()}
         >
             <View 
                 style = {{
@@ -81,11 +82,11 @@ const FeedEventItem = (props) => {
                 width: '100%',
                 height: '50%',
                 alignItems: 'center',
-                paddingTop: props.loggedType === 0 ? 10 : 30
+                paddingTop: user.type === 0 ? 10 : 30
             }}>
 
                 {(props.item.lineup.length > 0 &&
-                    <View style = {styles.row}>
+                    <View style = {{...styles.row, marginBottom: 15}}>
                         <Text style = {{
                             color: '#3F2058', 
                             fontWeight: 'bold',
@@ -95,18 +96,24 @@ const FeedEventItem = (props) => {
                         </Text>
                         {props.item.lineup.map((item, index) => {
                             let artistName = index === 0 ? item.name : ` | ${item.name}`;
-                            return <Text style = {{fontSize: 16}}>{artistName}</Text>;
+                            return (
+                                <Text 
+                                    key = {item.id}
+                                    style = {{fontSize: 16}}
+                                >
+                                    {artistName}
+                                </Text>
+                            );
                         })}
                     </View>) ||
-                    <Text>Ainda não há ninguém no line-up</Text>
+                    <Text style = {{marginBottom: 15}}>Ainda não há ninguém no line-up</Text>
                 }
                 
-                {props.loggedType === 0 && !props.item.inEvent &&
+                {user.type === 0 && !props.item.inEvent &&
                 <TouchableOpacity
                     style = {{
                         ...styles.outlineButton,
                         height: '50%',
-                        marginTop: 15
                     }}
                     onPress = {props.showSolicitationModal}
                 >
@@ -121,7 +128,7 @@ const FeedEventItem = (props) => {
                 </TouchableOpacity>
                 }
 
-                {props.loggedType === 0 && props.item.inEvent &&
+                {user.type === 0 && props.item.inEvent &&
                 <Text>
                     Você já está no line-up!
                 </Text>
@@ -129,7 +136,7 @@ const FeedEventItem = (props) => {
             </View>
 
             
-        </TouchableOpacity>
+        </View>
     )
 }
 
@@ -147,24 +154,22 @@ const FeedProfileItem = (props) => {
     const navigation = useNavigation();
 
     handleButtonClick = () => {
-        console.log('entra')
         if(props.type === 'artists'){
             navigation.navigate('profilePageInvitation', {artist: props.item})
         }else if(props.type == 'venues'){
             navigation.navigate('requestPage', {venue: props.item})
         }
     }
-    
+
     return(
-        <TouchableOpacity
+        <View
             style = {{
-                width: '90%',
+                width: '100%',
                 height: 160,
                 backgroundColor: 'white',
                 marginBottom: 15,
                 flexDirection: 'row'
             }}
-            key = {props.item.id}
         >
             <View
                 style = {{
@@ -182,7 +187,6 @@ const FeedProfileItem = (props) => {
                         height: '80%',
                         borderRadius: 100,
                     }}
-                    
                 />
 
             </View>
@@ -214,7 +218,7 @@ const FeedProfileItem = (props) => {
                     <View style = {styles.row}>
                         {props.item.genres.map((item, index) => {
                             let genreName = index === 0 ? item.name : ` | ${item.name}`;
-                            return <Text>{genreName}</Text>;
+                            return <Text key={item.artist_genres.genre_id}>{genreName}</Text>;
                         })}
                     </View>}                
                     
@@ -245,9 +249,34 @@ const FeedProfileItem = (props) => {
                 </TouchableOpacity>
 
             </View>
-        </TouchableOpacity>
+        </View>
     )
 }
+
+const FeedList = (props) => {
+    return(
+        <View style = {{width: '90%'}}>
+            {props.list.map(item => {
+                return props.type === 'events' ? 
+                (
+                    <FeedEventItem
+                        key = {item.id.toString()}
+                        item = {item}
+                        showSolicitationModal = {() => props.showSolicitationModal(item)}
+                    />
+                )
+                :(
+                    <FeedProfileItem
+                        key = {item.id.toString()}
+                        item = {item}
+                        type = {props.type}
+                    />
+                )
+            })}
+        </View>
+    )
+}
+
 
 class FeedPage extends Component{
     constructor(props){
@@ -278,16 +307,15 @@ class FeedPage extends Component{
                     {label: 'Produtores', value: 'producers'}
                 ],
                 selectedTab: 'events',
-
             })
             tabToLoad = 'events';
 
         }
 
         this.loadFeed(tabToLoad);
-        this.reload = this.props.navigation.addListener('focus', () => {
-            this.loadFeed(tabToLoad);
-        })
+        //this.reload = this.props.navigation.addListener('focus', () => {
+          //  this.loadFeed(tabToLoad);
+        //})
     }
 
     loadFeed = async (tab) => {
@@ -315,9 +343,7 @@ class FeedPage extends Component{
                     }
                 }
             )
-
-            console.log(result.data);
-            
+            console.log(result.data[0].genres)
             if(!result.data.error){
                 this.setState({
                     [tab]: result.data
@@ -376,6 +402,7 @@ class FeedPage extends Component{
 
     render(){
         var { tabs, selectedTab, events } = this.state;
+
         return(
             <View style = {styles.container}>
 
@@ -410,24 +437,14 @@ class FeedPage extends Component{
                         ))}
                     </View>
 
-                    {selectedTab === 'events' && 
-                    events &&
-                    events.map(item => (
-                        <FeedEventItem
-                            item = {item}
-                            loggedType = {this.context.user.type}
-                            showSolicitationModal = {() => this.showSolicitationModal(item)}
-                        />
-                    ))}
 
-                    {selectedTab !== 'events' &&
-                    this.state[selectedTab] &&
-                    this.state[selectedTab].map(item => (
-                        <FeedProfileItem 
-                            item = {item}
-                            type = {selectedTab}
-                        />
-                    ))}
+                    {this.state[selectedTab] &&
+                    <FeedList 
+                        list = {this.state[selectedTab]}
+                        type = {selectedTab}
+                        showSolicitationModal = {(item) => this.showSolicitationModal(item)}
+                    />
+                    }
 
                     {!this.state[selectedTab] &&
                         <ActivityIndicator 

@@ -14,13 +14,15 @@ const ProfilePageInvitation = (props) => {
         async function loadEvents(){
             try{
                 let result = await api.get(
-                    '/eventsOrganizer/',
+                    `/eventsOrganizer/${props.route.params.artist.id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
                         }
                     }
                 )
+
+                console.log(result.data)
                 
                 if(!('error' in result.data)){
                     setEventList(result.data)
