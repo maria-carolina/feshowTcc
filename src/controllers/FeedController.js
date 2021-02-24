@@ -20,18 +20,18 @@ function inArray(id, array) {
 
 function shuffle(array) { //para misturar array do search
     let m = array.length, t, i;
-  
-    while (m) {
-  
-      i = Math.floor(Math.random() * m--);
 
-      t = array[m];
-      array[m] = array[i];
-      array[i] = t;
+    while (m) {
+
+        i = Math.floor(Math.random() * m--);
+
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
     }
-  
+
     return array;
-  }
+}
 
 module.exports = {
     async feedArtist(req, res) {
@@ -326,9 +326,9 @@ module.exports = {
                     include: {
                         association: 'events',
                         attributes: [],
-                        where: { 
+                        where: {
                             event_id: event.id,
-                            status: 3 
+                            status: 3
                         }
                     }
                 });
@@ -414,7 +414,7 @@ module.exports = {
             eventsAll.forEach((event) => {
                 if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
                     inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
-                } 
+                }
                 !inArray(event.id, events) ? events.push(event) : ''
             });
 
@@ -472,149 +472,154 @@ module.exports = {
         }
     },
     async search(req, res) {
-        const { name } = req.body;
-        let artists = await Artist.findAll({
-            attributes: ['id', 'name', 'members', 'city', 'user_id'],
-            include: {
-                association: 'genres',
-                attributes: ['name']
-            },
-            where:{
-                name: {
-                    [Op.like]: '%' + name + '%'
-                },
-                user_id: { //nao retornar usuario logado
-                    [Op.ne]: req.userId,
-                }
-            }
-        });
-
-        for (let artist of artists) {
-            //status se existe ou não imagem
-            let image = await ImageUser.findOne({ where: { user_id: artist.user_id } });
-            let imageStatus = image ? true : false;
-            artist.dataValues.image = imageStatus;
-            artist.dataValues.type = 0;
-        }
-
-        let venues = await Venue.findAll({
-            attributes: ['id', 'name', 'capacity', 'user_id'],
-            include: [
-                {
+        try {
+            const { name } = req.body;
+            let artists = await Artist.findAll({
+                attributes: ['id', 'name', 'members', 'city', 'user_id'],
+                include: {
                     association: 'genres',
                     attributes: ['name']
                 },
-                {
-                    association: 'address',
-                    attributes: ['city']
-                }
-            ],
-            where:{
-                name: {
-                    [Op.like]: '%' + name + '%'
-                },
-                user_id: { //nao retornar usuario logado
-                    [Op.ne]: req.userId,
-                }
-            }
-        });
-
-        for (let venue of venues) {
-            //status se existe ou não imagem
-            let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
-            let imageStatus = image ? true : false;
-            venue.dataValues.image = imageStatus;
-            venue.dataValues.type = 1;
-        }
-
-        let events = await Event.findAll({
-            attributes: ['id', 'name', 'start_date', 'start_time', 'end_time', 'status'],
-            include: [
-                {
-                    association: 'venue',
-                    attributes: ['id', 'name', 'user_id'],
-                    include: [
-                        {
-                            association: 'address',
-                            attributes: ['city']
-                        }, {
-                            association: 'genres'
-                        }
-                    ]
-                },
-                {
-                    association: 'organizer',
-                    attributes: ['id']
-                }
-            ],
-            where: {
-                name: {
-                    [Op.like]: '%' + name + '%'
-                }
-            }
-        });
-
-        for (let event of events) { //artistas no lineup
-            let artists = await Artist.findAll({
-                attributes: ['id', 'name'],
-                include: {
-                    association: 'events',
-                    attributes: [],
-                    where: { 
-                        event_id: event.id,
-                        status: 3 
+                where: {
+                    name: {
+                        [Op.like]: '%' + name + '%'
+                    },
+                    user_id: { //nao retornar usuario logado
+                        [Op.ne]: req.userId,
                     }
                 }
             });
-            event.dataValues.lineup = artists;
-            event.dataValues.type = 3;
-            //ajuste horario e data
-            event.dataValues.start_date = moment(event.start_date, 'YYYY-MM-DD').format("DD/MM/YYYY");
-            event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
-            event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 
-            //pegar nome do organizador
-            let userOrganizer = await User.findByPk(event.organizer.id);
-            if (userOrganizer.type === 0) {
-                let artist = await Artist.findOne({
-                    where: { user_id: userOrganizer.id }
-                });
-                event.organizer.dataValues.name = artist.name;
-
-            } else if (userOrganizer.type === 1) {
-                let venue = await Venue.findOne({
-                    where: { user_id: userOrganizer.id }
-                });
-                event.organizer.dataValues.name = venue.name;
-
-            } else {
-                let producer = await Producer.findOne({
-                    where: { user_id: userOrganizer.id }
-                });
-                event.organizer.dataValues.name = producer.name;
+            for (let artist of artists) {
+                //status se existe ou não imagem
+                let image = await ImageUser.findOne({ where: { user_id: artist.user_id } });
+                let imageStatus = image ? true : false;
+                artist.dataValues.image = imageStatus;
+                artist.dataValues.type = 0;
             }
-        }
 
-        let producers = await Producer.findAll({
-            where:{
-                name: {
-                    [Op.like]: '%' + name + '%'
-                },
-                user_id: { //nao retornar usuario logado
-                    [Op.ne]: req.userId,
+            let venues = await Venue.findAll({
+                attributes: ['id', 'name', 'capacity', 'user_id'],
+                include: [
+                    {
+                        association: 'genres',
+                        attributes: ['name']
+                    },
+                    {
+                        association: 'address',
+                        attributes: ['city']
+                    }
+                ],
+                where: {
+                    name: {
+                        [Op.like]: '%' + name + '%'
+                    },
+                    user_id: { //nao retornar usuario logado
+                        [Op.ne]: req.userId,
+                    }
+                }
+            });
+
+            for (let venue of venues) {
+                //status se existe ou não imagem
+                let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
+                let imageStatus = image ? true : false;
+                venue.dataValues.image = imageStatus;
+                venue.dataValues.type = 1;
+            }
+
+            let events = await Event.findAll({
+                attributes: ['id', 'name', 'start_date', 'start_time', 'end_time', 'status'],
+                include: [
+                    {
+                        association: 'venue',
+                        attributes: ['id', 'name', 'user_id'],
+                        include: [
+                            {
+                                association: 'address',
+                                attributes: ['city']
+                            }, {
+                                association: 'genres'
+                            }
+                        ]
+                    },
+                    {
+                        association: 'organizer',
+                        attributes: ['id']
+                    }
+                ],
+                where: {
+                    name: {
+                        [Op.like]: '%' + name + '%'
+                    }
+                }
+            });
+
+            for (let event of events) { //artistas no lineup
+                let artists = await Artist.findAll({
+                    attributes: ['id', 'name'],
+                    include: {
+                        association: 'events',
+                        attributes: [],
+                        where: {
+                            event_id: event.id,
+                            status: 3
+                        }
+                    }
+                });
+                event.dataValues.lineup = artists;
+                event.dataValues.type = 3;
+                //ajuste horario e data
+                event.dataValues.start_date = moment(event.start_date, 'YYYY-MM-DD').format("DD/MM/YYYY");
+                event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+                event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
+
+                //pegar nome do organizador
+                let userOrganizer = await User.findByPk(event.organizer.id);
+                if (userOrganizer.type === 0) {
+                    let artist = await Artist.findOne({
+                        where: { user_id: userOrganizer.id }
+                    });
+                    event.organizer.dataValues.name = artist.name;
+
+                } else if (userOrganizer.type === 1) {
+                    let venue = await Venue.findOne({
+                        where: { user_id: userOrganizer.id }
+                    });
+                    event.organizer.dataValues.name = venue.name;
+
+                } else {
+                    let producer = await Producer.findOne({
+                        where: { user_id: userOrganizer.id }
+                    });
+                    event.organizer.dataValues.name = producer.name;
                 }
             }
-        });
 
-        for (let producer of producers) {
-            let image = await ImageUser.findOne({ where: { user_id: producer.user_id } });
-            let imageStatus = image ? true : false;
-            producer.dataValues.image = imageStatus;
-            producer.dataValues.type = 2;
-        };
+            let producers = await Producer.findAll({
+                where: {
+                    name: {
+                        [Op.like]: '%' + name + '%'
+                    },
+                    user_id: { //nao retornar usuario logado
+                        [Op.ne]: req.userId,
+                    }
+                }
+            });
 
-        let result = artists.concat(venues, events, producers)
-        result = shuffle(result);
-        return res.send(result);
+            for (let producer of producers) {
+                let image = await ImageUser.findOne({ where: { user_id: producer.user_id } });
+                let imageStatus = image ? true : false;
+                producer.dataValues.image = imageStatus;
+                producer.dataValues.type = 2;
+            };
+
+            let result = artists.concat(venues, events, producers)
+            result = shuffle(result);
+            return res.send(result);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir pesquisa no feed' })
+        }
     }
+
 };
