@@ -19,8 +19,8 @@ import InitialPage from '../pages/access/InitialPage';
 
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { TouchableOpacity, TextInput } from 'react-native-gesture-handler';
-import { View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { View, TextInput } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import LineUpEditPage from '../pages/event/LineUpEditPage';
 import FutureEventsPage from '../pages/social/FutureEventsPage';
@@ -31,6 +31,7 @@ import RequestListPage from '../pages/event/RequestListPage';
 import CalendarPage from '../pages/social/CalendarPage';
 import NotificationsPage from '../pages/social/NotificationsPage';
 import FeedPage from '../pages/social/FeedPage';
+import SearchPage from '../pages/social/SearchPage'
 
 
 const Stack = createStackNavigator();
@@ -54,41 +55,23 @@ const DrawerOpener = () => {
 } 
 
 const SearchOpener = (props) => {
-    var icon = props.isSearchOpen ?
-    <View style = {{flexDirection: 'row', alignItems: 'center'}}>
-        <TextInput 
-            style = {{...styles.textInput, 
-                marginTop: 0,
-                height: '90%',
-                width: '140%',
-                marginLeft: 15
-            }}
-        />
-        <TouchableOpacity
-            onPress = {() => props.handleClick(!props.isSearchOpen)}
-            style = {{padding: 4}}
-        >
-            <Ionicon
-                style = {{marginLeft: 15}} 
-                name = {'close'} 
-                size = {30} 
-                color = {'#000'}
-            />
-        </TouchableOpacity>
-    </View>
-    :
-    <TouchableOpacity
-        onPress = {() => props.handleClick(!props.isSearchOpen)}
-        style = {{marginRight: 20}}
-    >
-        <FontAwesome 
-            name = {'search'} 
-            size = {20} 
-            color = {'#000'}
-        />
-    </TouchableOpacity>
+    const navigation = useNavigation();
    
-    return icon;
+    return (
+        <TouchableOpacity
+            onPress = {() => {
+                props.handleClick(!props.isSearchOpen);
+                navigation.navigate('searchPage');
+            }}
+            style = {{marginRight: 20}}
+        >
+                <FontAwesome 
+                    name = {'search'} 
+                    size = {20} 
+                    color = {'#000'}
+                />
+        </TouchableOpacity>
+    );
 }
 
 const NavDrawer = () => {
@@ -139,21 +122,20 @@ const NavStack = (props) => {
         headerIcons = (
             <View style = {styles.row}>
     
+                
                 <SearchOpener
                     isSearchOpen = {isSearchOpen}
                     handleClick = {setSearchOpen} 
                 />
+                
 
-                {!isSearchOpen &&
-                    <TouchableOpacity>
-                        <FontAwesome 
-                            name = {'bell-o'} 
-                            size = {20} 
-                            color = {'#000'}
-                        />
-                    </TouchableOpacity>
-                }
-
+                <TouchableOpacity>
+                    <FontAwesome 
+                        name = {'bell-o'} 
+                        size = {20} 
+                        color = {'#000'}
+                    />
+                </TouchableOpacity>
             </View>
         )
     }else if (name === 'profile'){
@@ -181,13 +163,14 @@ const NavStack = (props) => {
         headerStyle: {backgroundColor: '#F2F2F2', elevation: 0},
         headerRightContainerStyle: {marginRight: 20, marginTop: 10},
         headerRight: () => headerIcons
+        
     }
 
-    if(isSearchOpen){
+   /* if(isSearchOpen){
         headerOptions.title = null;
         headerOptions.headerRight = null;
         headerOptions.headerLeft = () => headerIcons;
-    }
+    }*/
 
 
     return(
@@ -258,6 +241,11 @@ const NavStack = (props) => {
             <Stack.Screen 
                 name = 'profilePageInvitation' 
                 component = {ProfilePageInvitation} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'searchPage' 
+                component = {SearchPage} //provisório
             />
             
         </Stack.Navigator>
