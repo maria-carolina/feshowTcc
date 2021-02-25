@@ -74,7 +74,7 @@ module.exports = {
                 attributes: ['id', 'name', 'members', 'city', 'user_id'],
                 include: {
                     association: 'genres',
-                    attributes: ['name']
+                    attributes: ['id', 'name']
                 }
             });
 
@@ -186,7 +186,7 @@ module.exports = {
                 include: [
                     {
                         association: 'genres',
-                        attributes: ['name']
+                        attributes: ['id', 'name']
                     },
                     {
                         association: 'address',
@@ -309,7 +309,8 @@ module.exports = {
                                 association: 'address',
                                 attributes: ['city']
                             }, {
-                                association: 'genres'
+                                association: 'genres',
+                                attributes: ['id', 'name']
                             }
                         ]
                     },
@@ -478,7 +479,7 @@ module.exports = {
                 attributes: ['id', 'name', 'members', 'city', 'user_id'],
                 include: {
                     association: 'genres',
-                    attributes: ['name']
+                    attributes: ['id', 'name']
                 },
                 where: {
                     name: {
@@ -503,7 +504,7 @@ module.exports = {
                 include: [
                     {
                         association: 'genres',
-                        attributes: ['name']
+                        attributes: ['id', 'name']
                     },
                     {
                         association: 'address',
@@ -539,7 +540,8 @@ module.exports = {
                                 association: 'address',
                                 attributes: ['city']
                             }, {
-                                association: 'genres'
+                                association: 'genres',
+                                attributes: ['id', 'name']
                             }
                         ]
                     },
@@ -621,5 +623,7 @@ module.exports = {
             return res.send({ error: 'Erro ao exibir pesquisa no feed' })
         }
     }
+
+    
 
 };
