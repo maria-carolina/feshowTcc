@@ -622,8 +622,274 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao exibir pesquisa no feed' })
         }
-    }
+    },
 
-    
+    async filterArtistGenre(req, res) {
+        try {
+            const user = await User.findByPk(req.userId);
+
+            let resultGenre, artistAuth;
+            let artists = [],
+                genres = [];
+
+            if (user.type == 0) {
+                artistAuth = await Artist.findOne({
+                    include: { association: 'genres' },
+                    where: { user_id: user.id }
+                });
+                genres = artistAuth.genres;
+
+            } else if (user.type == 1) {
+                const venueAuth = await Venue.findOne({
+                    include: { association: 'genres' },
+                    where: { user_id: user.id }
+                });
+                genres = venueAuth.genres;
+            }
+
+            let artistsAll = await Artist.findAll({
+                attributes: ['id', 'name', 'members', 'city', 'user_id'],
+                include: {
+                    association: 'genres',
+                    attributes: ['id', 'name']
+                }
+            });
+
+            for (let artist of artistsAll) {
+
+                //status se existe ou não imagem
+                let image = await ImageUser.findOne({ where: { user_id: artist.user_id } });
+                let imageStatus = image ? true : false;
+                artist.dataValues.image = imageStatus;
+
+                artist.genres.forEach((genre) => {
+                    resultGenre = inArray(genre.id, genres)
+                    if (resultGenre)
+                        artists.push(artist);
+                });
+            }
+
+            artistsAll = artists;
+
+            //remover duplicidade
+            artistsAll.forEach((artist) => {
+                if (user.type === 0) { //remover artista logado da lista 
+                    if (artistAuth.id !== artist.id) {
+                        !inArray(artist.id, artists) ? artists.push(artist) : ''
+                    }
+                } else {
+                    !inArray(artist.id, artists) ? artists.push(artist) : ''
+                }
+            });
+
+            return res.send(artistsAll);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir filtro de artistas por gêneros' })
+        }
+    },
+
+    async filterArtistCity(req, res) {
+        try {
+            const user = await User.findByPk(req.userId);
+
+            let city, artistAuth;
+            let artists = [];
+
+            if (user.type == 0) {
+                artistAuth = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+                city = artistAuth.city;
+
+            } else if (user.type == 1) {
+                const venueAuth = await Venue.findOne({
+                    include: [
+                        { association: 'address' },
+                    ],
+                    where: { user_id: user.id }
+                });
+                city = venueAuth.address.city;
+
+            } else {
+                const producerAuth = await Producer.findOne({ where: { user_id: user.id } });
+                city = producerAuth.city;
+            }
+
+            let artistsAll = await Artist.findAll({
+                attributes: ['id', 'name', 'members', 'city', 'user_id'],
+                include: {
+                    association: 'genres',
+                    attributes: ['id', 'name']
+                }
+            });
+
+            for (let artist of artistsAll) {
+                //status se existe ou não imagem
+                let image = await ImageUser.findOne({ where: { user_id: artist.user_id } });
+                let imageStatus = image ? true : false;
+                artist.dataValues.image = imageStatus;
+
+                if (user.type === 0) {
+                    if (artistAuth.id !== artist.id) {
+                        if (artist.city === city)
+                            artists.push(artist);
+                    }
+                } else {
+                    if (artist.city === city)
+                        artists.push(artist);
+                }
+            }
+
+            return res.send(artists);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir filtro de artistas por cidade' })
+        }
+    },
+
+    /*async filterVenueGenre(req, res) {
+        //try {
+        const user = await User.findByPk(req.userId);
+
+        let resultGenre, venueAuth;
+        let venues = [],
+            genres = [];
+
+        if (user.type == 0) {
+            const artistAuth = await Artist.findOne({
+                include: { association: 'genres' },
+                where: { user_id: user.id }
+            });
+            genres = artistAuth.genres;
+
+        } else if (user.type == 1) {
+            venueAuth = await Venue.findOne({
+                include: [
+                    { association: 'address' },
+                    { association: 'genres' }
+                ],
+                where: { user_id: user.id }
+            });
+            genres = venueAuth.genres;
+
+        } else {
+            const producerAuth = await Producer.findOne({ where: { user_id: user.id } });
+        }
+
+        let venuesAll = await Venue.findAll({
+            attributes: ['id', 'name', 'capacity', 'user_id'],
+            include: [
+                {
+                    association: 'genres',
+                    attributes: ['id', 'name']
+                },
+                {
+                    association: 'address',
+                    attributes: ['city']
+                }
+            ]
+        });
+
+        for (let venue of venuesAll) {
+            //status se existe ou não imagem
+            let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
+            let imageStatus = image ? true : false;
+            venue.dataValues.image = imageStatus;
+
+            venue.genres.forEach((genre) => {
+                resultGenre = inArray(genre.id, genres)
+
+                if (user.type === 1) { //remover espaço logado da lista 
+                    if (venueAuth.id !== venue.id) {
+                        if (resultGenre)
+                            venues.push(venue)
+                    }
+                } else {
+                    if (resultGenre)
+                        venues.push(venue)
+                }
+            });
+        }
+
+        //remover duplicidade
+        venuesAll.forEach((venue) => {
+            !inArray(venue.id, venues) ? venues.push(venue) : ''
+        });
+
+        return res.send(venues);
+        // } catch (err) {
+        //      return res.send({ error: 'Erro ao exibir filtro de espaço por gêneros' })
+        //  }
+    },
+
+    async filterVenueCity(req, res) {
+        //try {
+        const user = await User.findByPk(req.userId);
+
+        let city, venueAuth;
+        let venues = [];
+
+        if (user.type === 0) {
+            const artistAuth = await Artist.findOne({
+                where: { user_id: user.id }
+            });
+            city = artistAuth.city;
+
+        } else if (user.type == 1) {
+            venueAuth = await Venue.findOne({
+                include: [
+                    { association: 'address' },
+                ],
+                where: { user_id: user.id }
+            });
+            city = venueAuth.address.city;
+            genres = venueAuth.genres;
+
+        } else {
+            const producerAuth = await Producer.findOne({ where: { user_id: user.id } });
+            city = producerAuth.city;
+        }
+
+        let venuesAll = await Venue.findAll({
+            attributes: ['id', 'name', 'capacity', 'user_id'],
+            include: [
+                {
+                    association: 'genres',
+                    attributes: ['id', 'name']
+                },
+                {
+                    association: 'address',
+                    attributes: ['city']
+                }
+            ]
+        });
+
+        for (let venue of venuesAll) {
+            //status se existe ou não imagem
+            let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
+            let imageStatus = image ? true : false;
+            venue.dataValues.image = imageStatus;
+
+            venuesAll.forEach((venue) => {
+                if (user.type === 1) {
+                    if (venueAuth.id !== venue.id) {
+                        if (venue.address.city === city) {
+                            venuesCity.push(venue);
+                        }
+
+                    }
+                } else {
+                    if (venue.address.city === city)
+                        venuesCity.push(venue);
+                }
+            });
+        }
+
+        return res.send(venues);
+        // } catch (err) {
+        //      return res.send({ error: 'Erro ao exibir filtro de espaço por cidade' })
+        //  }
+    },*/
+
+
 
 };
