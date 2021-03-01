@@ -107,7 +107,7 @@ const FeedEventItem = (props) => {
                     </Text>
                 }
                 
-                {props.showSolicitationModal &&
+                { user.type === 0 && !props.item.inEvent &&
                 <TouchableOpacity
                     style = {{
                         ...styles.outlineButton

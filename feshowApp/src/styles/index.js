@@ -75,12 +75,10 @@ const Styles = StyleSheet.create({
         borderBottomWidth: .5,
         borderBottomColor: '#cecece',
         padding: 10,
-        
     },
 
     itemText: {
         fontSize: 20,
-        fontFamily: 'roboto',
         color: '#3F2058',
         fontWeight: '100'
     },
@@ -210,7 +208,9 @@ const Styles = StyleSheet.create({
         textAlign: 'center',
         color: '#AAA',
         letterSpacing: 1
-    }
+    },
+
+ 
 
 })
 

@@ -6,6 +6,7 @@ import AuthContext from '../../contexts/auth';
 import SolicitationModal from '../event/SolicitationModal';
 import FeedEventItem from './FeedEventItem';
 import FeedProfileItem from './FeedProfileITem';
+import FilterModal from './FilterModal';
 
 
 const FeedList = (props) => {
@@ -13,6 +14,7 @@ const FeedList = (props) => {
     const type = props.type === 'artists' ? 0 : (props.type === 'venues' ? 1 : 2);
     return(
         <View style = {{width: '90%'}}>
+
             {props.list.map(item => {
                 return props.type === 'events' ? 
                 (
@@ -48,6 +50,7 @@ class FeedPage extends Component{
             ],
             selectedTab: 'artists',
             solicitationVisible: false,
+            filterModalVisible: false,
         }
     }
     
@@ -100,7 +103,7 @@ class FeedPage extends Component{
                     }
                 }
             )
-            console.log(result.data[0].genres)
+            
             if(!result.data.error){
                 this.setState({
                     [tab]: result.data
@@ -143,6 +146,17 @@ class FeedPage extends Component{
         this.loadFeed('events');
     }
 
+    showFilterModal = () => {
+        this.setState({
+            filterModalVisible: true
+        })
+    }
+    closeFilterModal = () => {
+        this.setState({
+            filterModalVisible: false
+        });
+    }
+
     search = () => {} 
 
     filter = () => {}
@@ -166,7 +180,7 @@ class FeedPage extends Component{
                 {(tabs &&
                 <ScrollView
                     contentContainerStyle = {{
-                        alignItems: 'center'
+                        alignItems: 'center',
                     }}
                 >
                     <View style = {styles.row}>
@@ -194,6 +208,23 @@ class FeedPage extends Component{
                         ))}
                     </View>
 
+                    <TouchableOpacity
+                        style = {{
+                            alignSelf: 'flex-end',
+                            marginRight: 20,
+                            marginTop: 15,
+                            marginBottom: 15,
+                        }}
+                        onPress = {() => this.showFilterModal()}
+                    >
+                        <Text
+                            style = {{
+                                fontSize: 15
+                            }}
+                        >
+                            Filtrar
+                        </Text>
+                    </TouchableOpacity>
 
                     {this.state[selectedTab] &&
                     <FeedList 
@@ -224,6 +255,12 @@ class FeedPage extends Component{
                     eventId = {this.state.choosenId}
                     token = {this.context.token}
                     closeModal = {() => this.closeSolicitationModal()} 
+                />
+
+                <FilterModal 
+                    visible = {this.state.filterModalVisible}
+                    selectedTab = {this.state.selectedTab}
+                    closeModal = {() => this.closeFilterModal()}
                 />
             </View>
         )

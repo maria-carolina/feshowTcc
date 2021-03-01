@@ -11,9 +11,9 @@ const FeedProfileItem = (props) => {
     const navigation = useNavigation();
 
     const handleButtonClick = () => {
-        if(props.type === 'artists'){
+        if(props.type === 0){
             navigation.navigate('profilePageInvitation', {artist: props.item})
-        }else if(props.type == 'venues'){
+        }else if(props.type === 1){
             navigation.navigate('requestPage', {venue: props.item})
         }
     }
@@ -70,20 +70,21 @@ const FeedProfileItem = (props) => {
                 <View
                     style = {{
                         marginLeft: 17
-                    }}
+                    }} 
                 >
                     <Text>{(props.item.city || props.item.address.city)}</Text>
-                    {props.type !== 'producers' && null
-                    /*<View style = {styles.row}>
+                    {props.type !== 2 && 
+                    <View style = {styles.row}>
                         {props.item.genres.map((item, index) => {
+                            console.log(item);
                             let genreName = index === 0 ? item.name : ` | ${item.name}`;
-                            return <Text key={item.artist_genres.genre_id}>{genreName}</Text>;
+                            return <Text key={item.id}>{genreName}</Text>;
                         })}
-                    </View>*/}                
+                    </View>}                
                     
-                    {(props.type === 'artists' && 
+                    {(props.type === 0 && 
                         <Text>{props.item.members} membros</Text>
-                    ) || (props.type === 'venues' &&
+                    ) || (props.type === 1 &&
                         <Text>{props.item.capacity} pessoas</Text>
                     )}
 

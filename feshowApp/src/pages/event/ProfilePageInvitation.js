@@ -52,10 +52,11 @@ const ProfilePageInvitation = (props) => {
                     width: '100%'
                 }}
                 contentContainerStyle = {{
-                    alignItems: 'center'
+                    alignItems: 'center',
+
                 }}
             >
-            {eventList.map(item => {
+            {eventList.length > 0 ? (eventList.map(item => {
                 return(
                     <TouchableOpacity
                         style = {{
@@ -73,7 +74,15 @@ const ProfilePageInvitation = (props) => {
                         >{item.name}</Text>
                     </TouchableOpacity>
                 )
-            })}
+            })):(
+                <Text
+                    style={{
+                        marginTop: 10,
+                    }}
+                >
+                    Você não está organizando nenhum evento.
+                </Text>
+            )}
             </ScrollView>
             ) || 
             <ActivityIndicator 

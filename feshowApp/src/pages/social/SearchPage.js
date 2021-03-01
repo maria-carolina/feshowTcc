@@ -1,9 +1,8 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableHighlight, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, ScrollView, ActivityIndicator } from "react-native";
 import styles from "../../styles";
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import FeedEventItem from './FeedEventItem';
 import FeedProfileItem from './FeedProfileITem';
 
