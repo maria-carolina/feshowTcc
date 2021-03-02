@@ -41,6 +41,7 @@ const FilterModal = (props) => {
                         marginBottom: 7
                     }}
                 >
+                    
                     <Text 
                         style = {{
                             alignSelf: 'center',
@@ -50,6 +51,7 @@ const FilterModal = (props) => {
                         }}>
                         Filtros
                     </Text>
+
                     {context.user.type !== 2 &&
                         <TouchableOpacity 
                             style = {{

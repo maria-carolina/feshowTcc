@@ -11,6 +11,8 @@ import InvitationsPage from '../pages/event/InvitationsPage';
 
 import EventPage from '../pages/event/EventPage';
 import ProfilePage from '../pages/access/ProfilePage';
+import ProfileEditPage from '../pages/access/ProfileEditPage';
+
 
 
 //só para teste
@@ -121,13 +123,11 @@ const NavStack = (props) => {
     if (name === 'feed'){
         headerIcons = (
             <View style = {styles.row}>
-    
                 
                 <SearchOpener
                     isSearchOpen = {isSearchOpen}
                     handleClick = {setSearchOpen} 
                 />
-                
 
                 <TouchableOpacity>
                     <FontAwesome 
@@ -136,6 +136,7 @@ const NavStack = (props) => {
                         color = {'#000'}
                     />
                 </TouchableOpacity>
+
             </View>
         )
     }else if (name === 'profile'){
@@ -211,6 +212,11 @@ const NavStack = (props) => {
             <Stack.Screen 
                 name = 'profilePage'
                 component = {ProfilePage} //provisório
+            />
+
+            <Stack.Screen 
+                name = 'profileEditPage'
+                component = {ProfileEditPage}
             />
 
             <Stack.Screen 

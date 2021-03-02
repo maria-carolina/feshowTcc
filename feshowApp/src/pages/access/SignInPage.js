@@ -28,11 +28,11 @@ const Form = (props) => {
 
                     <TextInput 
                         placeholder = 'Digite seu username...'
-                     
                         style = {styles.textInput}
                         value = {values.username}
                         onChangeText = {handleChange('username')}
                     />
+                    
                     <View style = {{...styles.row, width: '70%'}}>
                         <TextInput 
                             placeholder = 'Insira a senha...'

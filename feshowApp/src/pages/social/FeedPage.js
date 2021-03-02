@@ -112,7 +112,7 @@ class FeedPage extends Component{
                 Alert.alert('Ops', result.data.error)
             }
         }catch(e){
-            console.log(e)
+            console.log(e);
         }
     }
 
@@ -151,25 +151,23 @@ class FeedPage extends Component{
             filterModalVisible: true
         })
     }
+
     closeFilterModal = () => {
         this.setState({
             filterModalVisible: false
         });
     }
 
-    search = () => {} 
+    filter = (type) => {
+        try{
+            let result = api.get();
+        }catch(e){
+            console.log(e)
+        }
 
-    filter = () => {}
+    }
 
     handleClick = () => {} 
-
-    loadSearch = () => {}
-
-    openFilterOptions = () => {}
-
-    addAttribute = () => {}
-
-    applyFilter = () => {}
 
     render(){
         var { tabs, selectedTab, events } = this.state;

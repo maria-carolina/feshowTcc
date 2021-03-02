@@ -51,7 +51,6 @@ const Styles = StyleSheet.create({
     outlineButtonLabel: {
         fontSize: 15,
         color: '#3F2058',
-        fontWeight: 'bold'
     },
 
     textInput: {
@@ -210,7 +209,12 @@ const Styles = StyleSheet.create({
         letterSpacing: 1
     },
 
- 
+    inputLabel: {
+        fontWeight: 'bold',
+        fontSize: 15,
+        marginTop: 10,
+        marginBottom: 5,
+    }
 
 })
 

@@ -170,8 +170,14 @@ class ProfilePage extends Component{
         }
     }
 
-    openProfileEditPage = () => {}
-    openCalendarPage = () => {}
+    openProfileEditPage = () => {
+        this.props.navigation.navigate('profileEditPage')
+    }
+
+    openCalendarPage = (id) => {
+        this.props.navigation.navigate('calendarPage', {id})
+    }
+
     openHistoricPage = () => {}
     openChatPage = () => {}
 
@@ -264,7 +270,8 @@ class ProfilePage extends Component{
 
             if(this.context.user.id === profile.id){
                 firstButton = {
-                    label: 'Editar perfil'
+                    label: 'Editar perfil',
+                    handleClick: () => this.openProfileEditPage()
                 }
             }else if(profile.type === 0){
                 firstButton = {
@@ -347,7 +354,7 @@ class ProfilePage extends Component{
                                 style = {{
                                     marginTop: 10
                                 }}
-                                onPress = {() => this.props.navigation.navigate('calendarPage', {id: profile.id})}
+                                onPress = {() => this.openCalendarPage(profile.id)}
                             >
                                 <Text
                                     style = {styles.outlineButtonLabel}
