@@ -41,6 +41,7 @@ class Artist extends Model {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' })
         this.belongsToMany(models.Genre, { foreignKey: 'artist_id', through: 'artist_genres', as: 'genres' });
         this.hasMany(models.ArtistEvent, { foreignKey: 'artist_id', as: 'events' })
+        this.belongsToMany(models.Instrument, { foreignKey: 'artist_id', through: 'artist_instruments', as: 'instruments' });
     }
 
 }

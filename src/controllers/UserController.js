@@ -24,6 +24,8 @@ const Address = require('../models/Address');
 const Event = require('../models/Event');
 const ArtistEvent = require('../models/ArtistEvent');
 const Notification = require('../models/Notification');
+const GenreVenue = require('../models/GenreVenue');
+const ArtistGenre = require('../models/ArtistGenre');
 
 function generateToken(params = {}) {
     //expirar em 1 ano 
@@ -548,6 +550,32 @@ module.exports = {
                     where: { user_id: user.id }
                 });
 
+                const artistInstruments = await ArtistInstrument.findAll({
+                    where: { artist_id: artist.id }
+                });
+
+                instruments = [];
+                for (let artistInstrument of artistInstruments) {
+                    let instrument = await Instrument.findByPk(artistInstrument.instrument_id);
+                    instruments.push({
+                        name: instrument.name,
+                        quantity: artistInstrument.quantity
+                    });
+                }
+
+                const artistEquipments = await ArtistEquipment.findAll({
+                    where: { artist_id: artist.id }
+                });
+
+                equipments = [];
+                for (let artistEquipment of artistEquipments) {
+                    let equipment = await Equipment.findByPk(artistEquipment.equipment_id);
+                    equipments.push({
+                        name: equipment.name,
+                        quantity: artistEquipment.quantity
+                    });
+                }
+
                 //organizando objeto
                 user.dataValues.artistId = artist.id;
                 user.dataValues.name = artist.name;
@@ -557,6 +585,8 @@ module.exports = {
                 user.dataValues.members = artist.members;
                 user.dataValues.cache = artist.cache;
                 user.dataValues.genres = artist.genres;
+                user.dataValues.instruments = instruments;
+                user.dataValues.equipments = equipments;
 
             } else if (user.type == 1) {
 
@@ -567,6 +597,19 @@ module.exports = {
                     ],
                     where: { user_id: user.id }
                 });
+
+                const equipmentsVenue = await EquipmentVenue.findAll({
+                    where: { venue_id: venue.id }
+                });
+
+                equipments = [];
+                for (let equipmentVenue of equipmentsVenue) {
+                    let equipment = await Equipment.findByPk(equipmentVenue.equipment_id);
+                    equipments.push({
+                        name: equipment.name,
+                        quantity: equipmentVenue.quantity
+                    });
+                }
 
                 //organizando objeto
                 user.dataValues.venueId = venue.id;
@@ -579,6 +622,7 @@ module.exports = {
                 user.dataValues.capacity = venue.capacity;
                 user.dataValues.genres = venue.genres;
                 user.dataValues.address = venue.address;
+                user.dataValues.equipments = equipments;
 
             } else {
                 const producer = await Producer.findOne({
@@ -642,5 +686,134 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao exibir notificações' })
         }
+    },
+
+    async updateGenres(req, res) {
+        try {
+            const { genres } = req.body;
+            const user = await User.findByPk(req.userId);
+
+            if (user.type === 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                })
+                await ArtistGenre.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                if (genres !== undefined) {
+                    artist.setGenres(genres);
+                }
+
+            } else if (user.type === 1) {
+
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                })
+                await GenreVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                if (genres !== undefined) {
+                    venue.setGenres(genres);
+                }
+            }
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar generos' })
+        }
+    },
+
+    async updateInstruments(req, res) {
+        try {
+            const { instruments } = req.body;
+
+            const user = await User.findByPk(req.userId);
+
+            const artist = await Artist.findOne({
+                where: { user_id: user.id }
+            });
+
+            await ArtistInstrument.destroy({
+                where: { artist_id: artist.id }
+            });
+
+            if (instruments !== undefined) {
+                const instrument = instruments.map(
+                    data => {
+                        return {
+                            artist_id: artist.id,
+                            instrument_id: data.id,
+                            quantity: data.quantity
+                        }
+                    });
+
+                await ArtistInstrument.bulkCreate(instrument);
+            }
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar instrumentos' })
+        }
+
+    },
+
+    async updateEquipments(req, res) {
+        try {
+            const { equipments } = req.body;
+
+            const user = await User.findByPk(req.userId);
+
+            if (user.type == 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                await ArtistEquipment.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                if (equipments !== undefined) {
+                    const equip = equipments.map(
+                        data => {
+                            return {
+                                artist_id: artist.id,
+                                equipment_id: data.id,
+                                quantity: data.quantity
+                            }
+                        });
+
+                    await ArtistEquipment.bulkCreate(equip);
+
+                }
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                await EquipmentVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                if (equipments !== undefined) {
+                    const equip = equipments.map(
+                        data => {
+                            return {
+                                venue_id: venue.id,
+                                equipment_id: data.id,
+                                quantity: data.quantity
+                            }
+                        });
+
+                    await EquipmentVenue.bulkCreate(equip);
+                }
+            }
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar equipamentos' })
+        }
+
     }
 };
