@@ -1,15 +1,20 @@
-import React from 'react';
-import {View, Text, TouchableOpacity, TextInput, ScrollView} from 'react-native';
+import React, { useEffect, useContext, useState } from 'react';
+import {View, Text, TouchableOpacity, TextInput, ScrollView, Alert, ActivityIndicator} from 'react-native';
 import { Formik } from 'formik';
 import styles from '../../styles';
+import api from '../../services/api';
+import AuthContext from '../../contexts/auth';
+import Format from '../utils/Format';
+import { useNavigation } from '@react-navigation/native';
+import ProfileUpdateContext from '../../contexts/profileUpdate';
 
 
-AccountInfoEdit = () => {
+AccountInfoEdit = (props) => {
     return(
         <Formik
             initialValues = {{
-                username: 'boogarins',
-                email: 'boogarins@bol.com'
+                username: props.profile.username,
+                email: props.profile.email
             }}
         >
             {({values, handleChange, handleSubmit}) => (
@@ -71,17 +76,36 @@ AccountInfoEdit = () => {
     )
 }
 
-BasicInfoEdit = () => {
+BasicInfoEdit = (props) => {
+    const authContext = useContext(AuthContext);
+
+    let initialValues;
+    if(authContext.user.type === 0){
+        initialValues = {
+            name: props.profile.name,
+            state: 'SP',
+            city: props.profile.city,
+            members: String(props.profile.members),
+            payment: String(props.profile.cache),
+            description: props.profile.description
+        }
+    }else if(authContext.user.type === 1){
+        initialValues = {
+            name: props.profile.name,
+            capacity: String(props.profile.capacity),
+            description: props.profile.capacity
+        }
+    }else{
+        initialValues = {
+            name: props.profile.name,
+            state: 'GO',
+            city: 'Goiânia',
+        }
+    }
+
     return (
         <Formik
-            initialValues = {{
-                name: 'boogarins',
-                state: 'GO',
-                city: 'Goiânia',
-                members: '4',
-                payment: '5.000,00',
-                description: 'pipipopopopipop'
-            }}
+            initialValues = {initialValues}
         >
             {({values, handleChange, handleSubmit}) => (
                 <View
@@ -105,7 +129,8 @@ BasicInfoEdit = () => {
                         onChangeText = {handleChange('name')}
                     />
 
-                    <View style = {{ flexDirection: 'row' }}>
+                    {authContext.user.type !== 1 &&
+                        <View style = {{ flexDirection: 'row' }}>
 
 
                         <View 
@@ -145,46 +170,74 @@ BasicInfoEdit = () => {
                             />
                         </View>
                     </View>
+                    }
 
-                    <View style = {{ flexDirection: 'row' }}>
+                    {authContext.user.type === 0 &&
+                        <View style = {{ flexDirection: 'row' }}>
 
-                        <View 
+                            <View 
+                                style = {{
+                                    width: '49%',
+                                    marginRight: '2%'
+                                }}
+                            >
+                                <Text style = {styles.inputLabel}>
+                                    membros
+                                </Text>
+
+                                <TextInput 
+                                    value = {values.members}
+                                    style = {{
+                                        ...styles.textInput,
+                                        width: '100%',
+                                        marginTop: 0
+                                    }}
+                                    onChangeText = {handleChange('members')}
+                                    keyboardType = 'numeric'
+                                />
+                            </View>
+                            
+
+                            
+                            <View style = {{ width: '49%' }}>
+                                <Text style = {styles.inputLabel}>
+                                    cache
+                                </Text>
+
+                                <TextInput 
+                                    value = {values.payment}
+                                    style = {{
+                                        ...styles.textInput,
+                                        width: '100%',
+                                        marginTop: 0
+                                    }}
+                                    onChangeText = {handleChange('payment')}
+                                    keyboardType = 'numeric'
+                                />
+                            </View>
+                            
+                        </View>
+                    }
+
+
+                    {authContext.user.type === 1 &&
+                        <>
+                        <Text style = {styles.inputLabel}>
+                            capacidade
+                        </Text>
+
+                        <TextInput 
+                            value = {values.capacity}
                             style = {{
-                                width: '49%',
-                                marginRight: '2%'
+                                ...styles.textInput,
+                                width: '100%',
+                                marginTop: 0
                             }}
-                        >
-                            <Text style = {styles.inputLabel}>
-                                membros
-                            </Text>
-
-                            <TextInput 
-                                value = {values.members}
-                                style = {{
-                                    ...styles.textInput,
-                                    width: '100%',
-                                    marginTop: 0
-                                }}
-                                onChangeText = {handleChange('members')}
-                            />
-                        </View>
-
-                        <View style = {{ width: '49%' }}>
-                            <Text style = {styles.inputLabel}>
-                                cache
-                            </Text>
-
-                            <TextInput 
-                                value = {values.payment}
-                                style = {{
-                                    ...styles.textInput,
-                                    width: '100%',
-                                    marginTop: 0
-                                }}
-                                onChangeText = {handleChange('payment')}
-                            />
-                        </View>
-                    </View>            
+                            onChangeText = {handleChange('capacity')}
+                            keyboardType = 'numeric'
+                        />
+                        </>
+                    }
                     
                     <Text style = {styles.inputLabel}>
                         descrição
@@ -210,7 +263,8 @@ BasicInfoEdit = () => {
     )
 }
 
-GenreEdit = () => {
+GenreEdit = (props) => {
+    const navigation = useNavigation();
     return (
         <View
             style = {{
@@ -232,15 +286,28 @@ GenreEdit = () => {
             </Text>
 
             <View style = {{flexDirection: 'row'}}>
-                <Text>rock | </Text>
-                <Text>indie</Text>
+                {props.list.length > 0 ? (
+                    props.list.map((item, index) => {
+                        return (
+                            <Text key = {item.id}> 
+                                {index === 0 ? item.name: ` | ${item.name}`}
+                            </Text> 
+                        )
+                    })
+                ):(
+                    <Text>Nenhum gênero cadastrado.</Text>
+                )}
+                
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress = {() => navigation.navigate('genrePick', { list: props.list })}
+            >
                 <Text style = {{ color: '#3F2058' }} >
-                    Alterar generos
+                    {props.list.length > 0 ? 'Alterar' : 'Adicionar'} generos
                 </Text>
             </TouchableOpacity>
+
         </View>
     )
 }
@@ -261,56 +328,125 @@ StuffEdit = (props) => {
                     fontWeight: 'bold',
                 }}
             >
-                {props.type} 
+                {props.type === 'instrumento' ? 'Instrumentos' : 'Equipamentos'} 
             </Text>
             
             <View style = {{marginVertical: 15}}>
-                {props.list.map(item => (
+                {props.list.length > 0 ? (props.list.map(item => (
                     <Text style = {{textAlign: 'center'}}>{item.quantity} {item.name}</Text>
-                ))}
+                ))):
+                    <Text>{`Nenhum ${props.type} cadastrado.`}</Text>
+                }
             </View>
 
             
             <TouchableOpacity>
-                <Text style = {{ color: '#3F2058' }} >
-                    Alterar equipamentos
+                <Text style = {{ color: '#3F2058' }}>
+                    {props.list.length > 0 ? `Alterar ${props.type}`: `Adicionar ${props.type}s`}
                 </Text>
             </TouchableOpacity>
         </View>
     )
 }
 
-const ProfileEditPage = () => {
+OpeningPeriodEdit = (props) => {
+    return(
+        <View
+            style = {{
+                paddingVertical: 10,
+                borderBottomWidth: 1,
+                borderBottomColor: '#cecece',
+                alignItems: 'center',
+            }}
+        >
+            <Text
+                style = {{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                }}
+            >
+                Funcionamento
+            </Text>
 
-    const equipmentList = [
-        {
-            quantity: 2,
-            name : 'amplificadores'
-        },
-        {
-            quantity: 2,
-            name : 'monitores'
-        },
-        {
-            quantity: 1,
-            name : 'PA'
-        },
-    ]
+            <View style = {{marginVertical: 15, alignItems: 'center'}}>
+                <Text>{props.initialDay} a {props.finalDay}</Text>
+                <Text>{props.initialHour} às {props.finalHour}</Text>
+            </View>
 
-    const instrumentList = [
-        {
-            quantity: 2,
-            name : 'guitarras'
-        },
-        {
-            quantity: 1,
-            name : 'baixo'
-        },
-        {
-            quantity: 1,
-            name : 'bateria'
-        },
-    ]
+            <TouchableOpacity>
+                <Text style = {{ color: '#3F2058' }} >
+                    Alterar funcionamento
+                </Text>
+            </TouchableOpacity>
+
+        </View>
+    )
+}
+
+AddressEdit = (props) => {
+
+    return (
+        <View
+            style = {{
+                paddingVertical: 10,
+                borderBottomWidth: 1,
+                borderBottomColor: '#cecece',
+                alignItems: 'center',
+            }}
+        >
+
+            <Text
+                style = {{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                }}
+            >
+                Endereço
+            </Text>
+            
+            <View style = {{marginVertical: 15, alignItems: 'center'}}>
+                <Text>
+                    {props.address.street}
+                    , {props.address.number} 
+                </Text>
+
+                <Text>
+                    {props.address.district}
+                    , {props.address.city} - {props.address.uf}
+                    
+                </Text>
+
+                <Text>
+
+                    {props.address.zipcode}
+                </Text>
+            </View>
+
+            <TouchableOpacity>
+                <Text style = {{ color: '#3F2058' }} >
+                    Alterar endereço
+                </Text>
+            </TouchableOpacity>
+
+
+        </View>
+    )
+}
+
+const ProfileEditPage = ({ navigation }) => {
+    //const [profile, setProfile] = useState(null);
+    const { profile, loadProfile } = useContext(ProfileUpdateContext);
+    const authContext = useContext(AuthContext);
+
+    useEffect(() => {
+        async function load(){
+            await loadProfile();
+        }
+        load();
+    }, []);
+
+   
+    
     return (
         <ScrollView
             contentContainerStyle = {{
@@ -318,6 +454,9 @@ const ProfileEditPage = () => {
                 paddingTop: 10,
             }}
         >
+
+            {profile ? (
+            <>
             <Text
                 style = {{
                     fontSize: 18,
@@ -327,19 +466,50 @@ const ProfileEditPage = () => {
                 Editar Perfil
             </Text>
 
-            <AccountInfoEdit />
-            <BasicInfoEdit />
-            <GenreEdit />
-
-            <StuffEdit
-                type = {'Instrumentos'}
-                list = {instrumentList} 
+            <AccountInfoEdit 
+                profile = {profile}
             />
 
-            <StuffEdit
-                type = {'Equipamento'}
-                list = {equipmentList} 
+            <BasicInfoEdit
+                profile = {profile} 
             />
+            
+            {authContext.user.type === 1 && 
+                <>
+                <OpeningPeriodEdit
+                    initialDay = {Format.getWeekDay(profile.initialDay)}
+                    finalDay = {Format.getWeekDay(profile.finalDay)}
+                    initialHour = {Format.formatTime(profile.initialHour)}
+                    finalHour = {Format.formatTime(profile.finalHour)}
+                />
+
+                <AddressEdit
+                    address = {profile.address}
+                />
+
+                </>
+            }
+            
+            {authContext.user.type !== 2 &&
+                <>
+                <GenreEdit 
+                    list = {profile.genres}
+                />
+
+                <StuffEdit
+                    type = {'equipamento'}
+                    list = {profile.equipments} 
+                />
+                </>
+            }
+
+            {authContext.user.type === 0 &&
+                <StuffEdit
+                    type = {'instrumento'}
+                    list = {profile.instruments} 
+                />
+            }
+            
 
             <View 
                 style = {{
@@ -373,7 +543,13 @@ const ProfileEditPage = () => {
                     </Text>
                 </TouchableOpacity>
             </View>
-
+            </>
+            ):(
+                <ActivityIndicator
+                    size = 'large'
+                    color = '#000' 
+                />
+            )}
         </ScrollView>
     );
 }

@@ -1,79 +1,101 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect, useContext } from 'react';
 import {View, Text, TouchableOpacity, FlatList} from 'react-native';
 import ListItem from './ListItem';
 import styles from '../../../styles';
-import api from '../../../services/api'
+import api from '../../../services/api';
+import { useNavigation } from '@react-navigation/native';
+import ProfileUpdateContext from '../../../contexts/profileUpdate';
 
 
+function GenrePick(props) {
+    const [genres, setGenres] = useState(null);
+    const [selected, setSelected] = useState([]);
 
-class GenrePick extends Component {
-    constructor(props){
-        super(props)
-        this.state = {genres: [], selected: []}
-    }
+    const { alterProfile } = useContext(ProfileUpdateContext);
+    const navigation = useNavigation();
 
-    componentDidMount(){
-        this.loadGenres();
-    }
+    useEffect(() => {
+        loadGenres();
+    }, [])
 
-    loadGenres = async () => {
+    const loadGenres = async () => {
+
+        if(props.route.params.list){
+            for(let item of props.route.params.list){
+                select(item.id);
+            }
+        }
+
         try{
             var result = await api.get('/getGenres');
         }catch(e){
             throw e;
         }
 
-        this.setState({
-            genres: result.data
-        })
+        setGenres(result.data);
+        
     }
 
-    select = (value) => {
-        let selected = this.state.selected;
-        if(selected.includes(value)){
-            selected.splice(selected.indexOf(value), 1);
+    const select = (value) => {
+        let selectedAux = selected;
+
+        if(selectedAux.includes(value)){
+            selectedAux.splice(selectedAux.indexOf(value), 1);
         }else{
-            selected.push(value);
+            selectedAux.push(value);
         }
-        this.setState({
-            selected: selected
-        })
+        
+        setSelected([...selectedAux]);
     }
 
-    advance = () => {
-        let user = this.props.route.params.user;
-        user.profile.genres = this.state.selected;
-        console.log(user);
-        this.props.navigation.navigate('equipmentPick', {user: user});
+    const advance = () => {
+        let user = props.route.params.user;
+        user.profile.genres = selected;
+        navigation.navigate('equipmentPick', {user: user});
     }
 
-    render(){
-        let buttonLabel = this.state.selected.length > 0 ? 'Avançar':'Pular';
-        return(
-            <View style = {styles.container}>
-                <Text style = {styles.title}>Escolha os gêneros que tenham a ver com seu trabalho</Text>
+    const finishUpdate = () => {
+        alterProfile('genres', genres.filter(item => selected.includes(item.id)));
+        navigation.navigate('profileEditPage');
+    }
+
+    return(
+        <View style = {styles.container}>
+
+            <Text style = {styles.title}>
+                Escolha os gêneros que tenham a ver com seu trabalho
+            </Text>
+
+            {genres &&
+                <>
                 <FlatList
                     style = {styles.list}
-                    data = {this.state.genres}
+                    data = {genres}
                     renderItem = {({item}) => (
                         <ListItem
                             item = {item}
-                            select = {() => this.select(item.id)}
-                            selected = {this.state.selected}
+                            select = {() => select(item.id)}
+                            selected = {selected}
                             singlePick = {false} 
                         />
                     )}
                     keyExtractor = {(item, index) => index.toString()}
                 />
+
                 <TouchableOpacity 
-                    onPress = {() => this.advance()}
+                    onPress = {props.route.params.list ? () => finishUpdate() : () => advance()}
                     style = {styles.button}
                 >
-                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
+                    <Text style = {styles.buttonLabel}>
+                        {selected.length > 0 ? 'Avançar': 'Pular' }
+                    </Text>
                 </TouchableOpacity>
-            </View>
-        )
-    }
+                </>
+            }
+
+        </View>
+    )
+    
 }
 
 export default GenrePick;

@@ -34,11 +34,40 @@ import CalendarPage from '../pages/social/CalendarPage';
 import NotificationsPage from '../pages/social/NotificationsPage';
 import FeedPage from '../pages/social/FeedPage';
 import SearchPage from '../pages/social/SearchPage'
+import GenrePick from '../pages/access/signup/GenrePick';
+
+import { ProfileUpdateProvider } from '../contexts/profileUpdate';
 
 
 const Stack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
+
+const ProfileUpdate = () => {
+    return(
+        <ProfileUpdateProvider>
+
+            <Stack.Navigator
+                screenOptions = {{
+                    headerShown: false
+                }}
+            >
+
+                <Stack.Screen 
+                    name = 'profileEditPage'
+                    component = {ProfileEditPage}
+                />
+
+                <Stack.Screen
+                    name = 'genrePick'
+                    component = {GenrePick} 
+                />
+
+            </Stack.Navigator>
+
+        </ProfileUpdateProvider>
+    )
+}
 
 const DrawerOpener = () => { 
     var navigation = useNavigation();
@@ -164,7 +193,6 @@ const NavStack = (props) => {
         headerStyle: {backgroundColor: '#F2F2F2', elevation: 0},
         headerRightContainerStyle: {marginRight: 20, marginTop: 10},
         headerRight: () => headerIcons
-        
     }
 
    /* if(isSearchOpen){
@@ -215,8 +243,18 @@ const NavStack = (props) => {
             />
 
             <Stack.Screen 
+                name = 'profileUpdate'
+                component = {ProfileUpdate}
+            />
+
+            <Stack.Screen 
                 name = 'profileEditPage'
                 component = {ProfileEditPage}
+            />
+
+            <Stack.Screen
+                name = 'genrePick'
+                component = {GenrePick} 
             />
 
             <Stack.Screen 
@@ -253,6 +291,8 @@ const NavStack = (props) => {
                 name = 'searchPage' 
                 component = {SearchPage} //provisório
             />
+
+            
             
         </Stack.Navigator>
     )

@@ -130,7 +130,6 @@ class ProfilePage extends Component{
                     result.data.image = null;
                 }
 
-                console.log(result.data)
 
                 this.setState({
                     profile: result.data
@@ -171,7 +170,7 @@ class ProfilePage extends Component{
     }
 
     openProfileEditPage = () => {
-        this.props.navigation.navigate('profileEditPage')
+        this.props.navigation.navigate('profileUpdate')
     }
 
     openCalendarPage = (id) => {

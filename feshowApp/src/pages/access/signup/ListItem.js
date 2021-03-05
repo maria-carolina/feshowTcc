@@ -22,9 +22,11 @@ const Item = (props) => {
             </View>
         )
     }else{
-        text = <Text style = {styles.itemText}>
-                    {props.item.name}
-                </Text>
+        text = (
+            <Text style = {styles.itemText}>
+                {props.item.name}
+            </Text>
+        )
     } 
         
 

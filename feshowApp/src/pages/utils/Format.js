@@ -20,6 +20,16 @@ class Format{
         return formatted;
     }
 
+    static getWeekDay(number){
+        const weekDays = [
+            'Domingo', 'Segunda-Feira', 'Terça-Feira',
+            'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira',
+            'Sábado'
+        ]
+
+        return weekDays[number - 1];
+    }
+
 }
 
 export default Format;
