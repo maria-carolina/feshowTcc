@@ -4,6 +4,7 @@ const Venue = require('../models/Venue');
 const User = require('../models/User');
 const Event = require('../models/Event');
 const ImageUser = require('../models/ImageUser');
+const ArtistEquipment = require('../models/ArtistEquipment');
 
 const moment = require('moment');
 const { Op } = require('sequelize');
@@ -1164,5 +1165,42 @@ module.exports = {
             return res.send({ error: 'Erro ao exibir filtro de produtor por cidade' })
         }
     },
+
+    /*async filterEquipments(req, res) {
+        // try {
+        const user = await User.findByPk(req.userId);
+        let venuesCompatible = [];
+
+        if (user.type === 0) {
+            const artist = await Artist.findOne({
+                where: { user_id: user.id }
+            });
+            
+            const artistEquipments = await ArtistEquipment.findAll({
+                where: { artist_id: artist.id }
+            });
+
+            const venues = await Venue.findAll({
+                include: { association: 'equipments' }
+            });
+
+            return res.send(venues);
+
+            venues.forEach((venue) => {
+                venue.genres.forEach((genre) => {
+                    console.log(genre)
+
+                    inArray(genre.id, genres) ? venuesCompatible.push(venue) : '';
+                });
+            });
+        }
+
+        return res.send(venuesCompatible);
+
+
+        //   } catch (err) {
+        //        return res.send({ error: 'Erro ao exibir avisos' })
+        //   }
+    }*/
 
 };

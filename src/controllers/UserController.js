@@ -815,5 +815,145 @@ module.exports = {
             return res.send({ error: 'Erro ao editar equipamentos' })
         }
 
+    },
+
+    async update(req, res) {
+        try {
+            let { username, email, password } = req.body;
+
+            password = await bcrypt.hash(password, 10);
+
+            const user = await User.findByPk(req.userId);
+
+            await User.update({
+                username, email, password
+            }, {
+                where: { id: user.id }
+            });
+
+            if (user.type == 0) {
+                const { profile: {
+                    name, cache, zipcode, city, members, genres, equipment, instruments
+                } } = req.body;
+
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                await Artist.update({
+                    name, cache, zipcode, city, members
+                }, {
+                    where: { id: artist.id }
+                });
+
+                await ArtistEquipment.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                if (equipment !== undefined) {
+                    const equipments = equipment.map(
+                        data => {
+                            return {
+                                artist_id: artist.id,
+                                equipment_id: data.id,
+                                quantity: data.quantity
+                            }
+                        });
+
+                    await ArtistEquipment.bulkCreate(equipments);
+                }
+
+                await ArtistInstrument.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                if (instruments !== undefined) {
+                    const instrument = instruments.map(
+                        data => {
+                            return {
+                                artist_id: artist.id,
+                                instrument_id: data.id,
+                                quantity: data.quantity
+                            }
+                        });
+
+                    await ArtistInstrument.bulkCreate(instrument);
+                }
+
+                await ArtistGenre.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                if (genres !== undefined) {
+                    artist.setGenres(genres);
+                }
+            }
+
+            else if (user.type == 1) {
+                const {
+                    profile: {
+                        name, capacity, genres, equipment,
+                        address: { city: cityVenue, district, number, street, uf, zipcode },
+                        openinghours: { finalDay, finalHour, initialDay, initialHour }
+                    }
+                } = req.body;
+
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                await Venue.update({
+                    name, capacity, finalDay, finalHour, initialDay, initialHour
+                }, {
+                    where: { id: venue.id }
+                });
+
+                await Address.update({
+                    city: cityVenue, district, number, street, uf, zipcode
+                }, {
+                    where: { venue_id: venue.id }
+                });
+
+                await EquipmentVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                if (equipment !== undefined) {
+                    const equipments = equipment.map(
+                        data => {
+                            return {
+                                venue_id: venue.id,
+                                equipment_id: data.id,
+                                quantity: data.quantity
+                            }
+                        });
+
+                    await EquipmentVenue.bulkCreate(equipments);
+                }
+
+                await GenreVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                if (genres !== undefined) {
+                    venue.setGenres(genres);
+                }
+
+            } else {
+                const {
+                    profile: { name, zipcode, city }
+                } = req.body;
+
+                await Producer.update({
+                    name, chat_permission: 0, zipcode, city
+                }, {
+                    where: { user_id: user.id }
+                });
+            }
+
+            return res.status(200).send('ok');
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar usuário' })
+        }
     }
 };

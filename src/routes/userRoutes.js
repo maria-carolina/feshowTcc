@@ -32,6 +32,8 @@ userRoutes.put('/updateGenres', UserController.updateGenres);
 userRoutes.put('/updateInstruments', UserController.updateInstruments);
 userRoutes.put('/updateEquipments', UserController.updateEquipments);
 
+userRoutes.put('/updateUser', UserController.update);
+
 //userRoutes.delete('/deleteUser', UserController.deleteUser)
 
 module.exports = userRoutes;

@@ -40,6 +40,10 @@ class Venue extends Model {
                         msg: 'O campo capacidade não pode ser vazio'
                     }
                 }
+            },
+            user_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true
             }
         }, {
             sequelize,
@@ -50,6 +54,7 @@ class Venue extends Model {
         this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
         this.belongsToMany(models.Genre, { foreignKey: 'venue_id', through: 'genre_venues', as: 'genres' });
         this.hasOne(models.Address, { foreignKey: 'venue_id', as: 'address' });
+        this.hasMany(models.EquipmentVenue, { foreignKey: 'venue_id', as: 'equipments' });
     }
 
 }
