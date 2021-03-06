@@ -23,8 +23,7 @@ class EquipmentVenue extends Model {
         })
     }
     static associate(models){
-        this.belongsToMany(models.Equipment, { foreignKey: 'venue_id', through: 'equipment_venues', as: 'equipments'});
-        this.belongsToMany(models.Artist, { foreignKey: 'equipment_id', through: 'equipment_venues', as: 'equipmentVenues'});
+        this.belongsTo(models.Equipment, { foreignKey: 'equipment_id', as: 'equipments' })
     }
 
 }

@@ -19,6 +19,15 @@ function inArray(id, array) {
     return false;
 }
 
+function inArrayEquip(id, array) {
+    for (var i = 0; i < array.length; i++) {
+        if (array[i].equipment_id === id) {
+            return true; //existe no array
+        }
+    }
+    return false;
+}
+
 function shuffle(array) { //para misturar array do search
     let m = array.length, t, i;
 
@@ -1166,41 +1175,40 @@ module.exports = {
         }
     },
 
-    /*async filterEquipments(req, res) {
-        // try {
-        const user = await User.findByPk(req.userId);
-        let venuesCompatible = [];
+    async filterEquipments(req, res) {
+        try {
+            const user = await User.findByPk(req.userId);
+            let venuesCompatible = [];
 
-        if (user.type === 0) {
-            const artist = await Artist.findOne({
-                where: { user_id: user.id }
-            });
-            
-            const artistEquipments = await ArtistEquipment.findAll({
-                where: { artist_id: artist.id }
-            });
-
-            const venues = await Venue.findAll({
-                include: { association: 'equipments' }
-            });
-
-            return res.send(venues);
-
-            venues.forEach((venue) => {
-                venue.genres.forEach((genre) => {
-                    console.log(genre)
-
-                    inArray(genre.id, genres) ? venuesCompatible.push(venue) : '';
+            if (user.type === 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
                 });
-            });
+
+                const artistEquipments = await ArtistEquipment.findAll({
+                    where: { artist_id: artist.id }
+                });
+
+                const venues = await Venue.findAll({
+                    include: {
+                        association: 'equipments',
+                        include: { association: 'equipments' }
+                    }
+                });
+
+                venues.forEach((venue) => {
+                    venue.equipments.forEach((equipment) => {
+                        inArrayEquip(equipment.equipment_id, artistEquipments) ? venuesCompatible.push(venue) : '';
+                    });
+                });
+            }
+
+            return res.send(venuesCompatible);
+
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir filtro' })
         }
-
-        return res.send(venuesCompatible);
-
-
-        //   } catch (err) {
-        //        return res.send({ error: 'Erro ao exibir avisos' })
-        //   }
-    }*/
+    }
 
 };
