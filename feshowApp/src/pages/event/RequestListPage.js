@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, Modal} from 'react-native';
+import {View, Text, TouchableOpacity, FlatList, ActivityIndicator, Modal, Alert} from 'react-native';
 import api from '../../services/api';
 import styles from '../../styles';
 import AuthContext from '../../contexts/auth';
@@ -149,7 +149,9 @@ const RequestListItem = (props) => {
                     ...styles.row, 
                     alignSelf: 'flex-end'
                 }}>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress = {() => props.acceptRequest(props.item)}
+                    >
                         <Text 
                             style = {{
                                 color: '#3F2058',
@@ -203,8 +205,6 @@ class RequestListPage extends Component{
 
             if(!('error' in result.data)){
                 
-                
-                
                 this.setState({
                     requests: result.data
                 })
@@ -216,7 +216,24 @@ class RequestListPage extends Component{
         }
     }
     
-    respondRequest = () => {}
+    acceptRequest = async (item) => {
+        let event = item.solicitation;
+        var result = await api.post(
+            '/event/store', 
+            event, 
+            {
+                headers: {
+                    Authorization: `Bearer ${this.context.token}`
+                }
+            }
+        );
+
+
+        if(!('error' in result.data)){
+            this.props.navigation.navigate('eventPage', {id:result.data.id});
+            Alert.alert('Pronto!', `Evento cadastrado com sucesso!`)
+        }
+    }
 
     showModal = (item) => {
         this.setState({
@@ -244,7 +261,8 @@ class RequestListPage extends Component{
                             
                             return(
                                 <RequestListItem
-                                    item = {item} 
+                                    item = {item}
+                                    acceptRequest = {(item) => this.acceptRequest(item)} 
                                     showModal = {(item) => this.showModal(item)}
                                 />
                             )

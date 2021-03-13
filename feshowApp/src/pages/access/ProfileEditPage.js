@@ -10,74 +10,77 @@ import ProfileUpdateContext from '../../contexts/profileUpdate';
 
 
 AccountInfoEdit = (props) => {
+    const { alterProfile } = useContext(ProfileUpdateContext);
     return(
-        <Formik
-            initialValues = {{
-                username: props.profile.username,
-                email: props.profile.email
+        <View
+            style = {{
+                marginTop: 10,
+                borderBottomWidth: 1,
+                borderBottomColor: '#cecece'
             }}
         >
-            {({values, handleChange, handleSubmit}) => (
-                <View
+
+            <Text style = {styles.inputLabel}>
+                username
+            </Text>
+
+            <TextInput 
+                value = {props.profile.username}
+
+                style = {{
+                    ...styles.textInput,
+                    width: '100%',
+                    marginTop: 0
+                }}
+
+                onChangeText = {(text) => {
+                    alterProfile('username', text)
+                }}
+            />
+
+            <Text style = {styles.inputLabel}>
+                email
+            </Text>
+
+            <TextInput 
+                value = {props.profile.email}
+
+                style = {{
+                    ...styles.textInput,
+                    width: '100%',
+                    marginTop: 0
+                }}
+
+                onChangeText = {(text) => {
+                    handleChange('email');
+                    alterProfile('email', text);
+                }}
+            />
+
+            <TouchableOpacity
+                style = {{
+                    alignSelf: 'flex-end',
+                    marginVertical: 15
+                }}
+            >
+                <Text
                     style = {{
-                        marginTop: 10,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#cecece'
+                        fontSize: 15,
+                        color: '#3f2058'
                     }}
                 >
+                    Alterar senha
+                </Text>
+            </TouchableOpacity>
 
-                    <Text style = {styles.inputLabel}>
-                        username
-                    </Text>
-
-                    <TextInput 
-                        value = {values.username}
-                        style = {{
-                            ...styles.textInput,
-                            width: '100%',
-                            marginTop: 0
-                        }}
-                        onChangeText = {handleChange('username')}
-                    />
-
-                    <Text style = {styles.inputLabel}>
-                        email
-                    </Text>
-
-                    <TextInput 
-                        value = {values.email}
-                        style = {{
-                            ...styles.textInput,
-                            width: '100%',
-                            marginTop: 0
-                        }}
-                        onChangeText = {handleChange('email')}
-                    />
-
-                    <TouchableOpacity
-                        style = {{
-                            alignSelf: 'flex-end',
-                            marginVertical: 15
-                        }}
-                    >
-                        <Text
-                            style = {{
-                                fontSize: 15,
-                                color: '#3f2058'
-                            }}
-                        >
-                            Alterar senha
-                        </Text>
-                    </TouchableOpacity>
-
-                </View>
-            )}
-        </Formik>
-    )
+        </View>
+        )
+    
 }
 
 BasicInfoEdit = (props) => {
     const authContext = useContext(AuthContext);
+    const { alterProfile } = useContext(ProfileUpdateContext);
 
     let initialValues;
     if(authContext.user.type === 0){
@@ -126,7 +129,10 @@ BasicInfoEdit = (props) => {
                             width: '100%',
                             marginTop: 0
                         }}
-                        onChangeText = {handleChange('name')}
+                        onChangeText = {(text) => {
+                            handleChange('name');
+                            alterProfile('name', text)
+                        }}
                     />
 
                     {authContext.user.type !== 1 &&
@@ -192,7 +198,10 @@ BasicInfoEdit = (props) => {
                                         width: '100%',
                                         marginTop: 0
                                     }}
-                                    onChangeText = {handleChange('members')}
+                                    onChangeText = {(text) => {
+                                        handleChange('members');
+                                        alterProfile('members', text)
+                                    }}
                                     keyboardType = 'numeric'
                                 />
                             </View>
@@ -211,7 +220,10 @@ BasicInfoEdit = (props) => {
                                         width: '100%',
                                         marginTop: 0
                                     }}
-                                    onChangeText = {handleChange('payment')}
+                                    onChangeText = {(text) => {
+                                        handleChange('payment');
+                                        alterProfile('payment', text)
+                                    }}
                                     keyboardType = 'numeric'
                                 />
                             </View>
@@ -233,7 +245,10 @@ BasicInfoEdit = (props) => {
                                 width: '100%',
                                 marginTop: 0
                             }}
-                            onChangeText = {handleChange('capacity')}
+                            onChangeText = {(text) => {
+                                handleChange('capacity');
+                                alterProfile('capacity', text);
+                            }}
                             keyboardType = 'numeric'
                         />
                         </>
@@ -252,7 +267,10 @@ BasicInfoEdit = (props) => {
                             marginTop: 0,
                             textAlignVertical: 'top'
                         }}
-                        onChangeText = {handleChange('description')}
+                        onChangeText = {(text) => {
+                            handleChange('description');
+                            alterProfile('description', text)
+                        }}
                     />
 
 
@@ -313,6 +331,8 @@ GenreEdit = (props) => {
 }
 
 StuffEdit = (props) => {
+    const navigation = useNavigation();
+
     return (
         <View
             style = {{
@@ -340,7 +360,12 @@ StuffEdit = (props) => {
             </View>
 
             
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress = {() => {
+                    let routeName = props.type === 'instrumento' ? 'instrumentPick' : 'equipmentPick';
+                    navigation.navigate(routeName, {list: props.list})
+                }}
+            >
                 <Text style = {{ color: '#3F2058' }}>
                     {props.list.length > 0 ? `Alterar ${props.type}`: `Adicionar ${props.type}s`}
                 </Text>
@@ -350,6 +375,7 @@ StuffEdit = (props) => {
 }
 
 OpeningPeriodEdit = (props) => {
+    const navigation = useNavigation();
     return(
         <View
             style = {{
@@ -369,11 +395,13 @@ OpeningPeriodEdit = (props) => {
             </Text>
 
             <View style = {{marginVertical: 15, alignItems: 'center'}}>
-                <Text>{props.initialDay} a {props.finalDay}</Text>
-                <Text>{props.initialHour} às {props.finalHour}</Text>
+                <Text>{props.period.initialDay.label} a {props.period.finalDay.label}</Text>
+                <Text>{props.period.initialHour} às {props.period.finalHour}</Text>
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress = {() => navigation.navigate('openingHoursPick', { period: props.period})}
+            >
                 <Text style = {{ color: '#3F2058' }} >
                     Alterar funcionamento
                 </Text>
@@ -384,7 +412,7 @@ OpeningPeriodEdit = (props) => {
 }
 
 AddressEdit = (props) => {
-
+    const navigation = useNavigation();
     return (
         <View
             style = {{
@@ -422,7 +450,9 @@ AddressEdit = (props) => {
                 </Text>
             </View>
 
-            <TouchableOpacity>
+            <TouchableOpacity
+                onPress = {() => navigation.navigate('address', {address: props.address})}
+            >
                 <Text style = {{ color: '#3F2058' }} >
                     Alterar endereço
                 </Text>
@@ -433,7 +463,7 @@ AddressEdit = (props) => {
     )
 }
 
-const ProfileEditPage = ({ navigation }) => {
+const ProfileEditPage = ({ }) => {
     //const [profile, setProfile] = useState(null);
     const { profile, loadProfile } = useContext(ProfileUpdateContext);
     const authContext = useContext(AuthContext);
@@ -445,8 +475,7 @@ const ProfileEditPage = ({ navigation }) => {
         load();
     }, []);
 
-   
-    
+
     return (
         <ScrollView
             contentContainerStyle = {{
@@ -477,10 +506,21 @@ const ProfileEditPage = ({ navigation }) => {
             {authContext.user.type === 1 && 
                 <>
                 <OpeningPeriodEdit
-                    initialDay = {Format.getWeekDay(profile.initialDay)}
-                    finalDay = {Format.getWeekDay(profile.finalDay)}
-                    initialHour = {Format.formatTime(profile.initialHour)}
-                    finalHour = {Format.formatTime(profile.finalHour)}
+                    period = {{
+                        initialDay: {
+                            id: profile.initialDay, 
+                            label: Format.getWeekDay(profile.initialDay)
+                        },
+
+                        finalDay: {
+                            id: profile.finalDay,
+                            label: Format.getWeekDay(profile.finalDay)
+                        },
+
+                        initialHour: Format.formatTime(profile.initialHour),
+                        finalHour: Format.formatTime(profile.finalHour)
+                    }}
+                    
                 />
 
                 <AddressEdit

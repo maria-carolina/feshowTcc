@@ -34,9 +34,9 @@ export const ProfileUpdateProvider = ({ children }) => {
     }
 
     const alterProfile = (property, data) => {
-        let profileAux = profile
+        let profileAux = profile;
         profileAux[property] = data;
-        setProfile(profileAux);
+        setProfile({...profileAux});
     }
 
     return(

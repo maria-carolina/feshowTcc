@@ -527,7 +527,7 @@ class EventPage extends Component{
                             <Text
                                 style = {styles.outlineButtonLabel}
                             >
-                                Cancelar participação
+                                Sair do evento
                             </Text>
                         </TouchableOpacity>
                     )

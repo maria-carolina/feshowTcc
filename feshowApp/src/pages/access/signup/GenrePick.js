@@ -22,6 +22,7 @@ function GenrePick(props) {
 
         if(props.route.params.list){
             for(let item of props.route.params.list){
+                console.log(item)
                 select(item.id);
             }
         }

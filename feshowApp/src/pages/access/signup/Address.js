@@ -1,9 +1,11 @@
-import React, { Component } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, TextInput} from 'react-native';
 import styles from '../../../styles';
 import {apiCep as api} from '../../../services/api';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import ProfileUpdateContext from '../../../contexts/profileUpdate';
+import { useNavigation } from '@react-navigation/native';
 
 
 const FormSchema = yup.object().shape({
@@ -17,25 +19,40 @@ const FormSchema = yup.object().shape({
 
 
 const Form = (props) => {
+    let initialValues;
+
+    if(props.preloadedAddress){
+        initialValues = {
+            zipcode: props.preloadedAddress.cep,
+            street: props.preloadedAddress.logradouro,
+            district: props.preloadedAddress.bairro,
+            city: props.preloadedAddress.localidade,
+            uf: props.preloadedAddress.uf
+        }
+    }else if(props.address){
+        initialValues = {
+            zipcode: props.address.zipcode,
+            street: props.address.street,
+            number: props.address.number,
+            district: props.address.district,
+            city: props.address.city,
+            uf: props.address.uf,
+        }
+    }else{
+        initialValues = {
+            zipcode: '',
+            street: '',
+            number: '',
+            district: '',
+            city: '',
+            uf: ''
+        }
+    }
+
     return(
         <Formik
             enableReinitialize = {true}
-            initialValues = {props.preloadedAddress != '' ?
-                {
-                    zipcode: props.preloadedAddress.cep,
-                    street: props.preloadedAddress.logradouro,
-                    district: props.preloadedAddress.bairro,
-                    city: props.preloadedAddress.localidade,
-                    uf: props.preloadedAddress.uf
-                }:
-                {
-                    zipcode: '',
-                    street: '',
-                    number: '',
-                    district: '',
-                    city: '',
-                    uf: ''
-            }}
+            initialValues = {initialValues}
             onSubmit = {values => props.advance(values)}
             validationSchema = {FormSchema}
             validateOnChange = {false}
@@ -109,36 +126,46 @@ const Form = (props) => {
     )
 }
 
-class Address extends Component{
-    constructor(props){
-        super(props);
-        this.state = {preloadedAddress: ''}
+function Address (props){
+    const [address, setAddress] = useState(null)
+    const [preloadedAddress, setPreloadedAddress] = useState(null);
+
+    const { alterProfile } = useContext(ProfileUpdateContext);
+    const navigation = useNavigation();
+
+    useEffect(() => {
+        if(props.route.params.address){
+            console.log(props.route.params.address);
+            setAddress(props.route.params.address)
+        }
+    }, [])
+
+    const loadAddressByCep = async (cep) => {
+        let result = await api.get(`http://viacep.com.br/ws/${cep}/json/`);       
+        setPreloadedAddress(result.data);
     }
 
-    loadAddressByCep = async (cep) => {
-        let result = await api.get(`http://viacep.com.br/ws/${cep}/json/`)
-        
-        this.setState({
-            preloadedAddress: result.data
-        })
-
-    }
-
-    advance = (values) => {
-        let user = this.props.route.params.user;
+    const advance = (values) => {
+        let user = props.route.params.user;
         user.profile.address = values;
-        this.props.navigation.navigate('openingHoursPick', {user: user});
+        this.props.navigation.navigate('openingHoursPick', {user});
     }
 
-    render(){
-        return (
-            <Form 
-                advance = {(values) => this.advance(values)}
-                loadAddress = {(cep) => this.loadAddressByCep(cep)}
-                preloadedAddress = {this.state.preloadedAddress}
-            />
-        )
+    const finishUpdate = (values) => {
+        alterProfile('address', values);
+        navigation.navigate('profileEditPage');
     }
+    
+    return (
+        <Form 
+            advance = {props.route.params.address ? 
+                (values) => finishUpdate(values) : (values) => advance(values)}
+            loadAddress = {(cep) => loadAddressByCep(cep)}
+            address = {address}
+            preloadedAddress = {preloadedAddress}
+        />
+    )
+    
 }
 
 export default Address;

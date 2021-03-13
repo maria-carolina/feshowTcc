@@ -34,7 +34,13 @@ import CalendarPage from '../pages/social/CalendarPage';
 import NotificationsPage from '../pages/social/NotificationsPage';
 import FeedPage from '../pages/social/FeedPage';
 import SearchPage from '../pages/social/SearchPage'
+
+import EquipmentPick from '../pages/access/signup/EquipmentPick';
 import GenrePick from '../pages/access/signup/GenrePick';
+import InstrumentPick from '../pages/access/signup/InstrumentPick';
+import Address from '../pages/access/signup/Address';
+import OpeningHoursPick from '../pages/access/signup/OpeningHoursPick';
+
 
 import { ProfileUpdateProvider } from '../contexts/profileUpdate';
 
@@ -51,6 +57,7 @@ const ProfileUpdate = () => {
                 screenOptions = {{
                     headerShown: false
                 }}
+                initialRouteName = 'profileEditPage'
             >
 
                 <Stack.Screen 
@@ -61,6 +68,26 @@ const ProfileUpdate = () => {
                 <Stack.Screen
                     name = 'genrePick'
                     component = {GenrePick} 
+                />
+
+                <Stack.Screen
+                    component = {EquipmentPick}
+                    name = 'equipmentPick'
+                />
+
+                <Stack.Screen
+                    component = {InstrumentPick}
+                    name = 'instrumentPick'
+                />
+
+                <Stack.Screen
+                    component = {Address}
+                    name = 'address'
+                />
+
+                <Stack.Screen
+                    component = {OpeningHoursPick}
+                    name = 'openingHoursPick'
                 />
 
             </Stack.Navigator>

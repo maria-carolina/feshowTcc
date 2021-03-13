@@ -12,6 +12,7 @@ const Item = (props) => {
             onPress = {props.select} 
             style={styles.listItem}
         >
+            {console.log(props.item)}
             {(props.selected.some(item => item.id === props.item.id) &&
                 <View style = {{...styles.row, height: 50}}>
                     <Text style = {{...styles.itemText, fontWeight: 'bold'}}

@@ -1,8 +1,10 @@
-import React, { Component, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import styles from '../../../styles';
 import {Picker} from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useNavigation } from '@react-navigation/native';
+import ProfileUpdateContext from '../../../contexts/profileUpdate';
 
 
 const days = ['','Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
@@ -96,105 +98,106 @@ const TimePicker = (props) => {
     )
 }
 
-class OpeningHoursPick extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-            selected: {
-                initialDay: '', 
-                finalDay: '', 
-                initialHour: '', 
-                finalHour: ''
-             }, 
-            timePickerVisible: false
-        }
-    } 
+function OpeningHoursPick(props){
 
+    const [selected, setSelected] = useState({
+        initialDay: '',
+        finalDay: '',
+        initialHour: '',
+        finalHour: '',
+    });
+    const navigation = useNavigation();
+    const { alterProfile } = useContext(ProfileUpdateContext);
+
+    useEffect(() => {
+        if(props.route.params.period){
+            const {initialDay, finalDay, initialHour, finalHour} = props.route.params.period;
+            console.log(props.route.params.period);
+            setSelected({
+                initialDay: initialDay.id,
+                finalDay: finalDay.id,
+                initialHour,
+                finalHour,
+            })
+        }
+    }, [])
     
-    advance = () => {
-        if(this.state.selected.initialDay != '' && this.state.selected.finalDay === ''){
+    const advance = () => {
+        if(selected.initialDay != '' && selected.finalDay === ''){
             Alert.alert('', 'Escolha até que dia o espaço funciona ou deixe os ambos campos vazios se for o caso.');
         }else{
             let user = this.props.route.params.user;
             user.profile.openinghours = this.state.selected;
-            this.props.navigation.navigate('genrePick', {user: user})
+            navigation.navigate('genrePick', {user: user})
         }
     }
 
-    dayPickerHandleChange = (value, firstInput) => {
-        let selected = this.state.selected;
-        console.log(value);
+    const finishUpdate = () => {
+        alterProfile('openinghours', selected);
+        navigation.navigate('profileEditPage');
+    }
+
+    const dayPickerHandleChange = (value, firstInput) => {
+        let selectedAux = selected;
 
         if(value == 0) value = '';
 
         if(firstInput){
-            selected.initialDay = value;
+            selectedAux.initialDay = value;
         }else{
-            selected.finalDay = value;
+            selectedAux.finalDay = value;
         }
         
-
-        this.setState({
-            selected: selected
-        })
+        setSelected({...selectedAux});
     }
 
-    timePickerHandleChange = (date, firstInput) => {
-        let selected = this.state.selected;
+    const timePickerHandleChange = (date, firstInput) => {
+        let selectedAux = selected;
         let time = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 
         if(firstInput){
-            selected.initialHour = time;
+            selectedAux.initialHour = time;
         }else{
-            selected.finalHour = time;
+            selectedAux.finalHour = time;
         }
 
-        this.setState({
-            selected: selected
-        })
+        setSelected({...selectedAux});
     }
 
-    showTimePicker = (field) => {
-        this.setState({
-            timePickerVisible: true,
-            timeSelection: field
-        })
-    }
+    return(
+        <View style = {styles.container}>
+            <Text 
+                style = {{...styles.title, fontSize: 20}}
+            >
+                Qual período o espaço funciona?
+            </Text>
 
-    render(){
-        let buttonLabel = Object.keys(this.state.selected).length > 0 ? 'Avançar':'Pular';
-        return(
-            <View style = {styles.container}>
-                <Text 
-                    style = {{...styles.title, fontSize: 20}}
-                >Qual período o espaço funciona?</Text>
+            <DayPicker
+                selected = {selected}
+                handleChange = {dayPickerHandleChange} 
+            />
+            
+            <Text 
+                style = {{...styles.title, fontSize: 20}}
+            >
+                Qual horário o espaço funciona?
+            </Text>
 
-                <DayPicker
-                    selected = {this.state.selected}
-                    handleChange = {this.dayPickerHandleChange} 
-                />
-                
+            <TimePicker
+                selected = {selected}
+                handleChange = {timePickerHandleChange}
+            />
 
-                <Text 
-                    style = {{...styles.title, fontSize: 20}}
-                >Qual horário o espaço funciona?</Text>
-
-
-                <TimePicker
-                    selected = {this.state.selected}
-                    handleChange = {this.timePickerHandleChange}
-                />
-
-                <TouchableOpacity 
-                    style = {styles.button}
-                    onPress = {this.advance}
-                >
-                    <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
-                </TouchableOpacity>
-                
-            </View>
-        )
-    }
+            <TouchableOpacity 
+                style = {styles.button}
+                onPress = { props.route.params.period ? finishUpdate : advance}
+            >
+                <Text style = {styles.buttonLabel}>Avançar</Text>
+            </TouchableOpacity>
+            
+        </View>
+    )
+    
 }
 
 export default OpeningHoursPick;
