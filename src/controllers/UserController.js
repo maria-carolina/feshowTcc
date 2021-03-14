@@ -420,6 +420,42 @@ module.exports = {
         return res.status(200).send('ok');
     },
 
+    async verifyEmailUpdate(req, res) {
+        const { email } = req.body;
+
+
+        const user = await User.findOne({
+            where: {
+                email,
+                id: { [Op.ne]: req.userId }
+            }
+        });
+
+        if (user) {
+            return res.send({ error: 'Este e-mail já existe no sistema' })
+        }
+
+        return res.status(200).send('ok');
+
+    },
+
+    async verifyUsernameUpdate(req, res) {
+        const { username } = req.body;
+
+        const user = await User.findOne({
+            where: {
+                username,
+                id: { [Op.ne]: req.userId }
+            }
+        });
+
+        if (user) {
+            return res.send({ error: 'Este username já existe no sistema' })
+        }
+
+        return res.status(200).send('ok');
+    },
+
     async getInvitations(req, res) {
         try {
 
