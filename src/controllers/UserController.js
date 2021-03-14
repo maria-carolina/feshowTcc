@@ -862,14 +862,12 @@ module.exports = {
 
     async update(req, res) {
         try {
-            let { username, email, password } = req.body;
-
-            password = await bcrypt.hash(password, 10);
+            let { username, email } = req.body;
 
             const user = await User.findByPk(req.userId);
 
             await User.update({
-                username, email, password
+                username, email
             }, {
                 where: { id: user.id }
             });
