@@ -76,11 +76,11 @@ module.exports = {
             if (type == 0) {
 
                 const { profile: {
-                    name, cache, zipcode, city, members, genres, equipment, instruments
+                    name, cache, state, city, members, genres, equipment, instruments
                 } } = req.body;
 
                 const artist = await Artist.create({
-                    name, cache, zipcode, city, members, user_id: user.id
+                    name, cache, state, city, members, user_id: user.id
                 });
 
                 if (equipment !== undefined) {
@@ -156,10 +156,10 @@ module.exports = {
 
             } else {
                 const {
-                    profile: { name, zipcode, city }
+                    profile: { name, state, city }
                 } = req.body;
 
-                await Producer.create({ name, chat_permission: 0, zipcode, city, user_id: user.id });
+                await Producer.create({ name, chat_permission: 0, state, city, user_id: user.id });
             }
 
             return res.send({
@@ -582,7 +582,7 @@ module.exports = {
                 user.dataValues.artistId = artist.id;
                 user.dataValues.name = artist.name;
                 user.dataValues.description = artist.description;
-                user.dataValues.zipcode = artist.zipcode;
+                user.dataValues.state = artist.state;
                 user.dataValues.city = artist.city;
                 user.dataValues.members = artist.members;
                 user.dataValues.cache = artist.cache;
@@ -639,7 +639,7 @@ module.exports = {
                 user.dataValues.producerId = producer.id;
                 user.dataValues.name = producer.name;
                 user.dataValues.description = producer.description;
-                user.dataValues.zipcode = producer.zipcode;
+                user.dataValues.state = producer.state;
                 user.dataValues.city = producer.city;
 
             }
@@ -840,7 +840,7 @@ module.exports = {
 
             if (user.type == 0) {
                 const { profile: {
-                    name, cache, zipcode, description, city, members, genres, equipment, instruments
+                    name, cache, state, description, city, members, genres, equipment, instruments
                 } } = req.body;
 
                 let descript;
@@ -856,7 +856,7 @@ module.exports = {
                 });
 
                 await Artist.update({
-                    name, description: descript, cache, zipcode, city, members
+                    name, description: descript, cache, state, city, members
                 }, {
                     where: { id: artist.id }
                 });
@@ -964,7 +964,7 @@ module.exports = {
 
             } else {
                 const {
-                    profile: { name, description, zipcode, city }
+                    profile: { name, description, state, city }
                 } = req.body;
 
                 let descript;
@@ -976,7 +976,7 @@ module.exports = {
                 }
 
                 await Producer.update({
-                    name, description: descript, chat_permission: 0, zipcode, city
+                    name, description: descript, chat_permission: 0, state, city
                 }, {
                     where: { user_id: user.id }
                 });

@@ -20,7 +20,7 @@ class Producer extends Model {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
             },
-            zipcode: {
+            state: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
