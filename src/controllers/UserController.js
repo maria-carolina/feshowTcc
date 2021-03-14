@@ -558,6 +558,7 @@ module.exports = {
                 for (let artistInstrument of artistInstruments) {
                     let instrument = await Instrument.findByPk(artistInstrument.instrument_id);
                     instruments.push({
+                        id: instrument.id,
                         name: instrument.name,
                         quantity: artistInstrument.quantity
                     });
@@ -571,6 +572,7 @@ module.exports = {
                 for (let artistEquipment of artistEquipments) {
                     let equipment = await Equipment.findByPk(artistEquipment.equipment_id);
                     equipments.push({
+                        id: equipment.id,
                         name: equipment.name,
                         quantity: artistEquipment.quantity
                     });
@@ -606,19 +608,24 @@ module.exports = {
                 for (let equipmentVenue of equipmentsVenue) {
                     let equipment = await Equipment.findByPk(equipmentVenue.equipment_id);
                     equipments.push({
+                        id: equipment.id,
                         name: equipment.name,
                         quantity: equipmentVenue.quantity
                     });
+                }
+
+                let openinghours = {
+                    initialHour: moment(venue.initialHour, 'HH:mm:ss').format("HH:mm"),
+                    finalHour: moment(venue.finalHour, 'HH:mm:ss').format("HH:mm"),
+                    initialDay: venue.initialDay,
+                    finalDay: venue.finalDay
                 }
 
                 //organizando objeto
                 user.dataValues.venueId = venue.id;
                 user.dataValues.name = venue.name;
                 user.dataValues.description = venue.description;
-                user.dataValues.initialHour = venue.initialHour;
-                user.dataValues.finalHour = venue.finalHour;
-                user.dataValues.initialDay = venue.initialDay;
-                user.dataValues.finalDay = venue.finalDay;
+                user.dataValues.openinghours = openinghours;
                 user.dataValues.capacity = venue.capacity;
                 user.dataValues.genres = venue.genres;
                 user.dataValues.address = venue.address;
@@ -955,30 +962,57 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao editar usuário' })
         }
-    }, 
+    },
 
-    /*async delete (req, res){
-        const user = await User.findByPk(req.userId);
-
-        //Remover imagem
-        const imageUser = await ImageUser.findOne({
-            where: { user_id: user.id }
-        });
-
-        if (imageUser) { 
-            const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
-
-            if (fs.existsSync(path)) {
-                fs.unlink(file, function (err) {
-                    if (err) throw err;
-                    console.log('Arquivo deletado!');
-                });
-            }
-
-            await ImageUser.destroy({
-                where: { user_id: user.id }
-            });
-        }
-
-    }*/
+    /* async delete (req, res){
+         const user = await User.findByPk(req.userId);
+ 
+         //Remover imagem
+         const imageUser = await ImageUser.findOne({
+             where: { user_id: user.id }
+         });
+ 
+         if (imageUser) { 
+             const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
+ 
+             if (fs.existsSync(path)) {
+                 fs.unlink(file, function (err) {
+                     if (err) throw err;
+                     console.log('Arquivo deletado!');
+                 });
+             }
+ 
+             await ImageUser.destroy({
+                 where: { user_id: user.id }
+             });
+         }
+ 
+         // remover postagens 
+         // remover notificações
+         // remover eventos desde organizador e pagar images do evento
+         // remover posts destes eventos ou do usuário logado
+         // remover solicitações de requisição de evento 
+     
+ 
+         if(user.type == 0){
+             // remover equipametos 
+             // remover equipametos 
+             // remover generos 
+             // remover artist_events
+             //remover artista
+ 
+         } else if (user.type == 1) {
+             // remover endereço
+             // remover equipametos 
+             // remover equipametos 
+             // remover generos 
+             // remover eventos que acontecerão neste espaço e pagar images do evento
+             // remover solicitações de requisição de evento que acontecerão neste espaço
+             //remover espaço
+         } else {
+             
+             //remover produtor
+ 
+         }
+     } */
 };

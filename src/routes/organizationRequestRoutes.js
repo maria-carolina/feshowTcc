@@ -4,5 +4,7 @@ const OrgRequestController = require('../controllers/OrganizationRequestControll
 
 orgRequestRoutes.post('/sendOrganizationRequest', OrgRequestController.sendOrganizationRequest);
 orgRequestRoutes.get('/indexRequests', OrgRequestController.index);
+orgRequestRoutes.delete('/refuseSolicitation/:idSolicitation', OrgRequestController.refuseSolicitation);
+orgRequestRoutes.post('/acceptSolicitation/:idSolicitation', OrgRequestController.acceptSolicitation);
 
 module.exports = orgRequestRoutes;

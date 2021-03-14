@@ -1190,10 +1190,21 @@ module.exports = {
                 });
 
                 const venues = await Venue.findAll({
-                    include: {
-                        association: 'equipments',
-                        include: { association: 'equipments' }
-                    }
+                    attributes: ['id', 'name', 'capacity', 'user_id'],
+                    include: [
+                        {
+                            association: 'genres',
+                            attributes: ['id', 'name']
+                        },
+                        {
+                            association: 'address',
+                            attributes: ['city']
+                        },
+                        {
+                            association: 'equipments',
+                            include: { association: 'equipments' }
+                        }
+                    ]
                 });
 
                 venues.forEach((venue) => {
@@ -1204,7 +1215,6 @@ module.exports = {
             }
 
             return res.send(venuesCompatible);
-
 
         } catch (err) {
             return res.send({ error: 'Erro ao exibir filtro' })

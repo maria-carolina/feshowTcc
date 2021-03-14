@@ -4,6 +4,7 @@ const Venue = require('../models/Venue');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 module.exports = {
 
@@ -85,6 +86,68 @@ module.exports = {
             return res.send(solicitations);
         } catch (err) {
             return res.send({ error: 'Erro ao listar requisições de solicitação de evento' })
+        }
+    },
+
+    async acceptSolicitation(req, res) {
+        try {
+            const { idSolicitation } = req.params;
+
+            const solicitation = await Solicitation.findByPk(idSolicitation);
+
+            await Solicitation.destroy({
+                where: { id: solicitation.id }
+            });
+
+            const event = await Event.create({
+                organizer_id: solicitation.user_id,
+                venue_id: solicitation.venue_id,
+                name: solicitation.name,
+                start_date: solicitation.start_date,
+                start_time: solicitation.start_time,
+                end_time: solicitation.end_time,
+                status: 1
+            });
+
+            if (!event) {
+                return res.send({ error: 'Erro ao gravar evento no sistema' });
+            }
+            const venue = await Venue.findByPk(solicitation.venue_id);
+
+            await Notification.create({
+                user_id: solicitation.user_id,
+                message: `O ${venue.name} aceitou a solicitação de organização do ${solicitation.name}`,
+                status: 2,
+                auxiliary_id: event.id,
+            });
+
+            return res.send(event);
+        } catch (err) {
+            return res.send({ error: 'Erro ao criar evento solicitado' })
+        }
+    },
+
+    async refuseSolicitation(req, res) {
+        try {
+            const { idSolicitation } = req.params;
+
+            const solicitation = await Solicitation.findByPk(idSolicitation);
+            const venue = await Venue.findByPk(solicitation.venue_id);
+
+            await Notification.create({
+                user_id: solicitation.user_id,
+                message: `${venue.name} não aceitou a solicitação de criação do ${solicitation.name}`,
+                status: 0
+            });
+
+            await Solicitation.destroy({
+                where: { id: solicitation.id }
+            });
+
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao recusar evento solicitado' })
         }
     }
 };
