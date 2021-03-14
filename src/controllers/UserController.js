@@ -840,15 +840,23 @@ module.exports = {
 
             if (user.type == 0) {
                 const { profile: {
-                    name, cache, zipcode, city, members, genres, equipment, instruments
+                    name, cache, zipcode, description, city, members, genres, equipment, instruments
                 } } = req.body;
+
+                let descript;
+
+                if (description !== "") {
+                    descript = description;
+                } else {
+                    descript = null;
+                }
 
                 const artist = await Artist.findOne({
                     where: { user_id: user.id }
                 });
 
                 await Artist.update({
-                    name, cache, zipcode, city, members
+                    name, description: descript, cache, zipcode, city, members
                 }, {
                     where: { id: artist.id }
                 });
@@ -899,18 +907,26 @@ module.exports = {
             else if (user.type == 1) {
                 const {
                     profile: {
-                        name, capacity, genres, equipment,
+                        name, description, capacity, genres, equipment,
                         address: { city: cityVenue, district, number, street, uf, zipcode },
                         openinghours: { finalDay, finalHour, initialDay, initialHour }
                     }
                 } = req.body;
+
+                let descript;
+
+                if (description !== "") {
+                    descript = description;
+                } else {
+                    descript = null;
+                }
 
                 const venue = await Venue.findOne({
                     where: { user_id: user.id }
                 });
 
                 await Venue.update({
-                    name, capacity, finalDay, finalHour, initialDay, initialHour
+                    name, description: descript, capacity, finalDay, finalHour, initialDay, initialHour
                 }, {
                     where: { id: venue.id }
                 });
@@ -948,11 +964,19 @@ module.exports = {
 
             } else {
                 const {
-                    profile: { name, zipcode, city }
+                    profile: { name, description, zipcode, city }
                 } = req.body;
 
+                let descript;
+
+                if (description !== "") {
+                    descript = description;
+                } else {
+                    descript = null;
+                }
+
                 await Producer.update({
-                    name, chat_permission: 0, zipcode, city
+                    name, description: descript, chat_permission: 0, zipcode, city
                 }, {
                     where: { user_id: user.id }
                 });
