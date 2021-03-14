@@ -4,11 +4,12 @@ import ListItem from './ListItemWithQuantity';
 import styles from '../../../styles';
 import api from '../../../services/api'
 import { useNavigation } from '@react-navigation/native';
+import ProfileUpdateContext from '../../../contexts/profileUpdate';
 
 
 function InstrumentPick(props){
     const [instruments, setInstruments] = useState(null);
-    const [selected, setSelected] = useState(null);
+    const [selected, setSelected] = useState([]);
     const { alterProfile } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
 
@@ -17,6 +18,12 @@ function InstrumentPick(props){
     }, []);
 
     const loadInstruments = async () => {
+        if(props.route.params.list){
+            for(let item of props.route.params.list){
+                select(item);
+            }
+        }
+
         try{
             var result = await api.get('/getInstruments');
         }catch(e){
@@ -26,27 +33,29 @@ function InstrumentPick(props){
         setInstruments(result.data);
     }
 
-   const select = (value) => {
+   const select = (instrument) => {
         let selectedAux = selected;
-        if(selectedAux.some(item => item.id === value)){
-            let filtered = selectedAux.filter(item => item.id != value);
+        if(selectedAux.some(item => item.id === instrument.id)){
+            let filtered = selectedAux.filter(item => item.id != instrument.id);
             selectedAux = filtered;
         }else{
-            selectedAux.push({id: value, quantity: 1});
-        }
 
-        setSelected(selectedAux);
+            if(!instrument.quantity) selectedAux.push({...instrument, quantity: 1})
+            else selectedAux.push(instrument);
+        }
+        
+        setSelected([...selectedAux])
     }
 
     const quantityHandleChange = (num, index) => {
         let selectedAux = selected.map((item) => {
             if(item.id === index){
-                return {id: index, quantity: num}
+                item.quantity = num;
             }
             return item;
         });
 
-        setSelected(selectedAux);
+        setSelected([...selectedAux]);
     }
 
 
@@ -54,26 +63,25 @@ function InstrumentPick(props){
         let user = this.props.route.params.user;
         user.profile.instruments = this.state.selected;
         console.log(user);
-        this.props.navigation.navigate('paymentPick', {user: user});
+        navigation.navigate('paymentPick', {user: user});
     }
 
     const finishUpdate = () => {
-        alterProfile('instruments', instruments.filter(item => selected.includes(item.id)));
+        alterProfile('instruments', selected);
         navigation.navigate('profileEditPage');
     }
 
-    let buttonLabel = selected.length > 0 ? 'Avançar':'Pular';
 
     return(
         <View style = {styles.container} >
-            <Text style = {styles.title}>Seleciona os instrumentos utilizados no seu show</Text>
+            <Text style = {styles.title}>Selecione os instrumentos utilizados no seu show</Text>
             <FlatList 
                 style = {styles.list}
                 data = {instruments}
                 renderItem = {({item}) => (
                     <ListItem
                         item = {item}
-                        select = {() => select(item.id)}
+                        select = {() => select(item)}
                         selected = {selected} 
                         quantityHandleChange = {quantityHandleChange}
                     />
@@ -85,7 +93,7 @@ function InstrumentPick(props){
                 onPress = {props.route.params.list ? () => finishUpdate() : () => advance()}
                 style = {styles.button}
             >
-                <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
+                <Text style = {styles.buttonLabel}>Avançar</Text>
             </TouchableOpacity>
         </View>
     )

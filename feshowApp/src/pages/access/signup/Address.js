@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, Alert} from 'react-native';
 import styles from '../../../styles';
 import {apiCep as api} from '../../../services/api';
 import { Formik } from 'formik';
@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 
 
 const FormSchema = yup.object().shape({
-    zipcode: yup.string().required(),
+    zipcode: yup.string().required().min(9, 'O cep deve conter menos 9 caracteres'),
     number: yup.string().required(),
     street: yup.string().required(),
     district: yup.string().required(),
@@ -63,7 +63,7 @@ const Form = (props) => {
                     <Text style = {styles.title}>Cadastre o endereço do espaço</Text>
 
                     {Object.keys(errors).length > 0 && 
-                    <Text style = {styles.error}>Preencha todos os campos</Text>}
+                    <Text style = {styles.error}>{errors.zipcode}</Text>}
                     
                     <View style = {styles.row}>
                         <TextInput
@@ -71,8 +71,13 @@ const Form = (props) => {
                             style = {{...styles.textInput, width: '50%', marginRight: '5%'}}
                             keyboardType = 'numeric'
                             value = {values.zipcode}
-                            onChangeText = {handleChange('zipcode')}
-                            onEndEditing = {e => props.loadAddress(e.nativeEvent.text)}
+                            onChangeText = {value => {
+                                handleChange('zipcode')(value);
+                                if(value.length > 7){
+                                    props.loadAddress(value);
+                                }
+                            }}
+                            //onEndEditing = {e => props.loadAddress(e.nativeEvent.text)}
                         />
                         
                         <TextInput
@@ -86,6 +91,7 @@ const Form = (props) => {
 
                     <TextInput
                         placeholder = 'Logradouro'
+                        editable = {false}
                         style = {styles.textInput}
                         value = {values.street}
                         onChangeText = {handleChange('street')}
@@ -93,6 +99,7 @@ const Form = (props) => {
 
                     <TextInput
                         placeholder = 'Bairro'
+                        editable = {false}
                         style = {styles.textInput}
                         value = {values.district}
                         onChangeText = {handleChange('district')}
@@ -101,12 +108,14 @@ const Form = (props) => {
                     <View style = {styles.row}>
                         <TextInput
                             placeholder = 'Cidade'
+                            editable = {false}
                             style = {{...styles.textInput, width: '50%', marginRight: '5%'}}
                             value = {values.city}
                             onChangeText = {handleChange('city')}
                         />
                         <TextInput
                             placeholder = 'UF'
+                            editable = {false}
                             style = {{...styles.textInput, width: '15%'}}
                             value = {values.uf}
                             onChangeText = {handleChange('uf')}
@@ -141,8 +150,13 @@ function Address (props){
     }, [])
 
     const loadAddressByCep = async (cep) => {
-        let result = await api.get(`http://viacep.com.br/ws/${cep}/json/`);       
-        setPreloadedAddress(result.data);
+        try{
+            let result = await api.get(`http://viacep.com.br/ws/${cep}/json/`);   
+            console.log(result.status);    
+            setPreloadedAddress(result.data);
+        }catch(e){
+            Alert.alert('Ops', 'Erro ao encontrar CEP.')
+        }
     }
 
     const advance = (values) => {

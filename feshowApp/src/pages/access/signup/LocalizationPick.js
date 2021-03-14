@@ -106,15 +106,6 @@ class LocalizationPick extends Component{
                     {cities}
                 </Picker>
 
-                <TouchableOpacity
-                    onPress = {this.getCurrentLocalization}
-                    style = {styles.button}
-                >
-                    <Text 
-                        style = {{...styles.buttonLabel, fontSize: 18}}
-                    > Selecionar localização atual</Text>
-                </TouchableOpacity>
-
                 <TouchableOpacity 
                     onPress = {() => this.advance()}
                     style = {styles.button}

@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import styles from '../../../styles';
 import InputSpinner from "react-native-input-spinner";
 
 
 const Item = (props) => {
-    const [value, setValue] = useState(1);
+    const selectedItem = props.selected.filter(item => props.item.id === item.id)[0];
+    const [value, setValue] = useState(selectedItem ? selectedItem.quantity : 1);
     
     return(
         <TouchableOpacity
             onPress = {props.select} 
             style={styles.listItem}
         >
-            {console.log(props.item)}
-            {(props.selected.some(item => item.id === props.item.id) &&
+            {(selectedItem &&
                 <View style = {{...styles.row, height: 50}}>
                     <Text style = {{...styles.itemText, fontWeight: 'bold'}}
                     >{props.item.name}</Text>   

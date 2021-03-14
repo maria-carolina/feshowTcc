@@ -24,8 +24,7 @@ function EquipmentPick(props){
 
         if(props.route.params.list){
             for(let item of props.route.params.list){
-                select({id: item.id, quantity: item.quantity});
-                console.log(item);
+                select(item);
             }
         }
 
@@ -44,7 +43,9 @@ function EquipmentPick(props){
             let filtered = selectedAux.filter(item => item.id != equipment.id);
             selectedAux = filtered;
         }else{
-            selectedAux.push(equipment);
+
+            if(!equipment.quantity) selectedAux.push({...equipment, quantity: 1})
+            else selectedAux.push(equipment);
         }
         
         setSelected([...selectedAux])
@@ -53,12 +54,12 @@ function EquipmentPick(props){
     const quantityHandleChange = (num, index) => {
         let selectedAux = selected.map((item) => {
             if(item.id === index){
-                return {id: index, quantity: num}
+                item.quantity = num;
             }
             return item;
         });
 
-        setSelected(selectedAux);
+        setSelected([...selectedAux]);
     }
 
     const advance = () => {
@@ -69,19 +70,15 @@ function EquipmentPick(props){
     }
 
     const finishUpdate = () => {
-        alterProfile('equipment', equipment.filter(item => selected.includes(item.id)));
+        alterProfile('equipments', selected);
         navigation.navigate('profileEditPage');
     }
 
-    
 
     let userType = props.route.params.user ? props.route.params.user.type : authContext.type;
 
     let title = userType === 1 ? 
     'o espaço tem disponível':'você precisa para tocar';
-
-
-    let buttonLabel = selected.length > 0 ? 'Avançar':'Pular';
 
     return(
         <View style = {styles.container}>
@@ -106,7 +103,7 @@ function EquipmentPick(props){
                 onPress = {props.route.params.list ? () => finishUpdate() : () => advance()}
                 style = {styles.button}
             >
-                <Text style = {styles.buttonLabel}>{buttonLabel}</Text>
+                <Text style = {styles.buttonLabel}>Avançar</Text>
             </TouchableOpacity>
         </View>
     )

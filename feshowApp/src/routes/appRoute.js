@@ -42,6 +42,11 @@ import Address from '../pages/access/signup/Address';
 import OpeningHoursPick from '../pages/access/signup/OpeningHoursPick';
 
 
+import EmailInsert from '../pages/access/passwordRecovery/EmailInsert';
+import CodeInsert from '../pages/access/passwordRecovery/CodeInsert';
+import PasswordRedefinition from '../pages/access/passwordRecovery/PasswordRedefinition';
+
+
 import { ProfileUpdateProvider } from '../contexts/profileUpdate';
 
 
@@ -88,6 +93,21 @@ const ProfileUpdate = () => {
                 <Stack.Screen
                     component = {OpeningHoursPick}
                     name = 'openingHoursPick'
+                />
+
+                <Stack.Screen
+                    component = {EmailInsert}
+                    name = 'emailInsert'
+                />
+
+                <Stack.Screen
+                    component = {CodeInsert}
+                    name = 'codeInsert'
+                />
+
+                <Stack.Screen
+                    component = {PasswordRedefinition}
+                    name = 'passwordRedefinition'
                 />
 
             </Stack.Navigator>

@@ -1,16 +1,19 @@
 import React, { useEffect, useContext, useState } from 'react';
 import {View, Text, TouchableOpacity, TextInput, ScrollView, Alert, ActivityIndicator} from 'react-native';
-import { Formik } from 'formik';
+import {Picker} from '@react-native-picker/picker';
 import styles from '../../styles';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import Format from '../utils/Format';
 import { useNavigation } from '@react-navigation/native';
 import ProfileUpdateContext from '../../contexts/profileUpdate';
+import {apiIbge} from '../../services/api';
+
 
 
 AccountInfoEdit = (props) => {
     const { alterProfile } = useContext(ProfileUpdateContext);
+    const navigation = useNavigation();
     return(
         <View
             style = {{
@@ -34,7 +37,7 @@ AccountInfoEdit = (props) => {
                 }}
 
                 onChangeText = {(text) => {
-                    alterProfile('username', text)
+                    alterProfile('username', text.replace(/\s/g, ''))
                 }}
             />
 
@@ -52,7 +55,6 @@ AccountInfoEdit = (props) => {
                 }}
 
                 onChangeText = {(text) => {
-                    handleChange('email');
                     alterProfile('email', text);
                 }}
             />
@@ -62,6 +64,7 @@ AccountInfoEdit = (props) => {
                     alignSelf: 'flex-end',
                     marginVertical: 15
                 }}
+                onPress = {() => navigation.navigate('emailInsert')}
             >
                 <Text
                     style = {{
@@ -81,203 +84,227 @@ AccountInfoEdit = (props) => {
 BasicInfoEdit = (props) => {
     const authContext = useContext(AuthContext);
     const { alterProfile } = useContext(ProfileUpdateContext);
+    const [ufs, setUfs] = useState([]);
+    const [selectedUf, setSelectedUf] = useState(props.profile.state); 
+    const [selectedCity, setSelectedCity] = useState(); 
 
-    let initialValues;
-    if(authContext.user.type === 0){
-        initialValues = {
-            name: props.profile.name,
-            state: 'SP',
-            city: props.profile.city,
-            members: String(props.profile.members),
-            payment: String(props.profile.cache),
-            description: props.profile.description
+    const [cities, setCities] = useState([]);
+
+    useEffect(() => {
+        loadUfs();
+        loadCities(selectedUf);
+    }, [])
+
+    const loadUfs = async () => {
+        try{
+            var result = await apiIbge.get();
+        }catch(e){
+            return;
         }
-    }else if(authContext.user.type === 1){
-        initialValues = {
-            name: props.profile.name,
-            capacity: String(props.profile.capacity),
-            description: props.profile.capacity
+
+        setUfs(result.data);
+    }
+
+
+    const loadCities = async (uf) => {
+        try{
+            var result = await apiIbge.get(`/${uf}/municipios`);
+        }catch(e){
+            return;
         }
-    }else{
-        initialValues = {
-            name: props.profile.name,
-            state: 'GO',
-            city: 'Goiânia',
-        }
+
+        setCities(result.data);
+        const currentCity = result.data.filter(item => item.nome === props.profile.city)[0];
+        setSelectedCity(currentCity ? currentCity.id : null)
+    }
+
+    const getCityName = (id) => {
+        return cities.filter(item => item.id === id)[0].nome;
     }
 
     return (
-        <Formik
-            initialValues = {initialValues}
+        <View
+            style = {{
+                paddingVertical: 15,
+                borderBottomWidth: 1,
+                borderBottomColor: '#cecece',
+            }}
         >
-            {({values, handleChange, handleSubmit}) => (
-                <View
+            <Text style = {styles.inputLabel}>
+                nome
+            </Text>
+            <TextInput 
+                value = {props.profile.name}
+                style = {{
+                    ...styles.textInput,
+                    width: '100%',
+                    marginTop: 0
+                }}
+                onChangeText = {(text) => {
+                    alterProfile('name', text)
+                }}
+            />
+
+            {authContext.user.type !== 1 &&
+                <View style = {{ flexDirection: 'row' }}>
+
+
+                <View 
                     style = {{
-                        paddingVertical: 15,
-                        borderBottomWidth: 1,
-                        borderBottomColor: '#cecece',
+                        width: '49%',
+                        marginRight: '2%',
                     }}
                 >
                     <Text style = {styles.inputLabel}>
-                        nome
+                        estado
                     </Text>
 
-                    <TextInput 
-                        value = {values.name}
-                        style = {{
+                    <Picker
+                        selectedValue={selectedUf}
+                        style={{
                             ...styles.textInput,
                             width: '100%',
-                            marginTop: 0
+                            marginTop: 0,
                         }}
-                        onChangeText = {(text) => {
-                            handleChange('name');
-                            alterProfile('name', text)
+                        onValueChange = {(value) => {
+                            setSelectedUf(value);
+                            loadCities(value);
+                            alterProfile('state', value)
                         }}
-                    />
-
-                    {authContext.user.type !== 1 &&
-                        <View style = {{ flexDirection: 'row' }}>
-
-
-                        <View 
-                            style = {{
-                                width: '49%',
-                                marginRight: '2%'
-                            }}
-                        >
-                            <Text style = {styles.inputLabel}>
-                                estado
-                            </Text>
-
-                            <TextInput 
-                                value = {values.state}
-                                style = {{
-                                    ...styles.textInput,
-                                    width: '100%',
-                                    marginTop: 0
-                                }}
-                                onChangeText = {handleChange('state')}
+                    >
+                        {ufs.map(item => (
+                            <Picker.Item  
+                                label = {item.nome} 
+                                value = {item.sigla} 
+                                key = {item.id}
                             />
-                        </View>
+                        ))}
+                    </Picker>
 
-                        <View style = {{ width: '49%' }}>
-                            <Text style = {styles.inputLabel}>
-                                cidade
-                            </Text>
+                </View>
 
-                            <TextInput 
-                                value = {values.city}
-                                style = {{
-                                    ...styles.textInput,
-                                    width: '100%',
-                                    marginTop: 0
-                                }}
-                                onChangeText = {handleChange('cidade')}
+                <View style = {{ width: '49%' }}>
+                    <Text style = {styles.inputLabel}>
+                        cidade
+                    </Text>
+
+                    <Picker
+                        selectedValue={selectedCity}
+                        style={{
+                            ...styles.textInput,
+                            width: '100%',
+                            marginTop: 0,
+                        }}
+                        onValueChange = {(value) => {
+                            setSelectedCity(value);
+                            alterProfile('city', getCityName(value));
+                        }}
+                    >
+                        {cities.map(item => (
+                            <Picker.Item  
+                                label = {item.nome} 
+                                value = {item.id} 
+                                key = {item.id}
                             />
-                        </View>
-                    </View>
-                    }
+                        ))}
+                    </Picker>
+                </View>
+            </View>
+            }
 
-                    {authContext.user.type === 0 &&
-                        <View style = {{ flexDirection: 'row' }}>
+            {authContext.user.type === 0 &&
+                <View style = {{ flexDirection: 'row' }}>
 
-                            <View 
-                                style = {{
-                                    width: '49%',
-                                    marginRight: '2%'
-                                }}
-                            >
-                                <Text style = {styles.inputLabel}>
-                                    membros
-                                </Text>
-
-                                <TextInput 
-                                    value = {values.members}
-                                    style = {{
-                                        ...styles.textInput,
-                                        width: '100%',
-                                        marginTop: 0
-                                    }}
-                                    onChangeText = {(text) => {
-                                        handleChange('members');
-                                        alterProfile('members', text)
-                                    }}
-                                    keyboardType = 'numeric'
-                                />
-                            </View>
-                            
-
-                            
-                            <View style = {{ width: '49%' }}>
-                                <Text style = {styles.inputLabel}>
-                                    cache
-                                </Text>
-
-                                <TextInput 
-                                    value = {values.payment}
-                                    style = {{
-                                        ...styles.textInput,
-                                        width: '100%',
-                                        marginTop: 0
-                                    }}
-                                    onChangeText = {(text) => {
-                                        handleChange('payment');
-                                        alterProfile('payment', text)
-                                    }}
-                                    keyboardType = 'numeric'
-                                />
-                            </View>
-                            
-                        </View>
-                    }
-
-
-                    {authContext.user.type === 1 &&
-                        <>
+                    <View 
+                        style = {{
+                            width: '49%',
+                            marginRight: '2%'
+                        }}
+                    >
                         <Text style = {styles.inputLabel}>
-                            capacidade
+                            membros
                         </Text>
 
                         <TextInput 
-                            value = {values.capacity}
+                            value = {props.profile.members.toString()}
                             style = {{
                                 ...styles.textInput,
                                 width: '100%',
                                 marginTop: 0
                             }}
                             onChangeText = {(text) => {
-                                handleChange('capacity');
-                                alterProfile('capacity', text);
+                                alterProfile('members', text)
                             }}
                             keyboardType = 'numeric'
                         />
-                        </>
-                    }
+                    </View>
                     
-                    <Text style = {styles.inputLabel}>
-                        descrição
-                    </Text>
 
-                    <TextInput 
-                        value = {values.description}
-                        style = {{
-                            ...styles.textInput,
-                            width: '100%',
-                            height: 70,
-                            marginTop: 0,
-                            textAlignVertical: 'top'
-                        }}
-                        onChangeText = {(text) => {
-                            handleChange('description');
-                            alterProfile('description', text)
-                        }}
-                    />
-
-
+                    
+                    <View style = {{ width: '49%' }}>
+                        <Text style = {styles.inputLabel}>
+                            cache
+                        </Text>
+                        <TextInput 
+                            value = {props.profile.cache.toString()}
+                            style = {{
+                                ...styles.textInput,
+                                width: '100%',
+                                marginTop: 0
+                            }}
+                            onChangeText = {(text) => {
+                                alterProfile('cache', text)
+                            }}
+                            keyboardType = 'numeric'
+                        />
+                    </View>
+                    
                 </View>
-            )}
+            }
 
-        </Formik>
+
+            {authContext.user.type === 1 &&
+                <>
+                <Text style = {styles.inputLabel}>
+                    capacidade
+                </Text>
+
+                <TextInput 
+                    value = {props.profile.capacity.toString()}
+                    style = {{
+                        ...styles.textInput,
+                        width: '100%',
+                        marginTop: 0
+                    }}
+                    onChangeText = {(text) => {
+                        alterProfile('capacity', text);
+                    }}
+                    keyboardType = 'numeric'
+                />
+                </>
+            }
+            
+            <Text style = {styles.inputLabel}>
+                descrição
+            </Text>
+
+            <TextInput 
+                value = {props.profile.description}
+                style = {{
+                    ...styles.textInput,
+                    width: '100%',
+                    height: 70,
+                    marginTop: 0,
+                    textAlignVertical: 'top'
+                }}
+                onChangeText = {(text) => {
+                    alterProfile('description', text)
+                }}
+            />
+
+
+        </View>
+           
     )
 }
 
@@ -353,7 +380,11 @@ StuffEdit = (props) => {
             
             <View style = {{marginVertical: 15}}>
                 {props.list.length > 0 ? (props.list.map(item => (
-                    <Text style = {{textAlign: 'center'}}>{item.quantity} {item.name}</Text>
+                    <Text 
+                        style = {{textAlign: 'center'}}
+                    >
+                        {item.quantity} {item.name}
+                    </Text>
                 ))):
                     <Text>{`Nenhum ${props.type} cadastrado.`}</Text>
                 }
@@ -465,8 +496,9 @@ AddressEdit = (props) => {
 
 const ProfileEditPage = ({ }) => {
     //const [profile, setProfile] = useState(null);
-    const { profile, loadProfile } = useContext(ProfileUpdateContext);
+    const { profile, loadProfile, saveUpdate } = useContext(ProfileUpdateContext);
     const authContext = useContext(AuthContext);
+    const navigation = useNavigation();
 
     useEffect(() => {
         async function load(){
@@ -508,17 +540,17 @@ const ProfileEditPage = ({ }) => {
                 <OpeningPeriodEdit
                     period = {{
                         initialDay: {
-                            id: profile.initialDay, 
-                            label: Format.getWeekDay(profile.initialDay)
+                            id: profile.openinghours.initialDay, 
+                            label: Format.getWeekDay(profile.openinghours.initialDay)
                         },
 
                         finalDay: {
-                            id: profile.finalDay,
-                            label: Format.getWeekDay(profile.finalDay)
+                            id: profile.openinghours.finalDay,
+                            label: Format.getWeekDay(profile.openinghours.finalDay)
                         },
 
-                        initialHour: Format.formatTime(profile.initialHour),
-                        finalHour: Format.formatTime(profile.finalHour)
+                        initialHour: Format.formatTime(profile.openinghours.initialHour),
+                        finalHour: Format.formatTime(profile.openinghours.finalHour)
                     }}
                     
                 />
@@ -560,6 +592,10 @@ const ProfileEditPage = ({ }) => {
             >
                 <TouchableOpacity
                     style = {styles.outlineButton}
+                    onPress = {async () => {
+                        await saveUpdate();
+                        navigation.goBack();
+                    }}
                 >
                     <Text style = {styles.outlineButtonLabel}>
                         Salvar alterações

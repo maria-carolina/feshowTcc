@@ -92,6 +92,7 @@ class ProfilePage extends Component{
     componentDidMount(){
         let id = this.props.route.params ? this.props.route.params.id : this.context.user.id
         this.focus = this.props.navigation.addListener('focus', () => {
+            console.log('oi');
             this.loadProfileData(id);
         })
     }
