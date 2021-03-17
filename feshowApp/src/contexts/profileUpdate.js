@@ -20,8 +20,6 @@ export const ProfileUpdateProvider = ({ children }) => {
                 }
             )
 
-            console.log(result.data)
-
             if(!result.data.error){
                 setProfile(result.data);
             }else{
@@ -52,6 +50,7 @@ export const ProfileUpdateProvider = ({ children }) => {
                     "city": profile.city, 
                     "cache": values.cache, 
                     "equipment": profile.equipments,
+                    "instruments": profile.instruments,
                     "genres": profile.genres.map(item => item.id), 
                     "members": values.members, 
                 },
