@@ -40,67 +40,80 @@ export const ProfileUpdateProvider = ({ children }) => {
         setProfile({...profileAux});
     }
 
-    const saveUpdate = async () => {
+    const saveUpdate = async (values) => {
         let data;
         if(authContext.user.type === 0){
             data = {
-                "email": profile.email, 
+                "email": values.email, 
                 "profile": {
-                    "description" : profile.description,
+                    "name": values.name,
+                    "description" : values.description,
                     "state": profile.state, 
-                    "cache": profile.cache, 
                     "city": profile.city, 
+                    "cache": values.cache, 
                     "equipment": profile.equipments,
                     "genres": profile.genres.map(item => item.id), 
-                    
-                    "members": profile.members, 
-                    "name": profile.name
+                    "members": values.members, 
                 },
-                "username": profile.username
+                "username": values.username
             }
         }else if(authContext.user.type === 1){
             data = {
-                "email": profile.email, 
+                "email": values.email, 
                 "profile": {
                     "address": profile.address,
-                    "capacity": profile.capacity, 
+                    "capacity": values.capacity, 
                     "equipment": profile.equipments,
                     "genres": profile.genres.map(item => item.id), 
-                    "name": profile.name, 
-                    "description" : profile.description,
+                    "name": values.name, 
+                    "description" : values.description,
                     "openinghours": profile.openinghours
                 },  
-                "username": profile.username
+                "username": values.username
             }
         }else{
             data = {
-                "email": profile.email, 
+                "email": values.email, 
                 "profile": {
-                    "description" : profile.description,
+                    "name": values.name,
+                    "description" : values.description,
                     "state": profile.state,
                     "city": profile.city,
-                    "name": profile.name
                 }, 
-                "username": profile.username
+                "username": values.username
             }
         }
 
         try{
-            let result = await api.put(
-                '/updateUser',
-                data,
-                {
-                    headers:{
-                        Authorization: `Bearer ${authContext.token}`
-                    }
+            const config = {
+                headers:{
+                    Authorization: `Bearer ${authContext.token}`
                 }
-            )
+            }
+
+            let result = await api.post('/verifyUsernameUpdate', {username: values.username}, config);
 
             if(!result.data.error){
-                Alert.alert("Pronto!","Perfil alterado com sucesso");
+                result = await api.post('/verifyEmailUpdate', {email: values.email}, config);
+                if(!result.data.error){
+                    let result = await api.put(
+                        '/updateUser',
+                        data,
+                        config
+                    )
+        
+                    if(!result.data.error){
+                        Alert.alert("Pronto!","Perfil alterado com sucesso");
+                    }else{
+                        Alert.alert("Ops.", result.data.error);
+                    }
+                }else{
+                    Alert.alert("Ops.", result.data.error);
+                }
             }else{
-                Alert.alert("Ops.", result.data.error)
+                Alert.alert("Ops.", result.data.error);
             }
+            
 
         }catch(e){
             console.log(e);

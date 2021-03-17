@@ -96,16 +96,6 @@ const ProfileUpdate = () => {
                 />
 
                 <Stack.Screen
-                    component = {EmailInsert}
-                    name = 'emailInsert'
-                />
-
-                <Stack.Screen
-                    component = {CodeInsert}
-                    name = 'codeInsert'
-                />
-
-                <Stack.Screen
                     component = {PasswordRedefinition}
                     name = 'passwordRedefinition'
                 />

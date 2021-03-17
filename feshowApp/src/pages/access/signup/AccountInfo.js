@@ -9,7 +9,8 @@ import * as yup from 'yup';
 0
 const FormSchema = yup.object().shape({
     username: yup.string().required('Campo obrigatório')
-    .min(5, 'O nome deve conter menos 5 caracteres'),
+    .min(5, 'O nome deve conter pelo menos 5 caracteres')
+    .max(10, 'O nome deve conter pelo no máximo 10 caracteres'),
     email: yup.string().required('Campo obrigatório').email('Digite um email'),
     password: yup.string().required('Campo obrigatório')
     .min(6, 'A senha deve conter pelo menos 6 caracteres'),
