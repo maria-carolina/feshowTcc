@@ -26,6 +26,9 @@ const ArtistEvent = require('../models/ArtistEvent');
 const Notification = require('../models/Notification');
 const GenreVenue = require('../models/GenreVenue');
 const ArtistGenre = require('../models/ArtistGenre');
+const Post = require('../models/Post');
+const EventImage = require('../models/EventImage');
+const Solicitation = require('../models/Solicitation');
 
 function generateToken(params = {}) {
     //expirar em 1 ano 
@@ -1022,55 +1025,193 @@ module.exports = {
         }
     },
 
-    /* async delete (req, res){
-         const user = await User.findByPk(req.userId);
- 
-         //Remover imagem
-         const imageUser = await ImageUser.findOne({
-             where: { user_id: user.id }
-         });
- 
-         if (imageUser) { 
-             const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
- 
-             if (fs.existsSync(path)) {
-                 fs.unlink(file, function (err) {
-                     if (err) throw err;
-                     console.log('Arquivo deletado!');
-                 });
-             }
- 
-             await ImageUser.destroy({
-                 where: { user_id: user.id }
-             });
-         }
- 
-         // remover postagens 
-         // remover notificações
-         // remover eventos desde organizador e pagar images do evento
-         // remover posts destes eventos ou do usuário logado
-         // remover solicitações de requisição de evento 
-     
- 
-         if(user.type == 0){
-             // remover equipametos 
-             // remover equipametos 
-             // remover generos 
-             // remover artist_events
-             //remover artista
- 
-         } else if (user.type == 1) {
-             // remover endereço
-             // remover equipametos 
-             // remover equipametos 
-             // remover generos 
-             // remover eventos que acontecerão neste espaço e pagar images do evento
-             // remover solicitações de requisição de evento que acontecerão neste espaço
-             //remover espaço
-         } else {
-             
-             //remover produtor
- 
-         }
-     } */
+    async delete(req, res) {
+        try {
+            const user = await User.findByPk(req.userId);
+
+            //Remover imagem
+            const imageUser = await ImageUser.findOne({
+                where: { user_id: user.id }
+            });
+
+            if (imageUser) {
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
+
+                if (fs.existsSync(path)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
+
+                await ImageUser.destroy({
+                    where: { user_id: user.id }
+                });
+            }
+
+            // remover postagens 
+            await Post.destroy({
+                where: { user_id: user.id }
+            });
+
+            // remover notificações
+            await Notification.destroy({
+                where: { user_id: user.id }
+            });
+
+            // remover solicitações enviada pelo user logado
+            await Solicitation.destroy({
+                where: { user_id: user.id }
+            });
+
+            //pegar eventos organzados pelo usuário logado
+            let events = await Event.findAll({
+                where: { organizer_id: user.id }
+            });
+
+            if (events.length > 0) {
+                for (let event of events) {
+                    // notificacoes
+                    await Notification.destroy({
+                        where: { auxiliary_id: event.id }
+                    });
+
+                    // artist_events
+                    await ArtistEvent.destroy({
+                        where: { event_id: event.id }
+                    });
+
+                    // posts
+                    await Post.destroy({
+                        where: { event_id: event.id }
+                    });
+
+                    //imagem
+                    await EventImage.destroy({
+                        where: { event_id: event.id }
+                    });
+
+                    //evento
+                    await Event.destroy({
+                        where: { id: event.id }
+                    })
+                }
+            }
+
+            if (user.type == 0) {
+                let artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                })
+
+                //remover artist_events
+                await ArtistEvent.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                // remover equipametos
+                await ArtistEquipment.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                // remover instrumentos 
+                await ArtistInstrument.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                // remover generos 
+                await ArtistGenre.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                // remover artist_events
+                await ArtistEquipment.destroy({
+                    where: { artist_id: artist.id }
+                });
+
+                //remover artista
+                await Artist.destroy({
+                    where: { id: artist.id }
+                });
+
+            } else if (user.type == 1) {
+                let venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+
+                // remover endereço
+                await Address.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                // remover equipametos 
+                await EquipmentVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                // remover generos 
+                await GenreVenue.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                // remover eventos que acontecerão neste espaço 
+                let events = await Event.findAll({
+                    where: { venue_id: venue.id }
+                });
+
+                if (events.length > 0) {
+                    for (let event of events) {
+                        // notificacoes
+                        await Notification.destroy({
+                            where: { auxiliary_id: event.id }
+                        });
+
+                        // artist_events
+                        await ArtistEvent.destroy({
+                            where: { event_id: event.id }
+                        });
+
+                        // posts
+                        await Post.destroy({
+                            where: { event_id: event.id }
+                        });
+
+                        //imagem
+                        await EventImage.destroy({
+                            where: { event_id: event.id }
+                        });
+
+                        //evento
+                        await Event.destroy({
+                            where: { id: event.id }
+                        })
+                    }
+                }
+
+                // remover solicitações de requisição de evento que acontecerão neste espaço
+                await Solicitation.destroy({
+                    where: { venue_id: venue.id }
+                });
+
+                //remover espaço
+                await Venue.destroy({
+                    where: { id: venue.id }
+                });
+            } else {
+
+                //remover produtor
+                await Producer.destroy({
+                    where: { user_id: user.id }
+                });
+
+            }
+            await User.destroy({
+                where: { id: user.id }
+            });
+
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao deletar usuário' })
+        }
+    }
 };
