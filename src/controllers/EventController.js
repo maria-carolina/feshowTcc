@@ -1056,5 +1056,32 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao exibir agenda' })
         }
+    },
+
+    async deleteImage(req, res) {
+        try {
+            const { id } = req.params;
+
+            const eventImage = await EventImage.findOne({ where: { event_id: id } });
+
+            if (eventImage) { //remover imagem do sistema
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                if (fs.existsSync(file)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
+
+                await EventImage.destroy({
+                    where: { event_id: id }
+                });
+            }
+
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao deletar imagem de evento' })
+        }
     }
 };

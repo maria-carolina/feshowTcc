@@ -37,6 +37,7 @@ userRoutes.put('/updateUser', UserController.update);
 userRoutes.post('/verifyEmailUpdate', UserController.verifyEmailUpdate);
 userRoutes.post('/verifyUsernameUpdate', UserController.verifyUsernameUpdate);
 
-userRoutes.delete('/deleteUser', UserController.delete)
+userRoutes.delete('/deleteUser', UserController.delete);
+userRoutes.delete('/deleteUserImage', UserController.deleteImage);
 
 module.exports = userRoutes;

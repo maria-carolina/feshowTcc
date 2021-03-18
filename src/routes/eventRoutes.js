@@ -20,6 +20,7 @@ eventRoutes.get('/futureEventsParticipation/:page', EventController.getFutureEve
 eventRoutes.get('/pastEvents/:id/:page', EventController.getPastEvents)
 eventRoutes.get('/previewPastEvents/:id/', EventController.previewPastEvents)
 eventRoutes.get('/schedule/:id', EventController.getSchedule);
+eventRoutes.delete('/deleteEventImage/:id', EventController.deleteImage)
 
 
 

@@ -1213,5 +1213,35 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao deletar usuário' })
         }
+    },
+
+    async deleteImage(req, res) {
+        try {
+            const user = await User.findByPk(req.userId);
+
+            //Remover imagem
+            const imageUser = await ImageUser.findOne({
+                where: { user_id: user.id }
+            });
+
+            if (imageUser) {
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'images', imageUser.name);
+
+                if (fs.existsSync(path)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
+
+                await ImageUser.destroy({
+                    where: { user_id: user.id }
+                });
+            }
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao deletar imagem de usuário' })
+        }
     }
 };
