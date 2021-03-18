@@ -9,6 +9,22 @@ import FeedProfileItem from './FeedProfileITem';
 import FilterModal from './FilterModal';
 
 
+function blobTo64data(imageBlob) {
+    return new Promise((resolve) => {
+        const fileReader = new FileReader();
+
+        var base64data;
+
+        fileReader.readAsDataURL(imageBlob);
+        
+        fileReader.onload = () => {
+            base64data = fileReader.result;
+            resolve(base64data);
+        }
+    }) 
+}
+
+
 const FeedList = (props) => {
 
     const type = props.type === 'artists' ? 0 : (props.type === 'venues' ? 1 : 2);
@@ -96,15 +112,32 @@ class FeedPage extends Component{
             route = '/feedProducer';
         }
 
+        const config = {
+            headers: { 
+                Authorization: `Bearer ${this.context.token}`
+            }
+        }
+
         try{
-            let result = await api.get(route, {
-                    headers: { 
-                        Authorization: `Bearer ${this.context.token}`
-                    }
-                }
+            let result = await api.get(
+                route,
+                config
             )
             
             if(!result.data.error){
+                for(let item of result.data){
+                    if(item.image){
+                        let imageBlob = await api.get(
+                            `/getUserImage/${item.user_id}`,
+                            {...config, responseType: 'blob'},
+                        )
+    
+                        item.image = await blobTo64data(imageBlob.data);
+                    }else{
+                        item.image = null;
+                    }
+                }
+
                 this.setState({
                     [tab]: result.data
                 })

@@ -26,21 +26,23 @@ const FeedProfileItem = (props) => {
                 backgroundColor: 'white',
                 marginBottom: 15,
                 flexDirection: 'row',
+                alignItems: 'center'
             }}
             onPress = {() => navigation.navigate('profilePage', {id: props.item.user_id})}
             activeOpacity = {0.9}
         >
             <View
                 style = {{
-                    width: '40%',
-                    height: '100%',
+                    width: '45%',
+                    height: '90%',
                     justifyContent: 'center',
                     alignItems: 'center'
-                }}
+                }} 
             >
 
                 <Image
-                    source = {require('../../assets/defaultProfileImage.jpeg')}
+                    source = {props.item.image ? {uri: props.item.image} : 
+                    require('../../assets/defaultProfileImage.jpeg')}
                     style = {{
                         width: '80%',
                         height: '80%',
@@ -52,7 +54,7 @@ const FeedProfileItem = (props) => {
 
             <View
                 style = {{
-                    width: '60%',
+                    width: '55%',
                     height: '100%',
                     paddingTop: 15,
                     justifyContent: 'center'
@@ -76,7 +78,6 @@ const FeedProfileItem = (props) => {
                     {props.type !== 2 && 
                     <View style = {styles.row}>
                         {props.item.genres.map((item, index) => {
-                            console.log(item);
                             let genreName = index === 0 ? item.name : ` | ${item.name}`;
                             return <Text key={item.id}>{genreName}</Text>;
                         })}

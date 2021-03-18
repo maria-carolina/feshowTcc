@@ -1,8 +1,11 @@
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView, Dimensions, Alert} from 'react-native';
 import styles from '../../styles';
 import AuthContext from '../../contexts/auth';
 import api from '../../services/api';
+import ImageChangeModal from '../utils/ImageChange';
+import ImagePicker from 'react-native-image-picker';
+import { useNavigation } from '@react-navigation/native';
 
 
 const LogoutForTest = () => {
@@ -15,6 +18,21 @@ const LogoutForTest = () => {
             <Text style = {styles.buttonLabel}> Sair </Text>
         </TouchableOpacity>
     )
+}
+
+function blobTo64data(imageBlob) {
+    return new Promise((resolve) => {
+        const fileReader = new FileReader();
+
+        var base64data;
+
+        fileReader.readAsDataURL(imageBlob);
+        
+        fileReader.onload = () => {
+            base64data = fileReader.result;
+            resolve(base64data);
+        }
+    }) 
 }
 
 const HistoricPreviewItem = (props) => {
@@ -70,43 +88,37 @@ const HistoricPreviewItem = (props) => {
 }
 
 
-const artistInvitationModal = () => {
-    return;
-}
 
-const noticeModal = () => {
-    return;
-}
+const ProfilePage = (props) => {
+    
+    const [isFirstTabSelected, setIsFirstTabSelected] = useState(true);
+    const [profile, setProfile] = useState(null);
+    const [historicPreview, setHistoricPreview] = useState(null);
+    const [isImageChangeVisible, setImageChangeVisible] = useState(false);
+    const [newAvatar, setNewAvatar] = useState(null);
 
-class ProfilePage extends Component{
-    constructor(props){
-        super(props)
-        this.focus;
-        this.state = {
-            isFirstTabSelected: true
-        }
-    }
 
-    static contextType = AuthContext;
+    const authContext = useContext(AuthContext);
+    const navigation = useNavigation();
 
-    componentDidMount(){
-        let id = this.props.route.params ? this.props.route.params.id : this.context.user.id
-        this.focus = this.props.navigation.addListener('focus', () => {
-            console.log('oi');
-            this.loadProfileData(id);
-        })
-    }
-
-    loadProfileData = async (id) => {
-
-        this.setState({
-            profile: undefined,
-            historicPreview: undefined
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            let id = props.route.params ? props.route.params.id : authContext.user.id;
+            loadProfileData(id);
         })
 
-        let config = {
+        return unsubscribe;
+        
+    }, [])
+
+    const loadProfileData = async (id) => {
+
+        setProfile(null);
+        setHistoricPreview(null)
+
+        const config = {
             headers: {
-                Authorization: `Bearer ${this.context.token}`
+                Authorization: `Bearer ${authContext.token}`
             }
         }
         try{
@@ -117,24 +129,18 @@ class ProfilePage extends Component{
 
             if(!('error' in result.data)){
                 if(result.data.imageStatus){
-                    let imageResult = await api.get(
+                    let imageBlob = await api.get(
                         `/getUserImage/${id}`,
-                        config
+                        {...config, responseType: 'blob'},
                     )
 
-                    if(!('error' in imageResult.data)){
-                        result.data.image = imageResult.data;
-                    }else{
-                        Alert.alert('Ops', result.data.error);
-                    }
+                    result.data.image = await blobTo64data(imageBlob.data);
                 }else{
                     result.data.image = null;
                 }
 
 
-                this.setState({
-                    profile: result.data
-                })
+                setProfile(result.data)
                 
             }else{
                 Alert.alert('Ops', result.data.error)
@@ -146,21 +152,19 @@ class ProfilePage extends Component{
         }
     }
 
-    loadHistoricPreview = async () => {
+    const loadHistoricPreview = async () => {
         try{
             let result = await api.get(
                 `previewPastEvents/2`,
                 {
                     headers: {
-                        Authorization: `Bearer ${this.context.token}`
+                        Authorization: `Bearer ${authContext.token}`
                     }
                 }
             )
 
             if(!('error' in result.data)){
-                this.setState({
-                    historicPreview: result.data
-                })
+               setHistoricPreview(result.data)
             }else{
                 Alert.alert('Ops', result.data.error)
             }
@@ -170,19 +174,16 @@ class ProfilePage extends Component{
         }
     }
 
-    openProfileEditPage = () => {
-        this.props.navigation.navigate('profileUpdate')
+    const openProfileEditPage = () => {
+        navigation.navigate('profileUpdate')
     }
 
-    openCalendarPage = (id) => {
-        this.props.navigation.navigate('calendarPage', {id})
+    const openCalendarPage = (id) => {
+        navigation.navigate('calendarPage', {id})
     }
 
-    openHistoricPage = () => {}
-    openChatPage = () => {}
-
-    openRequestPage = () => {
-        this.props.navigation.navigate(
+    const openRequestPage = () => {
+        navigation.navigate(
             'requestPage',
             {
                 venue: this.state.profile
@@ -190,11 +191,8 @@ class ProfilePage extends Component{
         )
     }
 
-    openNoticeModal = () => {}
-    deleteNotice = () => {}
-
-    openInvitationPage = () => {
-        this.props.navigation.navigate(
+    const openInvitationPage = () => {
+        navigation.navigate(
             'profilePageInvitation',
             {
                 artist: this.state.profile
@@ -202,289 +200,389 @@ class ProfilePage extends Component{
         )
     }
 
-    changeTab = () => {
-        this.setState({
-            isFirstTabSelected: !this.state.isFirstTabSelected
-        })
+    const changeTab = () => {
+        setIsFirstTabSelected(!isFirstTabSelected);
 
-        if(!this.state.historicPreview){
-            this.loadHistoricPreview();
+        if(!historicPreview){
+            loadHistoricPreview();
         }
     }
 
-    handleLinkClick = (isAProfilePage, id) => {
-        if(isAProfilePage){
-            this.setState({
-                isFirstTabSelected: true,
-                profile: undefined,
-                historicPreview: undefined
-            })
+    const handleLinkClick = (isAProfilePage, id) => {
 
-            this.props.navigation.navigate('profilePage', { id });
+        if(isAProfilePage){
+            setIsFirstTabSelected(true);
+            setProfile(null);
+            setHistoricPreview(null)
+
+            navigation.navigate('profilePage', { id });
         }else{
-            this.props.navigation.navigate('eventPage', { id });
+            navigation.navigate('eventPage', { id });
+        }
+
+    }
+
+    const pickImage = () => {
+        ImagePicker.showImagePicker({
+            title: 'Selecione uma imagem',
+            storageOptions: {
+                skipBackup: true,
+                path: 'images'
+            }},
+            (response) => {
+                if (response.didCancel) return;
+                if (response.error) return;
+
+                const avatar = {
+                    uri: response.uri,
+                    name: response.fileName,
+                    type: response.type
+                }
+
+                setNewAvatar(avatar);
+                setImageChangeVisible(true);
+            })
+    }
+
+    const saveImage = async () => {
+        try{
+            var formData = new FormData();
+            formData.append('file', newAvatar);
+            await api.post(`/storeImage/`, 
+                formData, 
+                { 
+                    headers: {
+                        Authorization: `Bearer ${authContext.token}`, 
+                        'Content-type': 'multipart/form-data', 
+                        'Accept': 'application/json'
+                    }
+                }
+            )
+
+            setImageChangeVisible(false);
+            setNewAvatar(null);
+            loadProfileData(authContext.user.id);
+
+        }catch(e){
+            throw (e);
+        }
+    }
+
+    const removeImage = async () => { 
+        try{
+            await api.delete(`/deleteUserImage/`, 
+                { 
+                    headers: {
+                        Authorization: `Bearer ${authContext.token}`
+                    }
+                }
+            )
+            setImageChangeVisible(false);
+            loadProfileData(authContext.user.id)
+
+        }catch(e){
+            throw (e);
         }
     }
     
-    render(){
-        var { profile, isFirstTabSelected, historicPreview } = this.state;
 
-        if(profile){
-            var profileImage = (
-                <TouchableOpacity
+    if(profile){
+        var profileImage = (
+            <TouchableOpacity
+                style = {{
+                    width: '50%',
+                    height: '45%',
+                }}
+
+                activeOpacity = { 
+                    authContext.user.id === profile.id ?
+                    0.2 : 1
+                }
+
+                onPress = {authContext.user.id === profile.id ? 
+                    () => {
+                        if(profile.image === null){
+                            pickImage();
+                        }else{
+                            setImageChangeVisible(true);
+                        }
+                    }: null
+                }
+            >
+                <Image
+                    source = { 
+                        profile.image === null ? 
+                        require('../../assets/defaultProfileImage.jpeg'):
+                        {uri: profile.image}}
                     style = {{
-                        width: '50%',
-                        height: '45%',
+                        width: '100%',
+                        height: '100%', 
+                        borderRadius: Dimensions.get('window').width / 2
                     }}
+                    
+                />
 
-                    activeOpacity = { 
-                        this.context.user.id === profile.id ?
-                        0.2 : 1
-                    }
-                >
-                    <Image
-                        source = { 
-                            profile.image === null ? 
-                            require('../../assets/defaultProfileImage.jpeg'):{uri: this.state.profile.image}}
-                        style = {{
-                            width: '100%',
-                            height: '100%', 
-                            borderRadius: Dimensions.get('window').width / 2
-                        }}
-                        
-                    />
+            </TouchableOpacity>
+        );
 
-                </TouchableOpacity>
-            );
+        if(profile.type !== 2){
+            var genreList = "";
 
-            if(profile.type !== 2){
-                var genreList = "";
-
-                for(var item of profile.genres){
-                    genreList += profile.genres.indexOf(item) == 0 ?
-                    item.name : ` | ${item.name}`
-                }
-            }
-
-            var firstButton;
-
-            if(this.context.user.id === profile.id){
-                firstButton = {
-                    label: 'Editar perfil',
-                    handleClick: () => this.openProfileEditPage()
-                }
-            }else if(profile.type === 0){
-                firstButton = {
-                    label: 'Convidar para evento',
-                    handleClick: () => this.openInvitationPage()
-                }
-            }else if(profile.type === 1){
-                firstButton = {
-                    label: 'Marcar show',
-                    handleClick: () => this.openRequestPage()
-                }
-            }else if(profile.type === 2){
-                firstButton = {
-                    label: 'Abrir chat'
-                }
+            for(var item of profile.genres){
+                genreList += profile.genres.indexOf(item) == 0 ?
+                item.name : ` | ${item.name}`
             }
         }
 
+        var firstButton;
 
-        return(
-            <View style = {styles.container}>
-                {(profile &&
-                    <ScrollView
-                        style = {{width: '100%', height: '100%'}}
-                        contentContainerStyle = {{
+        if(authContext.user.id === profile.id){
+            firstButton = {
+                label: 'Editar perfil',
+                handleClick: () => openProfileEditPage()
+            }
+        }else if(profile.type === 0){
+            firstButton = {
+                label: 'Convidar para evento',
+                handleClick: () => openInvitationPage()
+            }
+        }else if(profile.type === 1){
+            firstButton = {
+                label: 'Marcar show',
+                handleClick: () => openRequestPage()
+            }
+        }else if(profile.type === 2){
+            firstButton = {
+                label: 'Abrir chat'
+            }
+        }
+    }
+
+    return(
+        <View style = {styles.container}>
+            {(profile &&
+                <ScrollView
+                    style = {{width: '100%', height: '100%'}}
+                    contentContainerStyle = {{
+                        ...styles.center,
+                        justifyContent: 'flex-start',
+                        padding: 10,
+                    }}
+                >
+                    <View
+                        style = {{
                             ...styles.center,
-                            justifyContent: 'flex-start',
-                            padding: 10,
+                            width: '100%',
+                            height: 375,
+                        }}
+                    >
+                        {profileImage}
+                        
+                        <Text style = {{
+                            fontSize: 22,
+                            fontWeight: 'bold'
+                        }}>
+                            {profile.name}
+                        </Text>
+
+                        {profile.type !== 2 &&
+                            <Text style = {styles.profileHeadInfos}>
+                                {(
+                                    profile.type == 0 ?
+                                    `${profile.members} membro(s)`: 
+                                    `${profile.capacity} pessoas`
+                                )} 
+                            </Text>
+                        }
+
+                        <Text style = {styles.profileHeadInfos}> 
+                            {(profile.city||profile.address.city)} 
+                        </Text>
+
+                        <Text
+                            style = {styles.profileHeadInfos}
+                        >
+                            {genreList}
+                        </Text>
+
+                        
+                        <TouchableOpacity
+                            style = {{...styles.outlineButton, marginTop: 3}}
+                            onPress = {firstButton.handleClick}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                {firstButton.label}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style = {{
+                                marginTop: 10
+                            }}
+                            onPress = {() => openCalendarPage(profile.id)}
+                        >
+                            <Text
+                                style = {styles.outlineButtonLabel}
+                            >
+                                Ver agenda
+                            </Text>
+                        </TouchableOpacity>
+
+                    </View>
+
+                    <View
+                        style = {{
+                            width: '100%',
+                            height: '100%'
                         }}
                     >
                         <View
-                            style = {{
-                                ...styles.center,
-                                width: '100%',
-                                height: 375,
-                            }}
+                            style = {styles.row}
                         >
-                            {profileImage}
-                            
-                            <Text style = {{
-                                fontSize: 22,
-                                fontWeight: 'bold'
-                            }}>
-                                {profile.name}
+                            <TouchableOpacity
+                                style = {
+                                    isFirstTabSelected ?
+                                    styles.selectedHalfRowTab: styles.halfRowTab
+                                }
+                                onPress = {changeTab}
+                            >
+                                <Text>Descrição</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style = {
+                                    isFirstTabSelected ?
+                                    styles.halfRowTab : styles.selectedHalfRowTab
+                                }
+                                onPress = {changeTab}
+                            >
+                                <Text>Histórico</Text>
+                            </TouchableOpacity>
+
+                        </View>
+
+                    {isFirstTabSelected && (
+                        <View style = {{marginTop: 15}}>
+                            <Text>
+                                {
+                                    profile.description !== null ?
+                                    profile.description : 'Nenhuma descrição disponível' 
+                                }
                             </Text>
+                        </View>
+                    )}
 
-                            {profile.type !== 2 &&
-                                <Text style = {styles.profileHeadInfos}>
-                                    {(
-                                        profile.type == 0 ?
-                                        `${profile.members} membros`: 
-                                        `${profile.capacity} pessoas`
-                                    )} 
-                                </Text>
-                            }
-
-                            <Text style = {styles.profileHeadInfos}> 
-                                {(profile.city||profile.address.city)} 
-                            </Text>
-
+                    {isFirstTabSelected && profile.type === 1 && (
+                        <View style = {{marginTop: 15}}>
                             <Text
-                                style = {styles.profileHeadInfos}
+                                style = {{
+                                    ...styles.title,
+                                    textAlign: 'left',
+                                    fontSize: 16
+                                }}
                             >
-                                {genreList}
+                                Endereço
+                            </Text>
+                            <Text>
+                                {`${profile.address.street}, `+ 
+                                `${profile.address.number} - ${profile.address.district}, `+ 
+                                `${profile.address.city} - ${profile.address.uf}`}
                             </Text>
 
-                            
-                            <TouchableOpacity
-                                style = {{...styles.outlineButton, marginTop: 3}}
-                                onPress = {firstButton.handleClick}
-                            >
-                                <Text
-                                    style = {styles.outlineButtonLabel}
-                                >
-                                    {firstButton.label}
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style = {{
-                                    marginTop: 10
-                                }}
-                                onPress = {() => this.openCalendarPage(profile.id)}
-                            >
-                                <Text
-                                    style = {styles.outlineButtonLabel}
-                                >
-                                    Ver agenda
-                                </Text>
-                            </TouchableOpacity>
-
                         </View>
+                    )}
 
-                        <View
-                            style = {{
-                                width: '100%',
-                                height: '100%'
-                            }}
-                        >
-                            <View
-                                style = {styles.row}
-                            >
-                                <TouchableOpacity
-                                    style = {
-                                        isFirstTabSelected ?
-                                        styles.selectedHalfRowTab: styles.halfRowTab
-                                    }
-                                    onPress = {() => this.changeTab()}
-                                >
-                                    <Text>Descrição</Text>
-                                </TouchableOpacity>
+                    {!isFirstTabSelected && 
+                    (
+                        (historicPreview &&
+                            <View style = {styles.center}>
+                            {historicPreview.map(item => {
+                                return (
+                                    <HistoricPreviewItem 
+                                        item = {item}
+                                        handleVenueClick = {() => 
+                                            handleLinkClick(true, item.venue.userId)
+                                        }
+                                        handleEventClick = {() => 
+                                            handleLinkClick(false, item.id)
+                                        }
+                                    />
+                                )
+                            })} 
 
-                                <TouchableOpacity
-                                    style = {
-                                        isFirstTabSelected ?
-                                        styles.halfRowTab : styles.selectedHalfRowTab
-                                    }
-                                    onPress = {() => this.changeTab()}
-                                >
-                                    <Text>Histórico</Text>
-                                </TouchableOpacity>
-
-                            </View>
-
-                        {isFirstTabSelected && (
-                            <View style = {{marginTop: 15}}>
-                                <Text>
+                            <TouchableOpacity
+                                style = {styles.button}
+                                onPress = {() => 
+                                    navigation.navigate('historicPage', 
                                     {
-                                        profile.description !== null ?
-                                        profile.description : 'Nenhuma descrição disponível' 
-                                    }
-                                </Text>
-                            </View>
-                        )}
-
-                        {isFirstTabSelected && profile.type === 1 && (
-                            <View style = {{marginTop: 15}}>
+                                        id: profile.id, 
+                                        name: profile.name,
+                                        type: profile.type
+                                    })
+                                }
+                            >
                                 <Text
-                                    style = {{
-                                        ...styles.title,
-                                        textAlign: 'left',
-                                        fontSize: 16
-                                    }}
+                                    style = {styles.buttonLabel}
                                 >
-                                    Endereço
+                                    Ver mais
                                 </Text>
-                                <Text>
-                                    {`${profile.address.street}, `+ 
-                                    `${profile.address.number} - ${profile.address.district}, `+ 
-                                    `${profile.address.city} - ${profile.address.uf}`}
-                                </Text>
+                            </TouchableOpacity>
+                            </View> 
+                        ) || 
+                        <ActivityIndicator
+                            size = 'large'
+                            color = '#000'
+                        />
+                    )
+                    }
+                        
+                    </View>
 
-                            </View>
-                        )}
-
-                        {!isFirstTabSelected && 
-                        (
-                            (historicPreview &&
-                                <View style = {styles.center}>
-                                {historicPreview.map(item => {
-                                    return (
-                                        <HistoricPreviewItem 
-                                            item = {item}
-                                            handleVenueClick = {() => 
-                                                this.handleLinkClick(true, item.venue.userId)
-                                            }
-                                            handleEventClick = {() => 
-                                                this.handleLinkClick(false, item.id)
-                                            }
-                                        />
-                                    )
-                                })}
-
-                                <TouchableOpacity
-                                    style = {styles.button}
-                                    onPress = {() => 
-                                        this.props.navigation.navigate('historicPage', 
-                                        {
-                                            id: profile.id, 
-                                            name: profile.name,
-                                            type: profile.type
-                                        })
-                                    }
-                                >
-                                    <Text
-                                        style = {styles.buttonLabel}
-                                    >
-                                        Ver mais
-                                    </Text>
-                                </TouchableOpacity>
-                                </View> 
-                            ) || 
-                            <ActivityIndicator
-                                size = 'large'
-                                color = '#000'
-                            />
-                        )
+                    <ImageChangeModal
+                        visible = {isImageChangeVisible}
+                        source = {newAvatar ? newAvatar : {uri: profile.image}}
+                        hasANewAvatar = {!!newAvatar}
+                        firstButtonHandleClick = {
+                            newAvatar ?
+                            () => saveImage() : () => pickImage() 
                         }
-                            
-                        </View>
+                        secondButtonHandleClick = {
+                            newAvatar ?
+                            () => {
+                                setImageChangeVisible(false);
+                                loadProfileData(authContext.user.id);
+                            }:
+                            () => removeImage() 
+                        }
 
-                    </ScrollView>
-                ) || 
-                <ActivityIndicator
-                    size = 'large'
-                    color = '#000'
-                />
-            }
-            <LogoutForTest />
-            </View>
-            
-        )
-    }
+                        closeModal = {
+                            () => {
+                                setImageChangeVisible(false);
+                                loadProfileData(authContext.user.id);
+                            }
+                        }
+                    />
+
+                </ScrollView>
+            ) || 
+            <ActivityIndicator
+                size = 'large'
+                color = '#000'
+            />
+        }
+
+        
+
+        
+
+        
+        <LogoutForTest />
+        </View>
+        
+    )
+    
 }
 
 export default ProfilePage;

@@ -51,7 +51,7 @@ const Form = (props) => {
                     </View>
                     
                     <TouchableOpacity
-                        style = {styles.button} 
+                        style = {{...styles.button, margin: 20}} 
                         onPress = {handleSubmit}
                     >
                         <Text style = {styles.buttonLabel}>Entrar</Text>
