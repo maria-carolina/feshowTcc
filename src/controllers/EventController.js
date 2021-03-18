@@ -465,7 +465,6 @@ module.exports = {
             const { id } = req.params;
 
             const event = await Event.findByPk(id);
-            const eventImage = await EventImage.findOne({ where: { event_id: id } });
 
             //verificar se não tem convites em aberto
             const verify = await ArtistEvent.findAll({
@@ -479,11 +478,23 @@ module.exports = {
                 return res.send({ error: 'Há convites em aberto, para proseguir na exclusão é preciso recusar ou cancelar convites ligados a este evento.' })
             }
 
-            await ArtistEvent.destroy({
-                where: { event_id: id }
+            // notificacoes
+            await Notification.destroy({
+                where: { auxiliary_id: event.id }
             });
 
+            // artist_events
+            await ArtistEvent.destroy({
+                where: { event_id: event.id }
+            });
 
+            // posts
+            await Post.destroy({
+                where: { event_id: event.id }
+            });
+
+            //imagem
+            let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
             if (eventImage) { //remover imagem do sistema
                 const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
                 if (fs.existsSync(file)) {
@@ -492,15 +503,15 @@ module.exports = {
                         console.log('Arquivo deletado!');
                     });
                 }
-
                 await EventImage.destroy({
-                    where: { event_id: id }
+                    where: { event_id: event.id }
                 });
             }
 
+            //evento
             await Event.destroy({
-                where: { id }
-            });
+                where: { id: event.id }
+            })
 
             return res.status(200).send('ok');
 
