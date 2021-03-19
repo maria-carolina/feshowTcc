@@ -52,11 +52,25 @@ const FilterModal = (props) => {
                         Filtros
                     </Text>
 
+                    {props.selectedTab === 'venues' && context.user.type === 0 &&
+                        <TouchableOpacity 
+                            style = {{
+                                ...styles.listItem
+                            }}
+                            onPress = {() => props.applyFilter(props.selectedTab, 'Equipment')}
+                        >
+                            <Text style={{fontSize: 15}}>
+                                Espaços que tenham os equipamentos que você precisa.
+                            </Text>
+                        </TouchableOpacity>
+                    }
+
                     {context.user.type !== 2 &&
                         <TouchableOpacity 
                             style = {{
                                 ...styles.listItem
                             }}
+                            onPress = {() => props.applyFilter(props.selectedTab, 'City')}
                         >
                             <Text style={{fontSize: 15}}>
                                 {type} na sua cidade
@@ -68,6 +82,7 @@ const FilterModal = (props) => {
                         style = {{
                             ...styles.listItem
                         }}
+                        onPress = {() => props.applyFilter(props.selectedTab, 'Genre')}
                     >
                         <Text style={{fontSize: 15}}>
                             {type} com os mesmos gêneros

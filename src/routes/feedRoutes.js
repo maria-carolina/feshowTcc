@@ -16,6 +16,6 @@ feedRoutes.get('/filterVenueCity', FeedController.filterVenueCity);
 feedRoutes.get('/filterEventGenre', FeedController.filterEventGenre);
 feedRoutes.get('/filterEventCity', FeedController.filterEventCity);
 feedRoutes.get('/filterProducerCity', FeedController.filterProducerCity);
-feedRoutes.get('/filterEquipments', FeedController.filterEquipments);
+feedRoutes.get('/filterVenueEquipment', FeedController.filterEquipments);
 
 module.exports = feedRoutes;

@@ -1,4 +1,4 @@
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
@@ -7,6 +7,7 @@ import SolicitationModal from '../event/SolicitationModal';
 import FeedEventItem from './FeedEventItem';
 import FeedProfileItem from './FeedProfileITem';
 import FilterModal from './FilterModal';
+import { useNavigation } from '@react-navigation/native';
 
 
 function blobTo64data(imageBlob) {
@@ -53,54 +54,58 @@ const FeedList = (props) => {
 }
 
 
-class FeedPage extends Component{
-    constructor(props){
-        super(props)
-        this.onfocus;
-        this.state = {
-            tabs: [
-                {label: 'Artistas', value: 'artists'}, 
-                {label: 'Eventos', value: 'events'}, 
-                {label: 'Espaços', value: 'venues'}, 
-                {label: 'Produtores', value: 'producers'}
-            ],
-            selectedTab: 'artists',
-            solicitationVisible: false,
-            filterModalVisible: false,
-        }
-    }
-    
-    static contextType = AuthContext;
+const FeedPage = () => {
+    const [tabs, setTabs] = useState([
+        {label: 'Artistas', value: 'artists'}, 
+        {label: 'Eventos', value: 'events'}, 
+        {label: 'Espaços', value: 'venues'}, 
+        {label: 'Produtores', value: 'producers'}
+    ]);
+    const [selectedTab, setSelectedTab] = useState('artists');
 
-    componentDidMount(){
-        let tabToLoad = 'artists';
-        if(this.context.user.type === 0){
-            this.setState({
-                tabs: [
+    const [isSolicitationVisible, setIsSolicitationVisible] = useState(false);
+    const [limits, setLimits] = useState(null);
+    const [choosenId, setChoosenId] = useState(null);
+
+    const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+    const [suggestions, setSuggestions] = useState({
+        artists: null,
+        venues: null,
+        producers: null,
+        events: null
+    })
+
+    const authContext = useContext(AuthContext);
+    const navigation = useNavigation();
+    
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            let tabToLoad = 'artists';
+            if(authContext.user.type === 0){
+                setTabs([
                     {label: 'Eventos', value: 'events'},
                     {label: 'Artistas', value: 'artists'}, 
                     {label: 'Espaços', value: 'venues'}, 
                     {label: 'Produtores', value: 'producers'}
-                ],
-                selectedTab: 'events',
-            })
-            tabToLoad = 'events';
-
-        }
-
-        this.loadFeed(tabToLoad);
-        //this.reload = this.props.navigation.addListener('focus', () => {
-          //  this.loadFeed(tabToLoad);
-        //})
-    }
-
-    loadFeed = async (tab) => {
-
-        this.setState({
-            [tab]: null
+                ]);
+                setSelectedTab('events');
+                
+                tabToLoad = 'events';
+            }
+            loadFeed(tabToLoad);
         })
+        
 
-        let route; 
+        return unsubscribe;
+    }, [])
+
+
+    const loadFeed = async (tab) => {
+        let route;
+        let suggestionsAux = suggestions;
+        suggestionsAux[tab] = null;
+        setSuggestions({...suggestionsAux});
 
         if(tab === 'events'){
             route = '/feedEvent';
@@ -114,7 +119,7 @@ class FeedPage extends Component{
 
         const config = {
             headers: { 
-                Authorization: `Bearer ${this.context.token}`
+                Authorization: `Bearer ${authContext.token}`
             }
         }
 
@@ -123,6 +128,91 @@ class FeedPage extends Component{
                 route,
                 config
             )
+            
+            if(!result.data.error){
+                for(const item of result.data){
+                    if(item.image){
+                        let imageBlob = await api.get(
+                            `/getUserImage/${item.user_id}`,
+                            {...config, responseType: 'blob'},
+                        )
+    
+                        item.image = await blobTo64data(imageBlob.data);
+                    }else{
+                        item.image = null;
+                    }
+                }
+
+                suggestionsAux[tab] = result.data;
+                setSuggestions({...suggestionsAux});
+                
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+            console.log(e);
+        }
+    }
+
+    const selectTab = (value) => {
+        setSelectedTab(value);
+
+        if(!suggestions[value]){
+            loadFeed(value);
+        }
+    }
+
+
+    const showSolicitationModal = (event) => {
+        var {id, start_date, start_time, end_time} = event;
+        setIsSolicitationVisible(true);
+        setLimits({start_date, start_time, end_time})
+        setChoosenId(id);
+    }
+
+    const closeSolicitationModal = () => {
+        setIsSolicitationVisible(true);
+        setLimits({start_date, start_time, end_time})
+        setChoosenId(id);
+
+        loadFeed('events');
+    }
+
+    const showFilterModal = () => {
+        setIsFilterModalVisible(true)
+    }
+
+    const closeFilterModal = () => {
+        setIsFilterModalVisible(false)
+    }
+
+    const filter = async (profileType, filterType) => {
+        let route = '/filter';
+        
+        if(profileType === 'artists'){
+            route += 'Artist';
+        }else if (profileType === 'venues'){
+            route += 'Venue';
+        }else if (profileType ===  'producers'){
+            route += 'Producer';
+        }else if (profileType ===  'events'){
+            route += 'Event';
+        }
+
+        route += filterType;
+        console.log(route);
+
+        const config = {
+            headers: { 
+                Authorization: `Bearer ${authContext.token}`
+            }
+        }
+
+        try{
+            let result = await api.get(
+                route,
+                config
+            );
             
             if(!result.data.error){
                 for(let item of result.data){
@@ -138,164 +228,115 @@ class FeedPage extends Component{
                     }
                 }
 
-                this.setState({
-                    [tab]: result.data
-                })
+                console.log(result.data)
+
+                let suggestionsAux = suggestions;
+                suggestionsAux[profileType] = result.data;
+                setSuggestions({...suggestionsAux});
+                setIsFilterModalVisible(false);
             }else{
-                Alert.alert('Ops', result.data.error)
+                Alert.alert('Ops', result.data.error);
             }
-        }catch(e){
-            console.log(e);
-        }
-    }
-
-    selectTab = (value) => {
-        this.setState({
-            selectedTab: value
-        })
-
-        if(!this.state[value]){
-            this.loadFeed(value);
-        }
-    }
-
-
-    showSolicitationModal = (event) => {
-        var {id, start_date, start_time, end_time} = event;
-        this.setState({
-            solicitationVisible: true,
-            limits: {start_date, start_time, end_time},
-            choosenId: id
-        })
-    }
-
-    closeSolicitationModal = () => {
-        this.setState({
-            solicitationVisible: false,
-            limits: null,
-            choosenId: null
-        })
-
-        this.loadFeed('events');
-    }
-
-    showFilterModal = () => {
-        this.setState({
-            filterModalVisible: true
-        })
-    }
-
-    closeFilterModal = () => {
-        this.setState({
-            filterModalVisible: false
-        });
-    }
-
-    filter = (type) => {
-        try{
-            let result = api.get();
+            
         }catch(e){
             console.log(e)
         }
 
     }
 
-    handleClick = () => {} 
+    
+    return(
+        <View style = {styles.container}>
 
-    render(){
-        var { tabs, selectedTab, events } = this.state;
-
-        return(
-            <View style = {styles.container}>
-
-                {(tabs &&
-                <ScrollView
-                    contentContainerStyle = {{
-                        alignItems: 'center',
-                    }}
-                >
-                    <View style = {styles.row}>
-                        {tabs.map((item, index) => (
-                            <TouchableOpacity
-                                style = {selectedTab === item.value ?
-                                    {
-                                        ...styles.quarterRowTab,
-                                        borderBottomWidth: 2,
-                                        borderBottomColor: '#3F2058'
-                                    } : styles.quarterRowTab
-                                }
-                                onPress = {() => this.selectTab(item.value)}
-                                key = {index.toString()}
-                            >
-                                <Text
-                                    style = {selectedTab === item.value ?
-                                    {color: '#3F2058', fontWeight: 'bold'}:
-                                    {color: '#000', fontWeight: 'normal'}
-                                    }
-                                >
-                                    {item.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    <TouchableOpacity
-                        style = {{
-                            alignSelf: 'flex-end',
-                            marginRight: 20,
-                            marginTop: 15,
-                            marginBottom: 15,
-                        }}
-                        onPress = {() => this.showFilterModal()}
-                    >
-                        <Text
-                            style = {{
-                                fontSize: 15
-                            }}
+            {(tabs &&
+            <ScrollView
+                contentContainerStyle = {{
+                    alignItems: 'center',
+                }}
+            >
+                <View style = {styles.row}>
+                    {tabs.map((item, index) => (
+                        <TouchableOpacity
+                            style = {selectedTab === item.value ?
+                                {
+                                    ...styles.quarterRowTab,
+                                    borderBottomWidth: 2,
+                                    borderBottomColor: '#3F2058'
+                                } : styles.quarterRowTab
+                            }
+                            onPress = {() => selectTab(item.value)}
+                            key = {index.toString()}
                         >
-                            Filtrar
-                        </Text>
-                    </TouchableOpacity>
+                            <Text
+                                style = {selectedTab === item.value ?
+                                {color: '#3F2058', fontWeight: 'bold'}:
+                                {color: '#000', fontWeight: 'normal'}
+                                }
+                            >
+                                {item.label}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
 
-                    {this.state[selectedTab] &&
-                    <FeedList 
-                        list = {this.state[selectedTab]}
-                        type = {selectedTab}
-                        showSolicitationModal = {(item) => this.showSolicitationModal(item)}
-                    />
-                    }
+                <TouchableOpacity
+                    style = {{
+                        alignSelf: 'flex-end',
+                        marginRight: 20,
+                        marginTop: 15,
+                        marginBottom: 15,
+                    }}
+                    onPress = {() => showFilterModal()}
+                >
+                    <Text
+                        style = {{
+                            fontSize: 15
+                        }}
+                    >
+                        Filtrar
+                    </Text>
+                </TouchableOpacity>
 
-                    {!this.state[selectedTab] &&
-                        <ActivityIndicator 
-                            size = 'large'
-                            color = '#000'
-                        /> 
-                    }
+                {suggestions[selectedTab] &&
+                <FeedList 
+                    list = {suggestions[selectedTab]}
+                    type = {selectedTab}
+                    showSolicitationModal = {(item) => showSolicitationModal(item)}
+                />
+                }
+
+                {!suggestions[selectedTab] &&
+                    <ActivityIndicator 
+                        size = 'large'
+                        color = '#000'
+                    /> 
+                }
+                
                     
-                        
-                </ScrollView>
-                ) ||
-                <ActivityIndicator
-                    size = 'large'
-                    color = '#000'
-                />}
+            </ScrollView>
+            ) ||
+            <ActivityIndicator
+                size = 'large'
+                color = '#000'
+            />}
 
-                <SolicitationModal
-                    visible = {this.state.solicitationVisible}
-                    limits = {this.state.limits}
-                    eventId = {this.state.choosenId}
-                    token = {this.context.token}
-                    closeModal = {() => this.closeSolicitationModal()} 
-                />
+            <SolicitationModal
+                visible = {isSolicitationVisible}
+                limits = {limits}
+                eventId = {choosenId}
+                token = {authContext.token}
+                closeModal = {() => closeSolicitationModal()} 
+            />
 
-                <FilterModal 
-                    visible = {this.state.filterModalVisible}
-                    selectedTab = {this.state.selectedTab}
-                    closeModal = {() => this.closeFilterModal()}
-                />
-            </View>
-        )
-    }
+            <FilterModal 
+                visible = {isFilterModalVisible}
+                selectedTab = {selectedTab}
+                applyFilter = {(profileType, filterType) => filter(profileType, filterType)}
+                closeModal = {() => closeFilterModal()}
+            />
+        </View>
+    )
+    
 }
 
 export default FeedPage;
