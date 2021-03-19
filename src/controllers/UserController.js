@@ -1087,9 +1087,19 @@ module.exports = {
                     });
 
                     //imagem
-                    await EventImage.destroy({
-                        where: { event_id: event.id }
-                    });
+                    let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
+                    if (eventImage) { //remover imagem do sistema
+                        const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                        if (fs.existsSync(file)) {
+                            fs.unlink(file, function (err) {
+                                if (err) throw err;
+                                console.log('Arquivo deletado!');
+                            });
+                        }
+                        await EventImage.destroy({
+                            where: { event_id: event.id }
+                        });
+                    }
 
                     //evento
                     await Event.destroy({
@@ -1176,9 +1186,19 @@ module.exports = {
                         });
 
                         //imagem
-                        await EventImage.destroy({
-                            where: { event_id: event.id }
-                        });
+                        let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
+                        if (eventImage) { //remover imagem do sistema
+                            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                            if (fs.existsSync(file)) {
+                                fs.unlink(file, function (err) {
+                                    if (err) throw err;
+                                    console.log('Arquivo deletado!');
+                                });
+                            }
+                            await EventImage.destroy({
+                                where: { event_id: event.id }
+                            });
+                        }
 
                         //evento
                         await Event.destroy({
