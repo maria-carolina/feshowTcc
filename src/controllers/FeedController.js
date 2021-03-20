@@ -19,13 +19,13 @@ function inArray(id, array) {
     return false;
 }
 
-function inArrayEquip(id, array) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i].equipment_id === id) {
-            return true; //existe no array
+function inArrayEquip(venueEquipments, idEquipmentArtist) {
+    for (let element of venueEquipments) {
+        if (element[i].equipment_id != idEquipmentArtist) {
+            return false;
         }
     }
-    return false;
+    return true;
 }
 
 function shuffle(array) { //para misturar array do search
@@ -452,6 +452,7 @@ module.exports = {
 
             } else if (user.type == 1) {
                 let venueAuth = await Venue.findOne({
+                    include: { association: 'address' },
                     where: { user_id: user.id }
                 });
                 city = venueAuth.address.city;
@@ -674,8 +675,16 @@ module.exports = {
 
                 artist.genres.forEach((genre) => {
                     resultGenre = inArray(genre.id, genres)
-                    if (resultGenre)
-                        artists.push(artist);
+                    if (resultGenre) {
+                        if (user.type === 0) { //remover artista logado da lista 
+                            if (artistAuth.id !== artist.id) {
+                                artists.push(artist)
+                            }
+                        } else {
+                            artists.push(artist);
+                        }
+                    }
+
                 });
             }
 
@@ -683,16 +692,10 @@ module.exports = {
 
             //remover duplicidade
             artistsAll.forEach((artist) => {
-                if (user.type === 0) { //remover artista logado da lista 
-                    if (artistAuth.id !== artist.id) {
-                        !inArray(artist.id, artists) ? artists.push(artist) : ''
-                    }
-                } else {
-                    !inArray(artist.id, artists) ? artists.push(artist) : ''
-                }
+                !inArray(artist.id, artists) ? artists.push(artist) : ''
             });
 
-            return res.send(artistsAll);
+            return res.send(artists);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir filtro de artistas por gêneros' })
         }
@@ -757,78 +760,78 @@ module.exports = {
     },
 
     async filterVenueGenre(req, res) {
-        //try 
-        const user = await User.findByPk(req.userId);
+        try {
+            const user = await User.findByPk(req.userId);
 
-        let resultGenre, venueAuth;
-        let venues = [],
-            genres = [];
+            let resultGenre, venueAuth;
+            let venues = [],
+                genres = [];
 
-        if (user.type == 0) {
-            const artistAuth = await Artist.findOne({
-                include: { association: 'genres' },
-                where: { user_id: user.id }
-            });
-            genres = artistAuth.genres;
+            if (user.type == 0) {
+                const artistAuth = await Artist.findOne({
+                    include: { association: 'genres' },
+                    where: { user_id: user.id }
+                });
+                genres = artistAuth.genres;
 
-        } else if (user.type == 1) {
-            venueAuth = await Venue.findOne({
+            } else if (user.type == 1) {
+                venueAuth = await Venue.findOne({
+                    include: [
+                        { association: 'genres' }
+                    ],
+                    where: { user_id: user.id }
+                });
+                genres = venueAuth.genres;
+            }
+
+            let venuesAll = await Venue.findAll({
+                attributes: ['id', 'name', 'capacity', 'user_id'],
                 include: [
-                    { association: 'genres' }
-                ],
-                where: { user_id: user.id }
+                    {
+                        association: 'genres',
+                        attributes: ['id', 'name']
+                    },
+                    {
+                        association: 'address',
+                        attributes: ['city']
+                    }
+                ]
             });
-            genres = venueAuth.genres;
-        }
 
-        let venuesAll = await Venue.findAll({
-            attributes: ['id', 'name', 'capacity', 'user_id'],
-            include: [
-                {
-                    association: 'genres',
-                    attributes: ['id', 'name']
-                },
-                {
-                    association: 'address',
-                    attributes: ['city']
-                }
-            ]
-        });
+            for (let venue of venuesAll) {
+                //status se existe ou não imagem
+                let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
+                let imageStatus = image ? true : false;
+                venue.dataValues.image = imageStatus;
 
-        for (let venue of venuesAll) {
-            //status se existe ou não imagem
-            let image = await ImageUser.findOne({ where: { user_id: venue.user_id } });
-            let imageStatus = image ? true : false;
-            venue.dataValues.image = imageStatus;
+                if (venue.genres.length > 0) {
+                    venue.genres.forEach((genre) => {
+                        resultGenre = inArray(genre.id, genres)
 
-            if (venue.genres.length > 0) {
-                venue.genres.forEach((genre) => {
-                    resultGenre = inArray(genre.id, genres)
-
-                    if (user.type === 1) { //remover espaço logado da lista 
-                        if (venueAuth.id !== venue.id) {
+                        if (user.type === 1) { //remover espaço logado da lista 
+                            if (venueAuth.id !== venue.id) {
+                                if (resultGenre)
+                                    venues.push(venue);
+                            }
+                        }
+                        else {
                             if (resultGenre)
                                 venues.push(venue);
                         }
-                    }
-                    else {
-                        if (resultGenre)
-                            venues.push(venue);
-                    }
-                });
+                    });
+                }
             }
+
+            venuesAll = venues;
+            //remover duplicidade
+            venuesAll.forEach((venue) => {
+                !inArray(venue.id, venues) ? venues.push(venue) : ''
+            });
+
+            return res.send(venues);
+        } catch (err) {
+            return res.send({ error: 'Erro ao exibir filtro de espaço por gêneros' })
         }
-
-        venuesAll = venues;
-        //remover duplicidade
-        venuesAll.forEach((venue) => {
-            !inArray(venue.id, venues) ? venues.push(venue) : ''
-        });
-
-        return res.send(venues);
-        // } catch (err) {
-        //      return res.send({ error: 'Erro ao exibir filtro de espaço por gêneros' })
-        //  }
 
     },
 
@@ -1179,7 +1182,7 @@ module.exports = {
         try {
             const user = await User.findByPk(req.userId);
             let venuesCompatible = [];
-
+            let checkCompatibility = true;
             if (user.type === 0) {
                 const artist = await Artist.findOne({
                     where: { user_id: user.id }
@@ -1208,16 +1211,22 @@ module.exports = {
                 });
 
                 venues.forEach((venue) => {
-                    venue.equipments.forEach((equipment) => {
-                        inArrayEquip(equipment.equipment_id, artistEquipments) ? venuesCompatible.push(venue) : '';
+                    artistEquipments.forEach((artistEquipment) => {
+                        //se nao espaço não tiver equipamento que artista tem
+                        if (!inArrayEquip(venue.equipments, artistEquipment.equipment_id)) {
+                            checkCompatibility = false;
+                        }
                     });
+                    if (checkCompatibility) {
+                        venuesCompatible.push(venue);
+                    }
                 });
             }
 
             return res.send(venuesCompatible);
 
         } catch (err) {
-            return res.send({ error: 'Erro ao exibir filtro' })
+            return res.send({ error: 'Erro ao exibir filtro por equipamentos' })
         }
     }
 
