@@ -19,15 +19,6 @@ function inArray(id, array) {
     return false;
 }
 
-function inArrayEquip(venueEquipments, idEquipmentArtist) {
-    for (let element of venueEquipments) {
-        if (element[i].equipment_id != idEquipmentArtist) {
-            return false;
-        }
-    }
-    return true;
-}
-
 function shuffle(array) { //para misturar array do search
     let m = array.length, t, i;
 
@@ -1211,9 +1202,11 @@ module.exports = {
                 });
 
                 venues.forEach((venue) => {
+                    checkCompatibility = true;
                     artistEquipments.forEach((artistEquipment) => {
                         //se nao espaço não tiver equipamento que artista tem
-                        if (!inArrayEquip(venue.equipments, artistEquipment.equipment_id)) {
+                        result = venue.equipments.find(equipments => equipments.equipment_id !== artistEquipment.equipment_id);
+                        if (result === undefined) {
                             checkCompatibility = false;
                         }
                     });
