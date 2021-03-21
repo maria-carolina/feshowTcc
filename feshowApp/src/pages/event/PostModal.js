@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {View, Text, TouchableOpacity, Modal, Alert, TextInput} from 'react-native';
 import styles from '../../styles';
 import api from '../../services/api';
+import { useNavigation } from '@react-navigation/native';
 
 const PostModal = (props) => {
     const [postInputValue, setPostInputValue] = useState(null);
+    const navigation = useNavigation();
 
     useEffect(() => {
-        if(props.post !== undefined){
+        if(props.post){
             console.log('passa dentro')
             setPostInputValue(props.post.text)
         }else{
@@ -32,8 +34,9 @@ const PostModal = (props) => {
                 );
 
                 if(result.data == 'ok'){
-                    Alert.alert('Pronto', 'Postagem realizada.')
-                    props.closeModal()
+                    Alert.alert('Pronto', 'Postagem realizada.');
+                    props.closeModal();
+                    props.reload();
                 }else{
                     Alert.alert('Ops', 'Ocorreu um erro.')
                 }
@@ -62,8 +65,9 @@ const PostModal = (props) => {
                 );
 
                 if(result.data == 'ok'){
-                    Alert.alert('Pronto', 'Postagem editada com sucesso.')
-                    props.closeModal()
+                    Alert.alert('Pronto', 'Postagem editada com sucesso.');
+                    props.closeModal();
+                    props.reload();
                 }else{
                     Alert.alert('Ops', 'Ocorreu um erro1')
                 }
@@ -84,7 +88,7 @@ const PostModal = (props) => {
                 <Text
                     style = {styles.title}
                 >
-                    {props.post === undefined ? 'Nova':'Editar'} Postagem
+                    {!props.post ? 'Nova':'Editar'} Postagem
                 </Text>
                 <TextInput
                     style = {{...styles.textInput,
@@ -97,16 +101,19 @@ const PostModal = (props) => {
                 />
 
                 <TouchableOpacity
-                    style = {styles.button}
+                    style = {{
+                        ...styles.button,
+                        marginVertical: 15
+                    }}
                     onPress = {
-                        props.post === undefined ? 
+                        !props.post ? 
                         () => savePost() : () => updatePost(props.post.id)
                     }
                 >
                     <Text
                         style = {styles.buttonLabel}
                     >
-                        {props.post === undefined ? 'Postar' : 'Editar'}
+                        {!props.post ? 'Postar' : 'Editar'}
                     </Text>
                 </TouchableOpacity>
 

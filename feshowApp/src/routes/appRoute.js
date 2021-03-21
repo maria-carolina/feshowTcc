@@ -9,7 +9,7 @@ import AuthContext from '../contexts/auth';
 import NewEventPage from '../pages/event/NewEventPage';
 import InvitationsPage from '../pages/event/InvitationsPage';
 
-import EventPage from '../pages/event/EventPage';
+import EventPage from '../pages/event/EventPageX';
 import ProfilePage from '../pages/access/ProfilePage';
 import ProfileEditPage from '../pages/access/ProfileEditPage';
 

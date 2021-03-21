@@ -158,6 +158,7 @@ const InvitationTimePick = (props) => {
                         style = {{
                             ...styles.button, 
                             width:'100%',
+                            marginVertical: 15
                         }}
                     >
                         <Text style = {styles.buttonLabel}>

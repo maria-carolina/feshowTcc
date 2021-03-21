@@ -209,7 +209,10 @@ class LineUpEditPage extends Component{
                 })}
 
                 <TouchableHighlight
-                    style = {styles.button}
+                    style = {{
+                        ...styles.button,
+                        marginVertical: 15
+                    }}
                 >
                     <Text
                         style = {{
