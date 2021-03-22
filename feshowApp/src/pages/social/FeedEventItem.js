@@ -107,22 +107,22 @@ const FeedEventItem = (props) => {
                     </Text>
                 }
                 
-                { user.type === 0 && !props.item.inEvent &&
-                <TouchableOpacity
-                    style = {{
-                        ...styles.outlineButton
-                    }}
-                    onPress = {props.showSolicitationModal}
-                >
-                    
-                    <Text style = {{
-                        ...styles.outlineButtonLabel,
-                        fontSize: 14
-                    }}>
-                        Participar desse evento
-                    </Text>
-                    
-                </TouchableOpacity>
+                {user.type === 0 && !props.item.inEvent &&
+                    <TouchableOpacity
+                        style = {{
+                            ...styles.outlineButton
+                        }}
+                        onPress = {props.showSolicitationModal}
+                    >
+                        
+                        <Text style = {{
+                            ...styles.outlineButtonLabel,
+                            fontSize: 14
+                        }}>
+                            Participar desse evento
+                        </Text>
+                        
+                    </TouchableOpacity>
                 }
 
                 {user.type === 0 && props.item.inEvent &&

@@ -9,6 +9,7 @@ import Format from '../utils/Format';
 import Lineup from './Lineup';
 import Posts from './Posts';
 import Warnings from './Warnings';
+import SolicitationModal from './SolicitationModal';
 
 
 const TABS = [
@@ -27,7 +28,9 @@ const EventPage = (props) => {
 
     const [isContentLoading, setIsContentLoading] = useState(false);
 
-    const [isSolicitationModalVisible, setSolicitationModalVisible] = useState(false);
+    const [isSolicitationModalVisible, setIsSolicitationModalVisible] = useState(false);
+    const [timeLimits, setTimeLimits] = useState(null);
+
     const [isInvitationModalVisible, setInvitationModalVisible] = useState(false);
 
     const authContext = useContext(AuthContext);
@@ -39,7 +42,7 @@ const EventPage = (props) => {
         })
             
         return unsubscribe;
-    });
+    }, []);
 
     const loadEvent = async () => {
         try{
@@ -54,6 +57,7 @@ const EventPage = (props) => {
 
             if(!result.data.error){
                 setEvent(result.data);
+                
             }else{
                 Alert.alert('Ops', result.data.error);
             }
@@ -96,7 +100,193 @@ const EventPage = (props) => {
                 Alert.alert('Ops', result.data.error);
             }
         }catch(e){
+            console.log(e);
+        }
+    }
 
+    const changeStatus = async () => {
+        try{
+            let result = await api.get(
+                `/changeStatus/${event.id}`,
+                {
+                    headers:{
+                        Authorization: `Bearer ${authContext.token}`
+                    }
+                }
+            );
+
+            if(!result.data.error){
+                setEvent(result.data);
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    const openSolicitationModal = async () => {
+        try{
+            let limitsResult = await api.get(`/event/getDateTime/${event.id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${authContext.token}`,
+                    }
+                }
+            )
+            
+            setTimeLimits(limitsResult.data);
+            setIsSolicitationModalVisible(true);
+            
+
+        }catch(e){
+            console.log(e);
+        }
+        
+    }
+
+    const closeSolicitationModal = () => {
+        setIsSolicitationModalVisible(false);
+        loadEvent();
+    }
+
+    const loadInvitationResponse = () => {
+        Alert.alert(
+            'Opa', 
+            `Aceita ou recusa esse convite?`, 
+            [
+                {
+                    text: 'Aceitar',
+                    onPress: () => respondInvitation(true)
+                },
+                {
+                    text: 'Recusar',
+                    onPress: () => respondInvitation(false)
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+    const loadRemoveConfirmation = (isArtistInEvent) => {
+        const message = isArtistInEvent ? 
+        'Realmente quer deixar o evento?':
+        'Realmente quer cancelar sua solicitação para participar desse evento?'
+        Alert.alert(
+            'Opa',
+            message,
+            [
+                {
+                    text: 'Sim',
+                    onPress: isArtistInEvent ? 
+                    () => leaveLineup() :
+                    () => respondInvitation(false) 
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+    const respondInvitation = async (wasAccepted) => {
+        var url = wasAccepted ? '/acceptParticipation' : '/removeAssociation';
+        try{
+            let result = await api.post(
+                url, 
+                {
+                    artistId: authContext.user.artistId, 
+                    eventId: event.id
+                },
+                {  
+                    headers: {
+                        Authorization: `Bearer ${authContext.token}`
+                    }
+                }
+            )
+
+            let message = wasAccepted ? 'Você foi adicionado ao evento' : 'O convite foi excluído'
+
+            if(!result.data.error){
+                Alert.alert('Pronto', message);
+                loadEvent();
+                loadTab(1);
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+
+        }catch(e){
+            console.log(e)
+        }
+    }
+
+    const leaveLineup = async () =>{
+        try{
+            let result = await api.post(
+                '/removeAssociation', 
+                {
+                    artistId: authContext.user.artistId, 
+                    eventId: event.id
+                },
+                {  
+                    headers: {
+                        Authorization: `Bearer ${authContext.token}`
+                    }
+                }
+            )
+
+            if(!result.data.error){
+                Alert.alert('Pronto','Você foi removido do lineup.');
+                loadEvent();
+                loadTab(1);
+            }else{
+                Alert.alert('Ops', result.data.error)
+            }
+        }catch(e){
+
+        }
+    }
+
+    const openEventEditPage = () => {
+        navigation.navigate('newEventPage', {event})
+    }
+
+
+    let mainButton;
+    if(event){
+        if(authContext.user.id === event.organizer_id){
+            mainButton = {
+                handleClick: () => changeStatus(),
+                label: `${event.status === 0 ? 'Abrir': 'Fechar'} evento`
+            }
+        }else if(event.status === 0){
+            mainButton = {
+                label: 'Feshow!'
+            }
+        }else if(event.artistStatus === 0){
+            mainButton = {
+                handleClick: () => openSolicitationModal(),
+                label: 'Solicitar participação'
+            }
+        }else if(event.artistStatus === 1){
+            mainButton = {
+                handleClick: () => loadInvitationResponse(),
+                label: 'Responder convite'
+            }
+        }else if (event.artistStatus === 2){
+            mainButton = {
+                handleClick: () => loadRemoveConfirmation(false),
+                label: 'Cancelar participação'
+            }
+        }else{
+            mainButton = {
+                handleClick: () => loadRemoveConfirmation(true),
+                label: 'Sair do evento'
+            }
         }
     }
 
@@ -106,8 +296,9 @@ const EventPage = (props) => {
                 <ScrollView
                     contentContainerStyle = {{
                         ...styles.center, 
-                        justifyContent: 'flex-start'
+                        justifyContent: 'flex-start', 
                     }}
+                    style = {{width: '100%'}}
                 >
                     <View style = {{alignItems: 'center'}}>
                         <Text
@@ -145,6 +336,34 @@ const EventPage = (props) => {
                             />
                             <Text> {event.start_time} às {event.end_time}</Text>
                         </View>
+
+                        <TouchableOpacity
+                            onPress = {mainButton.handleClick}
+                            style = {{
+                                ...styles.outlineButton,
+                                marginVertical: 15
+                            }}
+                        >
+                            <Text style = {styles.outlineButtonLabel}>
+                                {mainButton.label}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {authContext.user.id === event.organizer_id &&
+                            <TouchableOpacity
+                                onPress = {openEventEditPage}
+                                style = {{alignSelf: 'center'}}
+                            >
+                                <Text 
+                                    style = {{
+                                        color: '#3F2058', 
+                                        fontWeight: 'bold'
+                                    }
+                                }>
+                                    Editar evento
+                                </Text>
+                            </TouchableOpacity>
+                        }
                     </View>
 
                     <View
@@ -154,25 +373,34 @@ const EventPage = (props) => {
                             flexGrow: 0,
                             marginTop: 15,
                             marginBottom: 10,
-                            flexDirection: 'row'
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly'
                         }}
                     >
-                        {TABS.map(item => (
-                            <TouchableOpacity
-                                onPress = {() => loadTab(item.id)}
-                                style = {
-                                    selectedTab === item.id ?
-                                    {
-                                        ...styles.quarterRowTab,
-                                        borderBottomWidth: 2,
-                                        borderBottomColor: '#3F2058'
-                                    } :
-                                    styles.quarterRowTab
-                                }
-                            >
-                                <Text style = {styles.purpleText}>{item.label}</Text>
-                            </TouchableOpacity>
-                        ))}
+                        {TABS.map(item => {
+                            return authContext.user.id !== event.organizer_id
+                            && item.id === 3 ? 
+                            null :
+                            (
+                                <TouchableOpacity
+                                    onPress = {() => loadTab(item.id)}
+                                    style = {
+                                        selectedTab === item.id ?
+                                        {
+                                            ...styles.rowTab,
+                                            borderBottomWidth: 2,
+                                            borderBottomColor: '#3F2058'
+                                        } :
+                                        styles.rowTab
+                                    }
+                                    key = {item.id}
+                                >
+                                    <Text style = {styles.purpleText}>
+                                        {item.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            )
+                        })}
                     </View>
 
                     {selectedTab === 0 && <Text>{event.description}</Text>}
@@ -208,8 +436,14 @@ const EventPage = (props) => {
                             size = 'large'
                             color = '#000'
                         />
-                    }         
-
+                    }
+                    <SolicitationModal
+                        visible = {isSolicitationModalVisible}
+                        limits = {timeLimits}
+                        eventId = {event.id}
+                        token = {authContext.token}
+                        closeModal = {() => closeSolicitationModal()} 
+                    />         
 
                 </ScrollView>
             ):(
@@ -218,6 +452,8 @@ const EventPage = (props) => {
                     color = '#000'
                 />
             )}
+
+            
         </View>
     )
 }

@@ -158,8 +158,8 @@ const Styles = StyleSheet.create({
 
     rowTab: {
         alignItems: 'center',
-        padding: 18,
-        height: 50,
+        padding: 10,
+        height: 45,
     },
 
     quarterRowTab: {

@@ -27,8 +27,8 @@ function blobTo64data(imageBlob) {
 
 
 const FeedList = (props) => {
-
     const type = props.type === 'artists' ? 0 : (props.type === 'venues' ? 1 : 2);
+    console.log(props.list);
     return(
         <View style = {{width: '90%'}}>
 
@@ -54,7 +54,7 @@ const FeedList = (props) => {
 }
 
 
-const FeedPage = () => {
+const FeedPage = (props) => {
     const [tabs, setTabs] = useState([
         {label: 'Artistas', value: 'artists'}, 
         {label: 'Eventos', value: 'events'}, 
@@ -81,6 +81,8 @@ const FeedPage = () => {
     
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
+            console.log('FeedPage::useEffect')
+            console.log(selectedTab)
             let tabToLoad = 'artists';
             if(authContext.user.type === 0){
                 setTabs([
@@ -92,6 +94,8 @@ const FeedPage = () => {
                 setSelectedTab('events');
                 
                 tabToLoad = 'events';
+            }else{
+                setSelectedTab('artists')
             }
             loadFeed(tabToLoad);
         })

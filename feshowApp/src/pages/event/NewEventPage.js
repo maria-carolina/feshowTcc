@@ -145,7 +145,7 @@ const Form = (props) => {
                         />
 
                         <TouchableOpacity
-                            style = {styles.button}
+                            style = {{...styles.button, marginVertical: 15}}
                             onPress = {handleSubmit}
                         >
                             <Text 
