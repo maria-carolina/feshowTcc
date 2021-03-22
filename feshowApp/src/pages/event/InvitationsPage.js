@@ -1,45 +1,40 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect, useContext } from 'react';
 import {View, Text, TouchableOpacity, FlatList, Alert, ActivityIndicator} from 'react-native';
 import api from '../../services/api';
 import AuthContext from '../../contexts/auth';
 import styles from '../../styles';
+import { useNavigation } from '@react-navigation/native';
 
 const TABS = [
     {label: 'Recebidos', value: 'received'},
     {label: 'Enviados', value: 'sent'}
 ]
 
-class InvitationsPage extends Component{
-    constructor(props){
-        super(props)
-        this.reload;
-        this.state = {
-            selectedTab: TABS[0]
-        }
-    }
+const InvitationsPage = () => {
+    const [selectedTab, setSelectedTab] = useState(TABS[0]);
+    const [invitations, setInvitations] = useState(null);
 
-    static contextType = AuthContext;
+    const authContext = useContext(AuthContext);
+    const navigation = useNavigation();
 
-    componentDidMount(){
-        this.loadInvitations();
-        this.reload = this.props.navigation.addListener('focus', () => {
-            this.loadInvitations();
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            loadInvitations();
         })
-    }
 
+        return unsubscribe;
+    }, [])
 
-    loadInvitations = async () => {
+    const loadInvitations = async () => {
         try{
             let result = await api.get('/invitations', {
                 headers: {
-                    Authorization: `Bearer ${this.context.token}`
+                    Authorization: `Bearer ${authContext.token}`
                 }
             })
 
-            if(!('error' in result.data)){
-                this.setState({
-                    invitations: result.data
-                })
+            if(!result.data.error){
+                setInvitations(result.data);
             }
 
         }catch(e){
@@ -48,28 +43,28 @@ class InvitationsPage extends Component{
         
     } 
 
-    cancelInvitation = async (artistId, eventId) => {
+    const cancelInvitation = async (artistId, eventId) => {
         try{
             let result = await api.post(
                 '/removeAssociation', 
                 {artistId, eventId},
                 {  
                     headers: {
-                        Authorization: `Bearer ${this.context.token}`
+                        Authorization: `Bearer ${authContext.token}`
                     }
                 }
             )
 
             if(!('error' in result)){
                 Alert.alert('Pronto', 'O convite foi excluído.')
-                this.loadInvitations();
+                loadInvitations();
             }
         }catch(e){
             console.log(e)
         }
     } 
 
-    loadConfirmation = (artistId, eventId, accepted) => {
+    const loadConfirmation = (artistId, eventId, accepted) => {
 
         Alert.alert(
             'Opa', 
@@ -77,7 +72,7 @@ class InvitationsPage extends Component{
             [
                 {
                     text: 'Sim',
-                    onPress: () => this.respondInvitation(artistId, eventId, accepted)
+                    onPress: () => respondInvitation(artistId, eventId, accepted)
                 },
                 {
                     text: 'Cancelar',
@@ -86,14 +81,14 @@ class InvitationsPage extends Component{
             ])
     }
 
-    confirmCancellation = (artistId, eventId) => {
+    const confirmCancellation = (artistId, eventId) => {
         Alert.alert(
             'Opa', 
             `Realmente quer cancelar esse convite?`, 
             [
                 {
                     text: 'Sim',
-                    onPress: () => this.cancelInvitation(artistId, eventId)
+                    onPress: () => cancelInvitation(artistId, eventId)
                 },
                 {
                     text: 'Cancelar',
@@ -102,7 +97,7 @@ class InvitationsPage extends Component{
             ])
     }
 
-    respondInvitation = async (artistId, eventId, accepted) => {
+    const respondInvitation = async (artistId, eventId, accepted) => {
         var url = accepted ? '/acceptParticipation' : '/removeAssociation';
         try{
             let result = await api.post(
@@ -110,16 +105,16 @@ class InvitationsPage extends Component{
                 {artistId, eventId},
                 {  
                     headers: {
-                        Authorization: `Bearer ${this.context.token}`
+                        Authorization: `Bearer ${authContext.token}`
                     }
                 }
             )
 
-            let message = accepted ? `${this.context.user.type == 0 ? 'Você' : 'O artista'} foi adicionado ao evento` : 'O convite foi excluído'
+            let message = accepted ? `${authContext.user.type == 0 ? 'Você' : 'O artista'} foi adicionado ao evento` : 'O convite foi excluído'
 
-            if(!('error' in result)){
+            if(!result.error){
                 Alert.alert('Pronto', message);
-                this.loadInvitations();
+                loadInvitations();
             }
 
         }catch(e){
@@ -127,235 +122,229 @@ class InvitationsPage extends Component{
         }
     }
 
-    cancelSolicitation = () => {} 
-
-    changeTab = (index) => {
-        this.setState({
-            selectedTab: TABS[index]
-        })
+    const changeTab = (index) => {
+        setSelectedTab(TABS[index]);
     }
 
-    render(){
-        return(
-            <View
-                style = {{...styles.container, justifyContent: 'flex-start'}} 
+    return(
+        <View
+            style = {{...styles.container, justifyContent: 'flex-start'}} 
+        >
+            <Text
+                style = {{
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    alignSelf: 'flex-start',
+                    marginLeft: 15,
+                    color: '#3F2058'
+                }}
             >
-                <Text
-                    style = {{
-                        fontSize: 18,
-                        fontWeight: 'bold',
-                        alignSelf: 'flex-start',
-                        marginLeft: 15,
-                        color: '#3F2058'
-                    }}
-                >
-                    Convites
-                </Text>
-                <View style = {styles.row}>
+                Convites
+            </Text>
+            <View style = {styles.row}>
 
-                    <TouchableOpacity
-                        style = {this.state.selectedTab.value === 'received' ? 
-                            {
-                                ...styles.rowTab,
-                                width: '50%',
-                                borderBottomWidth: 2,
-                                borderBottomColor: '#3F2058',
-                            }:
-                            {
-                                ...styles.rowTab,
-                                width: '50%'
-                            }
-
+                <TouchableOpacity
+                    style = {selectedTab.value === 'received' ? 
+                        {
+                            ...styles.rowTab,
+                            width: '50%',
+                            borderBottomWidth: 2,
+                            borderBottomColor: '#3F2058',
+                        }:
+                        {
+                            ...styles.rowTab,
+                            width: '50%'
                         }
-                        onPress = {() => this.changeTab(0)} 
-                    >
-                        <Text>{TABS[0].label}</Text>
-                    </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style = {this.state.selectedTab.value === 'sent' ?
-                            {
-                                ...styles.rowTab,
-                                width: '50%',
-                                borderBottomWidth: 2,
-                                borderBottomColor: '#3F2058',
-                            }:
-                            {
-                                ...styles.rowTab,
-                                width: '50%'
-                            }
-                        }
-                        onPress = {() => this.changeTab(1)} 
-
-                    >
-                        <Text>{TABS[1].label}</Text>
-                    </TouchableOpacity>
-
-                </View>
-                
-                {('invitations' in this.state &&
-                this.state.invitations[this.state.selectedTab.value]
-                .map((item) => {
-                    let text, options;
-                    let tab = this.state.selectedTab.value;
-                    let status = item.status;
-                    
-                    let eventName = (
-                        <Text 
-                            onPress = {() => 
-                                this.props.navigation.navigate(
-                                    'eventPage', 
-                                    {id: item.events.id}
-                                )}
-                            style = {{fontWeight: 'bold'}}
-                        >
-                            {item.events.name}
-                        </Text>
-                    );
-
-                    if(tab === 'sent'){
-                        text = (
-                        <Text
-                            style = {{width: '60%'}}
-                        >
-                            {(status == 1 &&
-                                <Text> 
-                                    Você convidou {item.artists.name} para o {eventName}
-                                </Text>
-                            )|| 
-                                <Text>
-                                    Você solicitou participação no {eventName}
-                                </Text>
-                            }
-                        </Text>
-                        
-                        )
-                        options = (
-                            <View
-                                style = {{
-                                    position: 'absolute',
-                                    right: '5%',
-                                    top: '75%',
-                                    height: 100,
-                                    flexDirection: 'row'
-                                }}
-                            >
-
-                                <TouchableOpacity>
-                                    <Text
-                                        style = {{
-                                            color: 'red',
-                                            fontWeight: 'bold'
-                                        }}
-                                        onPress = {() =>
-                                                this.confirmCancellation(item.artists.id, item.events.id)
-                                            }
-                                    >
-                                        Cancelar
-                                    </Text>
-                                </TouchableOpacity>   
-
-                            </View>
-                        )
-                    }else{
-                        text = (
-                        <Text
-                            style = {{width: '50%'}}
-                        >
-                            {(status == 1 &&
-                                <Text> 
-                                    Você foi convidado para tocar no {eventName}
-                                </Text>
-                            )|| 
-                                <Text>
-                                    {item.artists.name} quer tocar no {eventName}
-                                </Text>
-                            }
-                        </Text>
-                        )
-                        
-                        options = (
-                            <View
-                                style = {{
-                                    position: 'absolute',
-                                    right: 0,
-                                    top: '75%',
-                                    flexDirection: 'row'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    style = {{
-                                        padding: 10,
-                                        borderRightWidth: 1
-                                    }}
-                                    onPress = {() => 
-                                        this.loadConfirmation(item.artists.id, item.events.id, true)}
-                                >
-                                    <Text
-                                        style = {{
-                                            color: '#3F2058',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Aceitar
-                                    </Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                     style = {{
-                                        padding: 10
-                                    }}
-                                >
-                                    <Text
-                                        style = {{
-                                            color: 'red',
-                                            fontWeight: 'bold'
-                                        }}
-                                        onPress = {() => 
-                                            this.loadConfirmation(item.artists.id, item.events.id, false)}
-                                    >
-                                        Recusar
-                                    </Text>
-                                </TouchableOpacity>
-                                
-                                
-                            </View>
-                        )
                     }
-                    
+                    onPress = {() => changeTab(0)} 
+                >
+                    <Text>{TABS[0].label}</Text>
+                </TouchableOpacity>
 
-                    return(
+                <TouchableOpacity
+                    style = {selectedTab.value === 'sent' ?
+                        {
+                            ...styles.rowTab,
+                            width: '50%',
+                            borderBottomWidth: 2,
+                            borderBottomColor: '#3F2058',
+                        }:
+                        {
+                            ...styles.rowTab,
+                            width: '50%'
+                        }
+                    }
+                    onPress = {() => changeTab(1)} 
+
+                >
+                    <Text>{TABS[1].label}</Text>
+                </TouchableOpacity>
+
+            </View>
+            
+            {(invitations && 
+            invitations[selectedTab.value].map((item) => {
+                let text, options;
+                let tab = selectedTab.value;
+                let status = item.status;
+                
+                let eventName = (
+                    <Text 
+                        onPress = {() => 
+                            navigation.navigate(
+                                'eventPage', 
+                                {id: item.events.id}
+                            )}
+                        style = {{fontWeight: 'bold'}}
+                    >
+                        {item.events.name}
+                    </Text>
+                );
+
+                if(tab === 'sent'){
+                    text = (
+                    <Text
+                        style = {{width: '60%'}}
+                    >
+                        {(status == 1 &&
+                            <Text> 
+                                Você convidou {item.artists.name} para o {eventName}
+                            </Text>
+                        )|| 
+                            <Text>
+                                Você solicitou participação no {eventName}
+                            </Text>
+                        }
+                    </Text>
+                    
+                    )
+                    options = (
                         <View
                             style = {{
-                                borderBottomWidth: .5,
-                                padding: 25,
-                                width:'90%',
-                                position: 'relative',
+                                position: 'absolute',
+                                right: '5%',
+                                top: '75%',
+                                height: 100,
                                 flexDirection: 'row'
                             }}
-                            key = {this.state.invitations[this.state.selectedTab.value].indexOf(item)}
-                        > 
-                            {text}
+                        >
 
-                            {options}
+                            <TouchableOpacity>
+                                <Text
+                                    style = {{
+                                        color: 'red',
+                                        fontWeight: 'bold'
+                                    }}
+                                    onPress = {() =>
+                                            confirmCancellation(item.artists.id, item.events.id)
+                                        }
+                                >
+                                    Cancelar
+                                </Text>
+                            </TouchableOpacity>   
+
+                        </View>
+                    )
+                }else{
+                    text = (
+                    <Text
+                        style = {{width: '50%'}}
+                    >
+                        {(status == 1 &&
+                            <Text> 
+                                Você foi convidado para tocar no {eventName}
+                            </Text>
+                        )|| 
+                            <Text>
+                                {item.artists.name} quer tocar no {eventName}
+                            </Text>
+                        }
+                    </Text>
+                    )
+                    
+                    options = (
+                        <View
+                            style = {{
+                                position: 'absolute',
+                                right: 0,
+                                top: '75%',
+                                flexDirection: 'row'
+                            }}
+                        >
+                            <TouchableOpacity
+                                style = {{
+                                    padding: 10,
+                                    borderRightWidth: 1
+                                }}
+                                onPress = {() => 
+                                    loadConfirmation(item.artists.id, item.events.id, true)}
+                            >
+                                <Text
+                                    style = {{
+                                        color: '#3F2058',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Aceitar
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                    style = {{
+                                    padding: 10
+                                }}
+                            >
+                                <Text
+                                    style = {{
+                                        color: 'red',
+                                        fontWeight: 'bold'
+                                    }}
+                                    onPress = {() => 
+                                        loadConfirmation(item.artists.id, item.events.id, false)}
+                                >
+                                    Recusar
+                                </Text>
+                            </TouchableOpacity>
+                            
                             
                         </View>
                     )
-                    } //renderiza a lista quando carregada.
-                
-                )) ||
-                <View
-                    style = {{...styles.center, flex: 1}}
-                >
-                    <ActivityIndicator
-                        size = 'large'
-                        color = '#000'
-                    />
-                </View>
                 }
+                
+
+                return(
+                    <View
+                        style = {{
+                            borderBottomWidth: .5,
+                            padding: 25,
+                            width:'90%',
+                            position: 'relative',
+                            flexDirection: 'row'
+                        }}
+                        key = {invitations[selectedTab.value].indexOf(item)}
+                    > 
+                        {text}
+
+                        {options}
+                        
+                    </View>
+                )
+                } //renderiza a lista quando carregada.
+            
+            )) ||
+            <View
+                style = {{...styles.center, flex: 1}}
+            >
+                <ActivityIndicator
+                    size = 'large'
+                    color = '#000'
+                />
             </View>
-        )
-    }
+            }
+        </View>
+    )
+    
     
 }
 
