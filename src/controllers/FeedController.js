@@ -275,6 +275,10 @@ module.exports = {
                 events = [],
                 genres = [];
 
+            let venueAuth = {
+                id: ''
+            }
+
             if (user.type == 0) {
                 artistAuth = await Artist.findOne({
                     include: { association: 'genres' },
@@ -284,7 +288,7 @@ module.exports = {
                 genres = artistAuth.genres;
 
             } else if (user.type == 1) {
-                let venueAuth = await Venue.findOne({
+                venueAuth = await Venue.findOne({
                     include: [
                         { association: 'address' },
                         { association: 'genres' }
@@ -319,7 +323,18 @@ module.exports = {
                         association: 'organizer',
                         attributes: ['id']
                     }
-                ]
+                ],
+                where: {
+                    organizer_id: {
+                        [Op.ne]: user.id
+                    },
+                    status: {
+                        [Op.ne]: 0
+                    },
+                    venue_id: {
+                        [Op.ne]: venueAuth.id
+                    }
+                }
             });
 
             for (let event of eventsAll) { //artistas no lineup
@@ -366,21 +381,25 @@ module.exports = {
             // organização do feed
 
             if (genres.length === 0) { //caso usuario logado nao tenha generos
-
                 eventsAll.forEach((event) => {
                     if (event.venue.address.city === city) {
                         eventsCity.push(event);
                     } else {
                         otherEvents.push(event);
                     }
+                });
+
+                eventsAll = eventsCity.concat(otherEvents);
+
+                //para remover artista logado no evento
+                eventsAll.forEach((event) => {
                     if (user.type === 0) {
-                        inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                        inArray(artistAuth.id, event.dataValues.lineup) ? '' : events.push(event);
                     } else {
-                        event.dataValues.inEvent = false;
+                        events.push(event);
                     }
                 });
 
-                events = eventsCity.concat(otherEvents);
                 return res.send(events);
 
             } else {
@@ -414,10 +433,14 @@ module.exports = {
 
             //remover duplicidade
             eventsAll.forEach((event) => {
-                if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
-                    inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                if (user.type === 0) {
+                    //para não puxar evento onde o artista logado ta no lineup
+                    if (!inArray(artistAuth.id, event.dataValues.lineup)) {
+                        !inArray(event.id, events) ? events.push(event) : ''
+                    }
+                } else {
+                    !inArray(event.id, events) ? events.push(event) : ''
                 }
-                !inArray(event.id, events) ? events.push(event) : ''
             });
 
             return res.send(events);
@@ -899,6 +922,9 @@ module.exports = {
             let resultGenre, artistAuth;
             let events = [],
                 genres = [];
+            let venueAuth = {
+                id: ''
+            }
 
             if (user.type == 0) {
                 artistAuth = await Artist.findOne({
@@ -908,7 +934,7 @@ module.exports = {
                 genres = artistAuth.genres;
 
             } else if (user.type == 1) {
-                let venueAuth = await Venue.findOne({
+                venueAuth = await Venue.findOne({
                     include: [
                         { association: 'genres' }
                     ],
@@ -938,7 +964,19 @@ module.exports = {
                         association: 'organizer',
                         attributes: ['id']
                     }
-                ]
+                ],
+                where: {
+                    organizer_id: {
+                        [Op.ne]: user.id
+                    },
+                    status: {
+                        [Op.ne]: 0
+                    },
+                    venue_id: {
+                        [Op.ne]: venueAuth.id
+                    }
+
+                }
             });
 
             for (let event of eventsAll) { //artistas no lineup
@@ -991,13 +1029,18 @@ module.exports = {
             });
 
             eventsAll = events;
+            events = [];
 
             //remover duplicidade
             eventsAll.forEach((event) => {
-                if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
-                    inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                if (user.type === 0) {
+                    //para não puxar evento onde o artista logado ta no lineup
+                    if (!inArray(artistAuth.id, event.dataValues.lineup)) {
+                        !inArray(event.id, events) ? events.push(event) : ''
+                    }
+                } else {
+                    !inArray(event.id, events) ? events.push(event) : ''
                 }
-                !inArray(event.id, events) ? events.push(event) : ''
             });
 
             return res.send(events);
@@ -1013,6 +1056,9 @@ module.exports = {
             let city, artistAuth;
             let events = [],
                 genres = [];
+            let venueAuth = {
+                id: ''
+            }
 
             if (user.type == 0) {
                 artistAuth = await Artist.findOne({
@@ -1021,7 +1067,7 @@ module.exports = {
                 city = artistAuth.city;
 
             } else if (user.type == 1) {
-                let venueAuth = await Venue.findOne({
+                venueAuth = await Venue.findOne({
                     include: [
                         { association: 'address' },
                     ],
@@ -1054,7 +1100,19 @@ module.exports = {
                         association: 'organizer',
                         attributes: ['id']
                     }
-                ]
+                ],
+                where: {
+                    organizer_id: {
+                        [Op.ne]: user.id
+                    },
+                    status: {
+                        [Op.ne]: 0
+                    },
+                    venue_id: {
+                        [Op.ne]: venueAuth.id
+                    }
+
+                }
             });
 
             for (let event of eventsAll) { //artistas no lineup
@@ -1097,22 +1155,21 @@ module.exports = {
                     event.organizer.dataValues.name = producer.name;
                 }
             }
-
+            events = [];
             //separar por cidade
             eventsAll.forEach((event) => {
-                if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
-                    inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
-                }
-
-                if (event.venue.address.city === city)
-                    events.push(event);
-            });
-
-            eventsAll.forEach((event) => {
-                if (user.type === 0) { //inEvent serve para ver se artista logado está no evento
-                    inArray(artistAuth.id, event.dataValues.lineup) ? event.dataValues.inEvent = true : event.dataValues.inEvent = false;
+                if (event.venue.address.city === city) {
+                    if (user.type === 0) {
+                        //para não puxar evento onde o artista logado ta no lineup
+                        if (!inArray(artistAuth.id, event.dataValues.lineup)) {
+                            !inArray(event.id, events) ? events.push(event) : ''
+                        }
+                    } else {
+                        !inArray(event.id, events) ? events.push(event) : ''
+                    }
                 }
             });
+
 
             return res.send(events);
         } catch (err) {
