@@ -156,6 +156,7 @@ module.exports = {
                     venue.setGenres(genres);
                 }
 
+                user.dataValues.venueId = venue.id;
 
             } else {
                 const {
@@ -270,6 +271,11 @@ module.exports = {
                     where: { user_id: user.id }
                 });
                 user.dataValues.artistId = artist.id;
+            } else if (user.type == 1) {
+                const venue = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+                user.dataValues.venueId = venue.id;
             }
 
             return res.send({
