@@ -230,6 +230,7 @@ const NavStack = (props) => {
     const navigation = useNavigation();
     var name = props.route.name;
     var headerIcons;
+    console.log(!!props.navigation.toggleDrawer);
     if (name === 'feed'){
         headerIcons = (
             <View style = {styles.row}>
@@ -251,7 +252,7 @@ const NavStack = (props) => {
 
             </View>
         )
-    }else if (name === 'ownProfile' || name === 'futureEvents' || name === 'requestList'){
+    }else if (!!props.navigation.toggleDrawer){
         headerIcons = (
             <View style = {styles.row}>
 

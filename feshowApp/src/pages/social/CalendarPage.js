@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, useContext, useEffect, useState } from 'react';
 import {View, Text, TouchableOpacity, FlatList, Alert} from 'react-native';
 import {Calendar, LocaleConfig} from 'react-native-calendars';
 import api from '../../services/api';
 import styles from '../../styles';
 import Format from '../utils/Format';
 import AuthContext from '../../contexts/auth';
+import { useNavigation } from '@react-navigation/native';
 
 
 LocaleConfig.locales['br'] = {
@@ -27,27 +28,32 @@ LocaleConfig.locales['br'] = {
 
 LocaleConfig.defaultLocale = 'br';
 
-class CalendarPage extends Component{
-    constructor(props){
-        super(props)
-        this.state = {}
-    }
+const CalendarPage = (props) => {
+    const [events, setEvents] = useState(null);
+    const [markedDates, setMarkedDates] = useState(null);
+    const [selectedDay, setSelectedDay] = useState(null);
+    const [eventOnSelectedDay, setEventOnSelectedDay] = useState(null);
 
-    static contextType = AuthContext;
-    
-    componentDidMount(){
-        this.loadEvents();
-    }
+    const authContext = useContext(AuthContext);
+    const navigation = useNavigation()
+ 
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            loadEvents()
+        })
 
-    loadEvents = async () => {
-        const userId = this.props.route.params ? 
-        this.props.route.params.id : this.context.user.id;
+        return unsubscribe;
+    }, [])
+
+    const loadEvents = async () => {
+        const userId = props.route.params ? 
+        props.route.params.id : authContext.user.id;
         try{
             let result = await api.get(
                 `/schedule/${userId}`,
                 {
                     headers: {
-                        Authorization: `Bearer ${this.context.token}`
+                        Authorization: `Bearer ${authContext.token}`
                     }
                 }
             )
@@ -58,10 +64,8 @@ class CalendarPage extends Component{
                     markedDates[item.start_date] = {marked: true}
                 }
 
-                this.setState({
-                    markedDates, 
-                    events: result.data
-                })
+                setMarkedDates(markedDates);
+                setEvents(result.data);
 
             }else{
                 Alert.alert('Ops', result.data.error);
@@ -72,84 +76,80 @@ class CalendarPage extends Component{
         }
     }
 
-    changeSelectedDay = (dateString) => {
-        let eventOnSelectedDay = this.state.events.filter(item => item.start_date === dateString)[0];
-        this.setState({
-            selectedDay: dateString,
-            eventOnSelectedDay
-        })
+    const changeSelectedDay = (dateString) => {
+        setEventOnSelectedDay(events.filter(item => item.start_date === dateString)[0]);
+        setSelectedDay(dateString);
     }
 
-    render(){   
-        var {selectedDay, eventOnSelectedDay, markedDates} = this.state;
-        if(selectedDay){
-            const today = new Date()
-            today.toLocaleString('default', { month: 'long' })
-        }
-        
-        return(
-            <View
+    
+    if(selectedDay){
+        const today = new Date()
+        today.toLocaleString('default', { month: 'long' })
+    }
+    
+    return(
+        <View
+            style = {{
+                ...styles.container, 
+                justifyContent: 'flex-start'
+            }}
+        >
+            <Calendar
                 style = {{
-                    ...styles.container, 
-                    justifyContent: 'flex-start'
+                    width: 325,
+                    marginTop: 15
                 }}
-            >
-                <Calendar
+
+                theme = {{
+                    calendarBackground: '#F2F2F2',
+                    selectedDayBackgroundColor: '#3F2058',
+                    arrowColor: '#3F2058'
+
+                }}
+
+                markedDates = {{
+                    ...markedDates,
+                    [selectedDay]:{
+                        selected: true
+                    }
+                }} 
+
+                onDayPress = {(day) => changeSelectedDay(day.dateString)}
+            />
+
+            {eventOnSelectedDay && 
+                <TouchableOpacity
                     style = {{
-                        width: 325,
-                        marginTop: 15
+                        borderTopWidth: 1,
+                        borderTopColor: '#cecece',
+                        width: '100%',
+                        padding: 15
                     }}
-
-                    theme = {{
-                        calendarBackground: '#F2F2F2',
-                        selectedDayBackgroundColor: '#3F2058',
-                        arrowColor: '#3F2058'
-
-                    }}
-
-                    markedDates = {{
-                        ...markedDates,
-                        [selectedDay]:{
-                            selected: true
-                        }
-                    }} 
-
-                    onDayPress = {(day) => this.changeSelectedDay(day.dateString)}
-                />
-
-                {eventOnSelectedDay && 
-                    <TouchableOpacity
+                    onPress = {() => navigation.navigate('eventPage', {id: eventOnSelectedDay.id})}
+                >
+                    <Text
                         style = {{
-                            borderTopWidth: 1,
-                            borderTopColor: '#cecece',
-                            width: '100%',
-                            padding: 15
+                            fontSize: 18,
+                            marginBottom: 10,  
+                            fontWeight: 'bold'
                         }}
-                        onPress = {() => this.props.navigation.navigate('eventPage', {id: eventOnSelectedDay.id})}
                     >
-                        <Text
-                            style = {{
-                                fontSize: 18,
-                                marginBottom: 10,  
-                                fontWeight: 'bold'
-                            }}
-                        >
-                            {Format.formatDate(selectedDay)}
-                        </Text>
+                        {Format.formatDate(selectedDay)}
+                    </Text>
 
-                        <Text
-                            style = {{
-                                fontSize: 16,
-                                color: '#3F2058'
-                            }}
-                        >
-                            {`${eventOnSelectedDay.name} @ ${eventOnSelectedDay.venue.name} das 18h00 às 23h00`}  
-                        </Text>
-                    </TouchableOpacity>
-                }
-            </View>
-        )
-    }
+                    <Text
+                        style = {{
+                            fontSize: 16,
+                            color: '#3F2058'
+                        }}
+                    >
+                        {`${eventOnSelectedDay.name} @ ${eventOnSelectedDay.venue.name} das 18h00 às 23h00`}  
+                    </Text>
+                </TouchableOpacity>
+            }
+        </View>
+    )
+    
 }
 
 export default CalendarPage;
