@@ -28,7 +28,6 @@ function blobTo64data(imageBlob) {
 
 const FeedList = (props) => {
     const type = props.type === 'artists' ? 0 : (props.type === 'venues' ? 1 : 2);
-    console.log(props.list);
     return(
         <View style = {{width: '90%'}}>
 
@@ -81,8 +80,7 @@ const FeedPage = (props) => {
     
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
-            console.log('FeedPage::useEffect')
-            console.log(selectedTab)
+        
             let tabToLoad = 'artists';
             if(authContext.user.type === 0){
                 setTabs([
@@ -200,11 +198,10 @@ const FeedPage = (props) => {
         }else if (profileType ===  'producers'){
             route += 'Producer';
         }else if (profileType ===  'events'){
-            route += 'Event';
+            route += 'Event'; 
         }
 
         route += filterType;
-        console.log(route);
 
         const config = {
             headers: { 

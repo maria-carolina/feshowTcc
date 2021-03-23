@@ -104,6 +104,7 @@ class NotificationsPage extends Component{
                         <NotificationListItem
                             item = {item}
                             onClick = {() => this.handleItemClick(item.status, item.auxiliary_id)}
+                            key = {item.id}
                         />
                     ))}
 

@@ -22,7 +22,7 @@ import InitialPage from '../pages/access/InitialPage';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { View, TextInput } from 'react-native';
+import { View, TextInput, Text } from 'react-native';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import LineUpEditPage from '../pages/event/LineUpEditPage';
 import FutureEventsPage from '../pages/social/FutureEventsPage';
@@ -157,9 +157,9 @@ const NavDrawer = () => {
             />
 
             <Drawer.Screen
-                name = 'notifications'
+                name = 'futureEvents'
                 component = {NavStack}
-                options = {{title: 'Notificações'}}
+                options = {{title: 'Meus eventos futuros'}}
             />
 
             {context.user.type === 1 &&
@@ -183,9 +183,10 @@ const NavDrawer = () => {
 const NavStack = (props) => {
 
     const [isSearchOpen, setSearchOpen] = useState(false);
+    const navigation = useNavigation();
     var name = props.route.name;
     var headerIcons;
-
+    console.log(name);
     if (name === 'feed'){
         headerIcons = (
             <View style = {styles.row}>
@@ -195,7 +196,9 @@ const NavStack = (props) => {
                     handleClick = {setSearchOpen} 
                 />
 
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress = {() => navigation.navigate('notificationsPage')}
+                >
                     <FontAwesome 
                         name = {'bell-o'} 
                         size = {20} 
@@ -205,11 +208,13 @@ const NavStack = (props) => {
 
             </View>
         )
-    }else if (name === 'profile'){
+    }else if (name === 'ownProfile' || name === 'futureEvents'){
         headerIcons = (
             <View style = {styles.row}>
 
-                <TouchableOpacity>
+                <TouchableOpacity
+                    onPress = {() => navigation.navigate('notificationsPage')}
+                >
                     <FontAwesome 
                         name = {'bell-o'} 
                         size = {20} 
@@ -320,6 +325,11 @@ const NavStack = (props) => {
             />
 
             <Stack.Screen 
+                name = 'futureEventsPage'
+                component = {FutureEventsPage}
+            />
+
+            <Stack.Screen 
                 name = 'profilePageInvitation' 
                 component = {ProfilePageInvitation} //provisório
             />
@@ -349,13 +359,13 @@ const AppRoute = () => {
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {
-                        return <Ionicon 
-                            name = {'home-outline'} 
+                        return <FontAwesome
+                            name = {'lightbulb-o'} 
                             color = {color} 
                             size = {size}
                         />
                     },
-                    tabBarLabel: 'Home'
+                    tabBarLabel: 'Sugestões'
                 }}
             />
 
@@ -390,19 +400,6 @@ const AppRoute = () => {
                 }}
             />
 
-            <Tabs.Screen 
-                name = 'chat' 
-                component = {NavStack}
-                options = {{
-                    tabBarIcon: ({color, size}) => {
-                        return <Ionicon 
-                            name = {'chatbox-outline'} 
-                            color = {color} 
-                            size = {size}
-                        />
-                    }
-                }}
-            />
             <Tabs.Screen 
                 name = 'profile' 
                 component = {NavDrawer}
