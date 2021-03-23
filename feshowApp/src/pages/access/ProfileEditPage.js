@@ -491,22 +491,6 @@ UpdateForm = (props) => {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    style = {{
-                        ...styles.outlineButton,
-                        borderColor: '#FD0505',
-                        marginTop: 5
-                    }}
-                >
-                    <Text
-                        style = {{
-                            fontSize: 15,
-                            color: '#FD0505'
-                        }}
-                    >
-                        Deletar perfil
-                    </Text>
-                </TouchableOpacity>
             </View>
             </>
             )}
@@ -708,6 +692,7 @@ const ProfileEditPage = ({ }) => {
     //const [profile, setProfile] = useState(null);
     const { profile, loadProfile, saveUpdate } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
+    const authContext = useContext(AuthContext);
 
     useEffect(() => {
         async function load(){
@@ -715,6 +700,45 @@ const ProfileEditPage = ({ }) => {
         }
         load();
     }, []);
+
+    const loadConfirmation = () => {
+        Alert.alert(
+            'Atenção!', 
+            'Realmente quer deletar seu perfil?', 
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => deleteProfile(),
+                },
+                {
+                    text: 'Cancelar',
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
+    const deleteProfile = async () => {
+        try{
+            let result = await api.delete(
+                '/deleteUser',
+                {
+                    headers:{
+                        Authorization: `Bearer ${authContext.token}`
+                    }
+                }
+            )
+
+            if(!result.data.error){
+                Alert.alert('Pronto', 'O perfil foi excluído.');
+                authContext.signOut();
+            }else{
+                Alert.alert('Ops', result.data.error);
+            }
+        }catch{
+            console.log(e);
+        }
+    }
 
 
     return (
@@ -736,13 +760,30 @@ const ProfileEditPage = ({ }) => {
                 Editar Perfil
             </Text>
 
-            {/*<AccountInfoEdit 
-                profile = {profile}
-            />*/}
-
+            
             <UpdateForm
                 profile = {profile} 
             />
+
+            <TouchableOpacity
+                style = {{
+                    ...styles.outlineButton,
+                    borderColor: '#FD0505',
+                    marginTop: 5,
+                    alignSelf: 'center',
+                    width: 130
+                }}
+                onPress = {() => loadConfirmation()}
+            >
+                <Text
+                    style = {{
+                        fontSize: 15,
+                        color: '#FD0505'
+                    }}
+                >
+                    Deletar perfil
+                </Text>
+            </TouchableOpacity>
             
             </>
             ):(

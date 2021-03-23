@@ -80,7 +80,7 @@ const DetailModal = (props) => {
                             marginTop: 15
                         }}
                     >
-                        {props.details.solicitation.description}
+                        {props.details.solicitation.note}
 
                     </Text>
                 </View>
@@ -168,6 +168,7 @@ const RequestListItem = (props) => {
                             style = {{
                                 color: 'red'
                             }}
+                            onPress = {() => props.declineRequest(props.item)}
                         >
                             Recusar
                         </Text>
@@ -204,7 +205,7 @@ class RequestListPage extends Component{
             )
 
             if(!('error' in result.data)){
-                
+                console.log(result.data);
                 this.setState({
                     requests: result.data
                 })
@@ -217,10 +218,8 @@ class RequestListPage extends Component{
     }
     
     acceptRequest = async (item) => {
-        let event = item.solicitation;
         var result = await api.post(
-            '/event/store', 
-            event, 
+            `acceptSolicitation/${item.solicitation.id}`, 
             {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
@@ -228,10 +227,25 @@ class RequestListPage extends Component{
             }
         );
 
-
-        if(!('error' in result.data)){
+        if(!result.data.error){
             this.props.navigation.navigate('eventPage', {id:result.data.id});
-            Alert.alert('Pronto!', `Evento cadastrado com sucesso!`)
+            Alert.alert('Pronto!', `Evento marcado com sucesso!`)
+        }
+    }
+
+    declineRequest = async (item) => {
+        var result = await api.delete(
+            `refuseSolicitation/${item.solicitation.id}`, 
+            {
+                headers: {
+                    Authorization: `Bearer ${this.context.token}`
+                }
+            }
+        );
+ 
+        if(!result.data.error){
+            this.loadRequests();
+            Alert.alert('Pronto!', 'A requisição foi excluída');
         }
     }
 
@@ -263,7 +277,9 @@ class RequestListPage extends Component{
                                 <RequestListItem
                                     item = {item}
                                     acceptRequest = {(item) => this.acceptRequest(item)} 
+                                    declineRequest = {(item) => this.declineRequest(item)}
                                     showModal = {(item) => this.showModal(item)}
+                                    key = {item.id}
                                 />
                             )
                         })

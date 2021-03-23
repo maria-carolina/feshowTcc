@@ -150,7 +150,10 @@ const Form = (props) => {
                     />
 
                     <TouchableOpacity
-                        style = {styles.button}
+                        style = {{
+                            ...styles.button,
+                            marginVertical: 15
+                        }}
                         onPress = {handleSubmit}
                     >
                         <Text 
@@ -215,9 +218,9 @@ class RequestPage extends Component{
     sendRequest = async (values) => {
         let splitted = values.start_date.split('/');
         values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
-
-        values.venue_id = this.props.route.params.venue.venueId;
-        
+        console.log(this.props.route.params.venue);
+        values.venue_id = this.props.route.params.venue.venueId ? 
+        this.props.route.params.venue.venueId : this.props.route.params.venue.id
         try{
             let result = await api.post(
                 '/sendOrganizationRequest', 
@@ -228,11 +231,10 @@ class RequestPage extends Component{
                     }
                 }
             )
-
             
             if(result.data === 'ok'){
                 Alert.alert('Pronto', 'Aguarde a aprovação do espaço');
-                this.props.navigation.navigate('profilePage', {id: 2});
+                this.props.navigation.goBack();
             }else{
                 Alert.alert('Ops', result.data.error);
             }

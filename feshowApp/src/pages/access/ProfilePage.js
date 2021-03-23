@@ -186,7 +186,7 @@ const ProfilePage = (props) => {
         navigation.navigate(
             'requestPage',
             {
-                venue: this.state.profile
+                venue: profile
             }
         )
     }
@@ -195,7 +195,7 @@ const ProfilePage = (props) => {
         navigation.navigate(
             'profilePageInvitation',
             {
-                artist: this.state.profile
+                artist: profile
             }
         )
     }
