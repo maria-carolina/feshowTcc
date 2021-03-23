@@ -8,17 +8,6 @@ import ImagePicker from 'react-native-image-picker';
 import { useNavigation } from '@react-navigation/native';
 
 
-const LogoutForTest = () => {
-    const { signOut } = useContext(AuthContext)
-    return(
-        <TouchableOpacity 
-            style = {styles.button}
-            onPress = {() => signOut()}
-        >
-            <Text style = {styles.buttonLabel}> Sair </Text>
-        </TouchableOpacity>
-    )
-}
 
 function blobTo64data(imageBlob) {
     return new Promise((resolve) => {
@@ -45,7 +34,8 @@ const HistoricPreviewItem = (props) => {
                 borderBottomWidth: .5,
                 borderBottomColor: '#cecece',
                 flexDirection: 'row',
-                alignSelf: 'flex-start'
+                alignSelf: 'flex-start',
+                width: '100%'
             }}
         >
             <Text
@@ -513,7 +503,7 @@ const ProfilePage = (props) => {
                             })} 
 
                             <TouchableOpacity
-                                style = {styles.button}
+                                style = {{...styles.outlineButton, marginVertical: 15}}
                                 onPress = {() => 
                                     navigation.navigate('historicPage', 
                                     {
@@ -524,7 +514,7 @@ const ProfilePage = (props) => {
                                 }
                             >
                                 <Text
-                                    style = {styles.buttonLabel}
+                                    style = {styles.outlineButtonLabel}
                                 >
                                     Ver mais
                                 </Text>
@@ -573,12 +563,6 @@ const ProfilePage = (props) => {
             />
         }
 
-        
-
-        
-
-        
-        <LogoutForTest />
         </View>
         
     )

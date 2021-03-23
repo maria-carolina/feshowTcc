@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createDrawerNavigator } from '@react-navigation/drawer'
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer'
 import styles from '../styles'
 import AuthContext from '../contexts/auth';
 
@@ -142,18 +142,68 @@ const SearchOpener = (props) => {
     );
 }
 
+const CustomDrawerContent  = (props) => {
+    const authContext = useContext(AuthContext);
+    return (
+      <DrawerContentScrollView {...props}>
+        <View
+            style = {{
+                height: 75,
+                borderBottomWidth: 1,
+                borderBottomColor: '#EEE',
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}
+        >
+            <Text style = {{letterSpacing: .5}}>
+                @{authContext.user.username}
+            </Text>
+        </View>
+        <DrawerItemList {...props} />
+
+        <TouchableOpacity
+            style = {{
+                height: 75,
+                borderTopWidth: 1,
+                borderTopColor: '#EEE',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row'
+            }}
+            onPress = {() => authContext.signOut()}
+        >
+            <Ionicon
+                name = {'exit-outline'} 
+                color = {'#3F2058'} 
+                size = {25}
+            />
+
+            <Text style = {{
+                letterSpacing: .5,
+                marginLeft: 5
+            }}>      
+                Sair
+            </Text>
+        </TouchableOpacity>
+      </DrawerContentScrollView>
+    );
+  }
+
 const NavDrawer = () => {
     const context = useContext(AuthContext);
     return(
         <Drawer.Navigator
             initialRouteName = 'drawerTest'
             drawerPosition = 'right'
-            
+            drawerContent = {(props) => <CustomDrawerContent {...props}/>}
+            drawerContentOptions = {{
+                activeTintColor: '#3F2058'
+            }}
         >
             <Drawer.Screen
                 name = 'ownProfile'
                 component = {NavStack}
-                options = {{title: 'Primeiro'}}
+                options = {{title: 'Perfil'}}
             />
 
             <Drawer.Screen
@@ -169,12 +219,6 @@ const NavDrawer = () => {
                     options = {{title: 'Requisições de show'}} 
                 />
             }
-
-            <Drawer.Screen
-                name = 'initial'
-                component = {InitialPage}
-                options = {{title: 'Provisório'}}
-            />
             
         </Drawer.Navigator>
     )
@@ -186,7 +230,6 @@ const NavStack = (props) => {
     const navigation = useNavigation();
     var name = props.route.name;
     var headerIcons;
-    console.log(name);
     if (name === 'feed'){
         headerIcons = (
             <View style = {styles.row}>
@@ -208,7 +251,7 @@ const NavStack = (props) => {
 
             </View>
         )
-    }else if (name === 'ownProfile' || name === 'futureEvents'){
+    }else if (name === 'ownProfile' || name === 'futureEvents' || name === 'requestList'){
         headerIcons = (
             <View style = {styles.row}>
 
@@ -346,6 +389,7 @@ const NavStack = (props) => {
 }
 
 const AppRoute = () => {
+    const authContext = useContext(AuthContext);
     return(
         <Tabs.Navigator
             tabBarOptions = {{
@@ -385,23 +429,40 @@ const AppRoute = () => {
                 }}
             />
 
+            {authContext.user.type === 1 &&
+                <Tabs.Screen 
+                    name = 'newEvent' 
+                    component = {NavStack}
+                    options = {{
+                        tabBarIcon: ({color, size}) => {
+                            return <FontAwesome 
+                                name = {'plus-square-o'} 
+                                color = {color} 
+                                size = {size}
+                            />
+                        },
+                        tabBarLabel: 'Novo Evento'
+                    }}
+                />
+            }
+
             <Tabs.Screen 
-                name = 'newEvent' 
+                name = 'calendar' 
                 component = {NavStack}
                 options = {{
                     tabBarIcon: ({color, size}) => {
                         return <FontAwesome 
-                            name = {'plus-square-o'} 
+                            name = {'calendar'} 
                             color = {color} 
                             size = {size}
                         />
                     },
-                    tabBarLabel: 'Novo Evento'
+                    tabBarLabel: 'Agenda'
                 }}
             />
 
             <Tabs.Screen 
-                name = 'profile' 
+                name = 'ownProfile' 
                 component = {NavDrawer}
                 options = {{
                     tabBarIcon: ({color, size}) => {

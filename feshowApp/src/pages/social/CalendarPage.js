@@ -40,9 +40,11 @@ class CalendarPage extends Component{
     }
 
     loadEvents = async () => {
+        const userId = this.props.route.params ? 
+        this.props.route.params.id : this.context.user.id;
         try{
             let result = await api.get(
-                `/schedule/${this.props.route.params.id}`,
+                `/schedule/${userId}`,
                 {
                     headers: {
                         Authorization: `Bearer ${this.context.token}`

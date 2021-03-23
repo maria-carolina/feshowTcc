@@ -57,7 +57,7 @@ const Form = (props) => {
                             marginBottom: 20,
                             fontSize: 16
                         }}>
-                            Local: {props.event != null ? props.event.venue.name : 'X'}
+                            Local: {props.event ? props.event.venue.name : 'X'}
                         </Text>
 
                         {Object.keys(errors).length > 0 && 
@@ -214,6 +214,7 @@ class NewEventPage extends Component{
 
     componentDidMount(){
         this.loadStates();
+        console.log(this.context.user);
         this.reload = this.props.navigation.addListener('focus', () => {
             this.loadStates();
         })
