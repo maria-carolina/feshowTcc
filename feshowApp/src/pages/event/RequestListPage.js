@@ -220,6 +220,7 @@ class RequestListPage extends Component{
     acceptRequest = async (item) => {
         var result = await api.post(
             `acceptSolicitation/${item.solicitation.id}`, 
+            {},
             {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
@@ -230,6 +231,8 @@ class RequestListPage extends Component{
         if(!result.data.error){
             this.props.navigation.navigate('eventPage', {id:result.data.id});
             Alert.alert('Pronto!', `Evento marcado com sucesso!`)
+        }else{
+            console.log(result.data.error);
         }
     }
 
@@ -272,14 +275,14 @@ class RequestListPage extends Component{
                 >
                     {(requests && 
                         requests.map(item => {
-                            
+                            console.log(item)
                             return(
                                 <RequestListItem
                                     item = {item}
                                     acceptRequest = {(item) => this.acceptRequest(item)} 
                                     declineRequest = {(item) => this.declineRequest(item)}
                                     showModal = {(item) => this.showModal(item)}
-                                    key = {item.id}
+                                    key = {item.solicitation.id}
                                 />
                             )
                         })

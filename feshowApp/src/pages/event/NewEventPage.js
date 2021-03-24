@@ -53,12 +53,6 @@ const Form = (props) => {
                 
                     <ScrollView contentContainerStyle = {styles.center}>
                         <Text style = {styles.title}>Insira as informações do evento</Text>
-                        <Text style = {{
-                            marginBottom: 20,
-                            fontSize: 16
-                        }}>
-                            Local: {props.event ? props.event.venue.name : 'X'}
-                        </Text>
 
                         {Object.keys(errors).length > 0 && 
                          <Text style = {styles.error}>Preencha todos os campos</Text>}
@@ -214,7 +208,6 @@ class NewEventPage extends Component{
 
     componentDidMount(){
         this.loadStates();
-        console.log(this.context.user);
         this.reload = this.props.navigation.addListener('focus', () => {
             this.loadStates();
         })
@@ -222,7 +215,7 @@ class NewEventPage extends Component{
 
     loadStates = () => {
         let isAEdition = this.props.route.params != undefined;
-        console.log('oi')
+        console.log(this.context.user);
 
         this.setState({
             event: isAEdition ? this.props.route.params.event : null,
@@ -239,7 +232,7 @@ class NewEventPage extends Component{
             let splitted = values.start_date.split('/');
             values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
 
-            values.venue_id = 1;
+            values.venue_id = this.context.user.venueId;
 
             var config = {
                 headers: {
