@@ -318,6 +318,7 @@ CREATE TABLE IF NOT EXISTS `feshow`.`notifications` (
   `message` VARCHAR(100) NOT NULL,
   `auxiliary_id` INT NULL DEFAULT NULL,
   `status` TINYINT(1) NOT NULL,
+  `new` TINYINT(1) NOT NULL DEFAULT 1,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`id`),

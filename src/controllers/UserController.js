@@ -278,6 +278,20 @@ module.exports = {
                 user.dataValues.venueId = venue.id;
             }
 
+            //quantidade de novas notificações
+            const notifications = await Notification.count({
+                where: {
+                    user_id: {
+                        [Op.eq]: user.id
+                    },
+                    new: {
+                        [Op.eq]: 1
+                    }
+                }
+            });
+
+            user.dataValues.notifications = notifications;
+
             return res.send({
                 user,
                 token: generateToken({ id: user.id })
@@ -732,6 +746,16 @@ module.exports = {
                 notification.dataValues.time = getTime(notification.createdAt);
             });
 
+            await Notification.update({
+                new: 0
+            }, {
+                where: {
+                    user_id: req.userId,
+                    new: {
+                        [Op.eq]: 1
+                    }
+                }
+            });
 
             return res.send(notifications);
 
