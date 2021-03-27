@@ -52,6 +52,10 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     }
 
+    const clearNotificationWarning = () => {
+        setUser({...user, notifications: 0})
+    }
+
     return (
         <AuthContext.Provider
             value = {{
@@ -61,6 +65,7 @@ export const AuthProvider = ({ children }) => {
                 signIn,
                 signOut,
                 loading,
+                clearNotificationWarning
             }}
         >
             {children}

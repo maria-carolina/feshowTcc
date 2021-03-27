@@ -47,6 +47,7 @@ class NotificationsPage extends Component{
     static contextType = AuthContext
     
     componentDidMount(){
+        this.context.clearNotificationWarning();
         this.loadNotifications();
     }
 

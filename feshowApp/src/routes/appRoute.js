@@ -228,9 +228,10 @@ const NavStack = (props) => {
 
     const [isSearchOpen, setSearchOpen] = useState(false);
     const navigation = useNavigation();
+    const authContext = useContext(AuthContext);
+
     var name = props.route.name;
     var headerIcons;
-    console.log(!!props.navigation.toggleDrawer);
     if (name === 'feed'){
         headerIcons = (
             <View style = {styles.row}>
@@ -242,12 +243,38 @@ const NavStack = (props) => {
 
                 <TouchableOpacity
                     onPress = {() => navigation.navigate('notificationsPage')}
+                    style = {{
+                        position: 'relative',
+                        padding: 5
+                    }}
                 >
+                    {authContext.user.notifications > 0 &&
+                        <View
+                            style = {{
+                                position: 'absolute',
+                                backgroundColor: 'red',
+                                color: '#FFF',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 10,
+                                width: '80%',
+                                height: '90%',
+                                right: 0,
+                                zIndex: 2
+                            }}
+                        >
+                            <Text style = {{color: '#FFF'}}> 
+                                {authContext.user.notifications}
+                            </Text>
+                        </View>
+                    }
+                    
                     <FontAwesome 
                         name = {'bell-o'} 
                         size = {20} 
                         color = {'#000'}
                     />
+                    
                 </TouchableOpacity>
 
             </View>
