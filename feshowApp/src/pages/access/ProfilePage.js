@@ -145,7 +145,7 @@ const ProfilePage = (props) => {
     const loadHistoricPreview = async () => {
         try{
             let result = await api.get(
-                `previewPastEvents/2`,
+                `previewPastEvents/${authContext.user.id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${authContext.token}`
@@ -502,23 +502,28 @@ const ProfilePage = (props) => {
                                 )
                             })} 
 
-                            <TouchableOpacity
-                                style = {{...styles.outlineButton, marginVertical: 15}}
-                                onPress = {() => 
-                                    navigation.navigate('historicPage', 
-                                    {
-                                        id: profile.id, 
-                                        name: profile.name,
-                                        type: profile.type
-                                    })
-                                }
-                            >
-                                <Text
-                                    style = {styles.outlineButtonLabel}
+
+                            {historicPreview.length > 0 ?
+                                <TouchableOpacity
+                                    style = {{...styles.outlineButton, marginVertical: 15}}
+                                    onPress = {() => 
+                                        navigation.navigate('historicPage', 
+                                        {
+                                            id: profile.id, 
+                                            name: profile.name,
+                                            type: profile.type
+                                        })
+                                    }
                                 >
-                                    Ver mais
-                                </Text>
-                            </TouchableOpacity>
+                                    <Text
+                                        style = {styles.outlineButtonLabel}
+                                    >
+                                        Ver mais
+                                    </Text>
+                                </TouchableOpacity>
+                            : <Text style = {{alignSelf: 'flex-start', marginVertical: 15}}>
+                                Nenhum evento passado.
+                            </Text>}
                             </View> 
                         ) || 
                         <ActivityIndicator

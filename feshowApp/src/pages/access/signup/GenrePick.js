@@ -11,7 +11,6 @@ function GenrePick(props) {
     const [genres, setGenres] = useState(null);
     const [selected, setSelected] = useState([]);
 
-    const { alterProfile } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -56,6 +55,7 @@ function GenrePick(props) {
     }
 
     const finishUpdate = () => {
+        const { alterProfile } = useContext(ProfileUpdateContext);
         alterProfile('genres', genres.filter(item => selected.includes(item.id)));
         navigation.navigate('profileEditPage');
     }

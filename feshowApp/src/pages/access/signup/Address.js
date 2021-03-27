@@ -139,7 +139,6 @@ function Address (props){
     const [address, setAddress] = useState(null)
     const [preloadedAddress, setPreloadedAddress] = useState(null);
 
-    const { alterProfile } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -162,10 +161,11 @@ function Address (props){
     const advance = (values) => {
         let user = props.route.params.user;
         user.profile.address = values;
-        this.props.navigation.navigate('openingHoursPick', {user});
+        navigation.navigate('openingHoursPick', {user});
     }
 
     const finishUpdate = (values) => {
+        const { alterProfile } = useContext(ProfileUpdateContext);
         alterProfile('address', values);
         navigation.navigate('profileEditPage');
     }

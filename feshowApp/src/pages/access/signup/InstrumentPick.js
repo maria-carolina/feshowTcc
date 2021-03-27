@@ -10,7 +10,6 @@ import ProfileUpdateContext from '../../../contexts/profileUpdate';
 function InstrumentPick(props){
     const [instruments, setInstruments] = useState(null);
     const [selected, setSelected] = useState([]);
-    const { alterProfile } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -60,13 +59,14 @@ function InstrumentPick(props){
 
 
     const advance = () => {
-        let user = this.props.route.params.user;
-        user.profile.instruments = this.state.selected;
-        console.log(user);
-        navigation.navigate('paymentPick', {user: user});
+        let user = props.route.params.user;
+        user.profile.instruments = selected;
+        navigation.navigate('paymentPick', {user});
     }
 
     const finishUpdate = () => {
+            const { alterProfile } = useContext(ProfileUpdateContext);
+
         alterProfile('instruments', selected);
         navigation.navigate('profileEditPage');
     }

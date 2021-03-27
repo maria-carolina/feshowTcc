@@ -228,12 +228,15 @@ class NewEventPage extends Component{
         if((values.end_date < values.start_date) && values.end_date != ''){
             Alert.alert('Data inválida', 'A data final deve ser posterior a inicial');
         }else{
+            const isANewEvent = this.props.route.params ? false : true;
             
             let splitted = values.start_date.split('/');
             values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
 
-            values.venue_id = this.context.user.venueId;
 
+            values.venue_id = isANewEvent ? 
+            this.context.user.venueId : this.props.route.params.event.venue_id;
+ 
             var config = {
                 headers: {
                     Authorization: `Bearer ${this.context.token}`
@@ -241,7 +244,6 @@ class NewEventPage extends Component{
             }
 
             try{
-                let isANewEvent = this.props.route.params == undefined;
                 if(isANewEvent){
                     var result = await api.post('/event/store', values, config);
                 }else{

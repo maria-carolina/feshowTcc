@@ -180,7 +180,7 @@ const FeedPage = (props) => {
         loadFeed('events');
     }
 
-    const showFilterModal = () => {
+    const openFilterOptions = () => {
         setIsFilterModalVisible(true)
     }
 
@@ -188,7 +188,7 @@ const FeedPage = (props) => {
         setIsFilterModalVisible(false)
     }
 
-    const filter = async (profileType, filterType) => {
+    const filterSuggestions = async (profileType, filterType) => {
         let route = '/filter';
         
         if(profileType === 'artists'){
@@ -287,7 +287,7 @@ const FeedPage = (props) => {
                         marginTop: 15,
                         marginBottom: 15,
                     }}
-                    onPress = {() => showFilterModal()}
+                    onPress = {openFilterOptions}
                 >
                     <Text
                         style = {{
@@ -332,7 +332,7 @@ const FeedPage = (props) => {
             <FilterModal 
                 visible = {isFilterModalVisible}
                 selectedTab = {selectedTab}
-                applyFilter = {(profileType, filterType) => filter(profileType, filterType)}
+                applyFilter = {(profileType, filterType) => filterSuggestions(profileType, filterType)}
                 closeModal = {() => closeFilterModal()}
             />
         </View>

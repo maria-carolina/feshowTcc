@@ -20,7 +20,7 @@ const Styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 5,
+        marginVertical: 15
     },
 
     outlineButton: {
@@ -39,6 +39,7 @@ const Styles = StyleSheet.create({
         color: '#3F2058',
         fontWeight: 'bold',
         fontFamily: 'roboto',
+        marginBottom: 15
     },
 
     buttonLabel: {
@@ -57,7 +58,7 @@ const Styles = StyleSheet.create({
         borderRadius: 5,
         padding: 5,
         width: '70%',
-        marginTop: 30,
+        marginVertical: 15,
         fontSize: 16,
     },
     
@@ -104,7 +105,6 @@ const Styles = StyleSheet.create({
         color: '#3F2058',
         width: '70%',
         fontSize: 14,
-        marginBottom: 15
     },
 
     row: {

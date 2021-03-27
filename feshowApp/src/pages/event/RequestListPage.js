@@ -217,7 +217,7 @@ class RequestListPage extends Component{
         }
     }
     
-    acceptRequest = async (item) => {
+    acceptSolicitation = async (item) => {
         var result = await api.post(
             `acceptSolicitation/${item.solicitation.id}`, 
             {},
@@ -236,7 +236,7 @@ class RequestListPage extends Component{
         }
     }
 
-    declineRequest = async (item) => {
+    declineSolicitation = async (item) => {
         var result = await api.delete(
             `refuseSolicitation/${item.solicitation.id}`, 
             {
@@ -279,8 +279,8 @@ class RequestListPage extends Component{
                             return(
                                 <RequestListItem
                                     item = {item}
-                                    acceptRequest = {(item) => this.acceptRequest(item)} 
-                                    declineRequest = {(item) => this.declineRequest(item)}
+                                    acceptRequest = {(item) => this.acceptSolicitation(item)} 
+                                    declineRequest = {(item) => this.declineSolicitation(item)}
                                     showModal = {(item) => this.showModal(item)}
                                     key = {item.solicitation.id}
                                 />

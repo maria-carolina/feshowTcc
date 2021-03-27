@@ -12,8 +12,6 @@ function EquipmentPick(props){
 
     const [equipment, setEquipment] = useState(null);
     const [selected, setSelected] = useState([]);
-    const { alterProfile } = useContext(ProfileUpdateContext);
-    const authContext = useContext(AuthContext);
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -70,6 +68,7 @@ function EquipmentPick(props){
     }
 
     const finishUpdate = () => {
+        const authContext = useContext(AuthContext);
         alterProfile('equipments', selected);
         navigation.navigate('profileEditPage');
     }

@@ -66,28 +66,31 @@ const FilterModal = (props) => {
                     }
 
                     {context.user.type !== 2 &&
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style = {{
                                 ...styles.listItem
                             }}
-                            onPress = {() => props.applyFilter(props.selectedTab, 'City')}
+                            onPress = {() => props.applyFilter(props.selectedTab, 'Genre')}
                         >
                             <Text style={{fontSize: 15}}>
-                                {type} na sua cidade
+                                {type} com os mesmos gêneros
                             </Text>
                         </TouchableOpacity>
+                        
                     }
 
-                    <TouchableOpacity
+                    <TouchableOpacity 
                         style = {{
                             ...styles.listItem
                         }}
-                        onPress = {() => props.applyFilter(props.selectedTab, 'Genre')}
+                        onPress = {() => props.applyFilter(props.selectedTab, 'City')}
                     >
                         <Text style={{fontSize: 15}}>
-                            {type} com os mesmos gêneros
+                            {type} na sua cidade
                         </Text>
                     </TouchableOpacity>
+
+                    
                 </View>
             </View>
         </Modal>

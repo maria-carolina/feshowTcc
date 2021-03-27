@@ -171,7 +171,7 @@ module.exports = {
                 token: generateToken({ id: user.id })
             });
 
-        } catch (err) {
+       } catch (err) {
             return res.send({ error: 'Erro ao cadastrar usuário' })
         }
 

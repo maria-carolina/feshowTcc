@@ -10,7 +10,7 @@ import * as yup from 'yup';
 const FormSchema = yup.object().shape({
     username: yup.string().required('Campo obrigatório')
     .min(5, 'O nome deve conter pelo menos 5 caracteres')
-    .max(10, 'O nome deve conter pelo no máximo 10 caracteres'),
+    .max(15, 'O nome deve conter no máximo 15 caracteres'),
     email: yup.string().required('Campo obrigatório').email('Digite um email'),
     password: yup.string().required('Campo obrigatório')
     .min(6, 'A senha deve conter pelo menos 6 caracteres'),
@@ -61,7 +61,7 @@ const Form = (props) => {
                             placeholder = 'Digite seu e-mail...'
                             style = {styles.textInput}
                             value = {values.email}
-                            onChangeText = {handleChange('email')}
+                            onChangeText = {text => handleChange('email')(text.replace(/\s/g, ''))}
                         />
                         {errors.email && 
                         <Text style = {styles.error}>{errors.email}</Text>}
@@ -80,7 +80,7 @@ const Form = (props) => {
                             <FontAwesome 
                                 name = {'eye'} 
                                 size = {30}
-                                style = {{position: 'absolute', right: 10, bottom: 5}}
+                                style = {{position: 'absolute', right: 10, bottom: 18}}
                                 color = {props.passwordVisible[0] ? '#FFF': '#000'}
                                 onPress = {() => props.changePasswordVisibility(0)}
                             />
@@ -102,7 +102,7 @@ const Form = (props) => {
                             <FontAwesome 
                                 name = {'eye'} 
                                 size = {30}
-                                style = {{position: 'absolute', right: 10,  bottom: 5}}
+                                style = {{position: 'absolute', right: 10,  bottom: 18}}
                                 color = {props.passwordVisible[1] ? '#FFF': '#000'}
                                 onPress = {() => props.changePasswordVisibility(1)}
                             />

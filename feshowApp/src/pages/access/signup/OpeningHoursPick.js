@@ -107,7 +107,6 @@ function OpeningHoursPick(props){
         finalHour: '',
     });
     const navigation = useNavigation();
-    const { alterProfile } = useContext(ProfileUpdateContext);
 
     useEffect(() => {
         if(props.route.params.period){
@@ -126,13 +125,14 @@ function OpeningHoursPick(props){
         if(selected.initialDay != '' && selected.finalDay === ''){
             Alert.alert('', 'Escolha até que dia o espaço funciona ou deixe os ambos campos vazios se for o caso.');
         }else{
-            let user = this.props.route.params.user;
-            user.profile.openinghours = this.state.selected;
+            let user = props.route.params.user;
+            user.profile.openinghours = selected;
             navigation.navigate('genrePick', {user: user})
         }
     }
 
     const finishUpdate = () => {
+        const { alterProfile } = useContext(ProfileUpdateContext);
         alterProfile('openinghours', selected);
         navigation.navigate('profileEditPage');
     }

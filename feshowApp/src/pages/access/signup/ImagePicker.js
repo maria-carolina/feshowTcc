@@ -1,9 +1,10 @@
-import React, { Component, useState } from 'react';
-import {View, Text, TouchableOpacity, Image} from 'react-native';
+import React, { Component, useState, useContext } from 'react';
+import {View, Text, TouchableOpacity, Image, Alert} from 'react-native';
 import styles from '../../../styles';
 import ImagePicker from 'react-native-image-picker';
 import api from '../../../services/api';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import AuthContext from '../../../contexts/auth';
 
 
 
@@ -11,22 +12,42 @@ const ImagePick = (props) => {
     const [avatar, setAvatar] = useState(null);
     const [source, setSource] = useState(null);
     const user = props.route.params.user; 
+    const authContext = useContext(AuthContext);
 
-    const advance = async () => {
+    const save = async () => {
         try{
-            var response = await api.post('/store', user);
-            if(avatar){
-                var formData = new FormData();
-                formData.append('file', avatar);
-                await api.post('/storeImage', formData, 
-                {headers: 
-                    {
-                        Authorization: `Bearer ${response.data.token}`, 
-                        'Content-type': 'multipart/form-data', 
-                        'Accept': 'application/json'
-                    }
-                })
-            }  
+            var result = await api.post('/store', user);
+            console.log(user);
+
+            if(!result.data.error){
+                if(avatar){
+                    var formData = new FormData();
+                    formData.append('file', avatar);
+                    result = await api.post('/storeImage', formData, 
+                        {
+                            headers: 
+                            {
+                                Authorization: `Bearer ${result.data.token}`, 
+                                'Content-type': 'multipart/form-data', 
+                                'Accept': 'application/json'
+                            }
+                        }
+                    )
+                }
+
+                if(!result.data.error){
+                    authContext.signIn({
+                        username: user.username,
+                        password: user.password
+                    })
+                }else{
+                    Alert.alert("Ops", result.data.error);
+                }
+                
+                
+            }else{
+                Alert.alert("Ops", result.data.error)
+            }
         }catch(e){
             throw e;
         }
@@ -82,7 +103,7 @@ const ImagePick = (props) => {
             }
             
             <TouchableOpacity
-                onPress = {advance}
+                onPress = {save}
                 style = {styles.button}
             >
                 <Text style = {styles.buttonLabel}>{avatar ? 'Avançar' : 'Pular'}</Text>
