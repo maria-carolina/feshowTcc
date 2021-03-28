@@ -173,11 +173,7 @@ const FeedPage = (props) => {
     }
 
     const closeSolicitationModal = () => {
-        setIsSolicitationVisible(true);
-        setLimits({start_date, start_time, end_time})
-        setChoosenId(id);
-
-        loadFeed('events');
+        setIsSolicitationVisible(false);
     }
 
     const openFilterOptions = () => {

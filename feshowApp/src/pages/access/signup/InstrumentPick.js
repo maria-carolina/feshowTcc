@@ -11,6 +11,7 @@ function InstrumentPick(props){
     const [instruments, setInstruments] = useState(null);
     const [selected, setSelected] = useState([]);
     const navigation = useNavigation();
+    const profileUpdateContext = props.route.params.list ? useContext(ProfileUpdateContext) : null;
 
     useEffect(() => {
         loadInstruments();
@@ -65,9 +66,7 @@ function InstrumentPick(props){
     }
 
     const finishUpdate = () => {
-            const { alterProfile } = useContext(ProfileUpdateContext);
-
-        alterProfile('instruments', selected);
+        profileUpdateContext.alterProfile('instruments', selected);
         navigation.navigate('profileEditPage');
     }
 

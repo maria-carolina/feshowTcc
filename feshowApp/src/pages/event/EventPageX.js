@@ -280,7 +280,7 @@ const EventPage = (props) => {
         }else if (event.artistStatus === 2){
             mainButton = {
                 handleClick: () => loadRemoveConfirmation(false),
-                label: 'Cancelar participação'
+                label: 'Desfazer convite'
             }
         }else{
             mainButton = {

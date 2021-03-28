@@ -29,6 +29,7 @@ class Notification extends Model {
             new: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                defaultValue: 1
             },
             createdAt: {
                 type: DataTypes.DATE,

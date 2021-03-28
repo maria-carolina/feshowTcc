@@ -11,7 +11,8 @@ const ListItem = (props) => {
     }
 
     const openVenuePage = () => {
-        navigation.navigate('profilePage', {id: props.item.venue.userId})
+        console.log(props.item);
+        navigation.navigate('profilePage', {id: 5 /* tem que vir user Id*/})
     }
 
     let splitted = props.item.start_date.split('-');

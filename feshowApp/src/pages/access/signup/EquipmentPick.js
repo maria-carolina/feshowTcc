@@ -13,8 +13,11 @@ function EquipmentPick(props){
     const [equipment, setEquipment] = useState(null);
     const [selected, setSelected] = useState([]);
     const navigation = useNavigation();
+    const authContext = useContext(AuthContext);
+    const profileUpdateContext = props.route.params.list ? useContext(ProfileUpdateContext) : null;
 
     useEffect(() => {
+
         loadEquipment();
     }, []);
 
@@ -68,13 +71,12 @@ function EquipmentPick(props){
     }
 
     const finishUpdate = () => {
-        const authContext = useContext(AuthContext);
-        alterProfile('equipments', selected);
+        profileUpdateContext.alterProfile('equipments', selected);
         navigation.navigate('profileEditPage');
     }
 
 
-    let userType = props.route.params.user ? props.route.params.user.type : authContext.type;
+    let userType = props.route.params.user ? props.route.params.user.type : authContext.user.type;
 
     let title = userType === 1 ? 
     'o espaço tem disponível':'você precisa para tocar';

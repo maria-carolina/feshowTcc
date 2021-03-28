@@ -13,6 +13,8 @@ function GenrePick(props) {
 
     const navigation = useNavigation();
 
+    const profileUpdateContext = props.route.params.list ? useContext(ProfileUpdateContext) : null;
+
     useEffect(() => {
         loadGenres();
     }, [])
@@ -55,8 +57,7 @@ function GenrePick(props) {
     }
 
     const finishUpdate = () => {
-        const { alterProfile } = useContext(ProfileUpdateContext);
-        alterProfile('genres', genres.filter(item => selected.includes(item.id)));
+        profileUpdateContext.alterProfile('genres', genres.filter(item => selected.includes(item.id)));
         navigation.navigate('profileEditPage');
     }
 

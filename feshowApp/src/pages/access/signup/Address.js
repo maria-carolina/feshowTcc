@@ -140,6 +140,8 @@ function Address (props){
     const [preloadedAddress, setPreloadedAddress] = useState(null);
 
     const navigation = useNavigation();
+    const profileUpdateContext = props.route.params.list ? useContext(ProfileUpdateContext) : null;
+
 
     useEffect(() => {
         if(props.route.params.address){
@@ -165,8 +167,7 @@ function Address (props){
     }
 
     const finishUpdate = (values) => {
-        const { alterProfile } = useContext(ProfileUpdateContext);
-        alterProfile('address', values);
+        profileUpdateContext.alterProfile('address', values);
         navigation.navigate('profileEditPage');
     }
     

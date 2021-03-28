@@ -9,6 +9,8 @@ const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
 
 const { Op } = require('sequelize');
 const fs = require('fs');
