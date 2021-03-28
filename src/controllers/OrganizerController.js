@@ -129,7 +129,7 @@ module.exports = {
             let result, resultGenre;
 
             const artistsAll = await Artist.findAll({
-                attributes: ['id', 'name', 'city'],
+                attributes: ['id', 'name', 'city', 'user_id'],
                 include: {
                     association: 'genres',
                     attributes: ['id', 'name']
@@ -142,11 +142,13 @@ module.exports = {
             const invitations = await ArtistEvent.findAll({
                 where: { event_id: id }
             });
-
+            
+            const user = await User.findByPk(req.userId);
+           
             artistsAll.forEach((artist) => {
-                //pegar os que nao estão no evento
+                //pegar os que nao estão no evento e não pegar artista logado 
                 result = verifyArtist(artist.id, invitations)
-                if (!result) {
+                if (!result && user.id != artist.user_id) {
                     artistVerified.push(artist);
                 }
             });

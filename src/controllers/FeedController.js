@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Event = require('../models/Event');
 const ImageUser = require('../models/ImageUser');
 const ArtistEquipment = require('../models/ArtistEquipment');
+const ArtistEvent = require('../models/ArtistEvent');
 
 const moment = require('moment');
 const { Op } = require('sequelize');
@@ -337,7 +338,26 @@ module.exports = {
                 }
             });
 
-            for (let event of eventsAll) { //artistas no lineup
+            //remover eventos com artista logado que estejam vinculados ao evento
+            if (user.type === 0) {
+                for (let event of eventsAll) { //artistas no lineup        
+                    let artistEvents = await ArtistEvent.findAll({
+                        where: {
+                            artist_id: artistAuth.id,
+                            event_id: event.id
+                        }
+                    });
+
+                    if (artistEvents.length == 0) {
+                        events.push(event);
+                    }
+                }
+                eventsAll = events;
+                events = [];
+            }
+
+            for (let event of eventsAll) { //artistas no lineup            
+
                 let artists = await Artist.findAll({
                     attributes: ['id', 'name'],
                     include: {
@@ -391,16 +411,7 @@ module.exports = {
 
                 eventsAll = eventsCity.concat(otherEvents);
 
-                //para remover artista logado no evento
-                eventsAll.forEach((event) => {
-                    if (user.type === 0) {
-                        inArray(artistAuth.id, event.dataValues.lineup) ? '' : events.push(event);
-                    } else {
-                        events.push(event);
-                    }
-                });
-
-                return res.send(events);
+                return res.send(eventsAll);
 
             } else {
                 eventsAll.forEach((event) => {
@@ -433,14 +444,7 @@ module.exports = {
 
             //remover duplicidade
             eventsAll.forEach((event) => {
-                if (user.type === 0) {
-                    //para não puxar evento onde o artista logado ta no lineup
-                    if (!inArray(artistAuth.id, event.dataValues.lineup)) {
-                        !inArray(event.id, events) ? events.push(event) : ''
-                    }
-                } else {
-                    !inArray(event.id, events) ? events.push(event) : ''
-                }
+                !inArray(event.id, events) ? events.push(event) : ''
             });
 
             return res.send(events);
@@ -979,6 +983,24 @@ module.exports = {
                 }
             });
 
+            //remover eventos com artista logado que estejam vinculados ao evento
+            if (user.type === 0) {
+                for (let event of eventsAll) { //artistas no lineup        
+                    let artistEvents = await ArtistEvent.findAll({
+                        where: {
+                            artist_id: artistAuth.id,
+                            event_id: event.id
+                        }
+                    });
+
+                    if (artistEvents.length == 0) {
+                        events.push(event);
+                    }
+                }
+                eventsAll = events;
+                events = [];
+            }
+
             for (let event of eventsAll) { //artistas no lineup
                 let artists = await Artist.findAll({
                     attributes: ['id', 'name'],
@@ -1033,14 +1055,7 @@ module.exports = {
 
             //remover duplicidade
             eventsAll.forEach((event) => {
-                if (user.type === 0) {
-                    //para não puxar evento onde o artista logado ta no lineup
-                    if (!inArray(artistAuth.id, event.dataValues.lineup)) {
-                        !inArray(event.id, events) ? events.push(event) : ''
-                    }
-                } else {
-                    !inArray(event.id, events) ? events.push(event) : ''
-                }
+                !inArray(event.id, events) ? events.push(event) : ''
             });
 
             return res.send(events);
@@ -1115,6 +1130,24 @@ module.exports = {
                 }
             });
 
+            //remover eventos com artista logado que estejam vinculados ao evento
+            if (user.type === 0) {
+                for (let event of eventsAll) { //artistas no lineup        
+                    let artistEvents = await ArtistEvent.findAll({
+                        where: {
+                            artist_id: artistAuth.id,
+                            event_id: event.id
+                        }
+                    });
+
+                    if (artistEvents.length == 0) {
+                        events.push(event);
+                    }
+                }
+                eventsAll = events;
+                events = [];
+            }
+
             for (let event of eventsAll) { //artistas no lineup
                 let artists = await Artist.findAll({
                     attributes: ['id', 'name'],
@@ -1156,20 +1189,13 @@ module.exports = {
                 }
             }
             events = [];
+            
             //separar por cidade
             eventsAll.forEach((event) => {
                 if (event.venue.address.city === city) {
-                    if (user.type === 0) {
-                        //para não puxar evento onde o artista logado ta no lineup
-                        if (!inArray(artistAuth.id, event.dataValues.lineup)) {
-                            !inArray(event.id, events) ? events.push(event) : ''
-                        }
-                    } else {
-                        !inArray(event.id, events) ? events.push(event) : ''
-                    }
+                    !inArray(event.id, events) ? events.push(event) : ''
                 }
             });
-
 
             return res.send(events);
         } catch (err) {
