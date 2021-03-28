@@ -5,6 +5,7 @@ const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const ArtistEvent = require('../models/ArtistEvent');
 
 module.exports = {
 
@@ -112,11 +113,34 @@ module.exports = {
             if (!event) {
                 return res.send({ error: 'Erro ao gravar evento no sistema' });
             }
+
             const venue = await Venue.findByPk(solicitation.venue_id);
+
+            const user = await User.findByPk(solicitation.user_id);
+
+            let message;
+
+            if (user.type === 0) {
+                //vincular ao evento se o organizador for artista
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+                await ArtistEvent.create({
+                    event_id: event.id,
+                    artist_id: artist.id,
+                    date: event.start_date,
+                    start_time: event.start_time,
+                    status: 3
+                });
+
+                message = `O ${venue.name} aceitou a solicitação de organização do ${solicitation.name} e você está no line-up do evento.`;
+            } else {
+                message = `O ${venue.name} aceitou a solicitação de organização do ${solicitation.name}`;
+            }
 
             await Notification.create({
                 user_id: solicitation.user_id,
-                message: `O ${venue.name} aceitou a solicitação de organização do ${solicitation.name}`,
+                message: message,
                 status: 2,
                 auxiliary_id: event.id,
             });
