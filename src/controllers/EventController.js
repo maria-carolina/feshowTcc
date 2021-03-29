@@ -250,7 +250,7 @@ module.exports = {
             let event = await Event.findByPk(id, {
                 include: {
                     association: 'venue',
-                    attributes: ['id', 'name']
+                    attributes: ['id', 'name', 'user_id']
                 }
             });
 
@@ -582,7 +582,7 @@ module.exports = {
                 attributes: ['id', 'name', 'start_date', 'status'],
                 include: {
                     association: 'venue',
-                    attributes: ['id', 'name']
+                    attributes: ['id', 'name', 'user_id']
                 },
                 limit,
                 offset,
@@ -616,7 +616,7 @@ module.exports = {
             let events = await Event.findAll({
                 include: {
                     association: 'venue',
-                    attributes: ['id', 'name']
+                    attributes: ['id', 'name', 'user_id']
                 },
                 where: {
                     start_date: {
