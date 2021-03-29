@@ -13,6 +13,13 @@ class Format{
         return formatted;
     }
 
+    static formatDatetoDMY(date){
+        const splitted = date.split('-');
+
+        const formatted = `${splitted[2]}/${splitted[1]}/${splitted[0]}`
+        return formatted;
+    }
+
     static formatTime(time){
         const splitted = time.split(':');
         const formatted = `${splitted[0]}h${splitted[1]}`

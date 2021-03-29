@@ -28,11 +28,13 @@ const FeedEventItem = (props) => {
                     paddingLeft: 15
                 }}
             >
-                <View style = {styles.row}>
+                <View style = {{
+                    width: '50%'
+                }}>
                     <Text 
                         style = {{
                             color: '#3F2058', 
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: 'bold'
                         }}
                     >

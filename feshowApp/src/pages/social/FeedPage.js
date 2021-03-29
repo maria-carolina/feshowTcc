@@ -58,7 +58,6 @@ const FeedPage = (props) => {
         {label: 'Artistas', value: 'artists'}, 
         {label: 'Eventos', value: 'events'}, 
         {label: 'Espaços', value: 'venues'}, 
-        {label: 'Produtores', value: 'producers'}
     ]);
     const [selectedTab, setSelectedTab] = useState('artists');
 
@@ -71,7 +70,6 @@ const FeedPage = (props) => {
     const [suggestions, setSuggestions] = useState({
         artists: null,
         venues: null,
-        producers: null,
         events: null
     })
 
@@ -87,7 +85,6 @@ const FeedPage = (props) => {
                     {label: 'Eventos', value: 'events'},
                     {label: 'Artistas', value: 'artists'}, 
                     {label: 'Espaços', value: 'venues'}, 
-                    {label: 'Produtores', value: 'producers'}
                 ]);
                 setSelectedTab('events');
                 
@@ -251,15 +248,15 @@ const FeedPage = (props) => {
                     alignItems: 'center',
                 }}
             >
-                <View style = {styles.row}>
+                <View style = {{...styles.row, width: '100%', justifyContent: 'space-evenly'}}>
                     {tabs.map((item, index) => (
                         <TouchableOpacity
                             style = {selectedTab === item.value ?
                                 {
-                                    ...styles.quarterRowTab,
+                                    ...styles.rowTab,
                                     borderBottomWidth: 2,
                                     borderBottomColor: '#3F2058'
-                                } : styles.quarterRowTab
+                                } : styles.rowTab
                             }
                             onPress = {() => selectTab(item.value)}
                             key = {index.toString()}

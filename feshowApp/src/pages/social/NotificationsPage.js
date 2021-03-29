@@ -12,7 +12,6 @@ const NotificationListItem = (props) => {
             style = {{
                 borderBottomWidth: .5,
                 borderBottomColor: '#cecece',
-                height: 80,
                 padding: 15,
             }}
             onPress = {props.onClick}
@@ -20,7 +19,7 @@ const NotificationListItem = (props) => {
         >
             <Text
                 style = {{
-                    marginBottom: 10
+                    marginBottom: 10,
                 }}
             >
                 {props.item.message}

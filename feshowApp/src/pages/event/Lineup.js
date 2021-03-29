@@ -76,7 +76,7 @@ const Lineup = (props) => {
     return(
         <View style = {{width: '90%'}}>
             
-            {props.isOrganizer && props.list.length > 0 &&
+            {props.isOrganizer && props.list.length > 0 && props.event.status === 1 &&
             <TouchableOpacity
                 style = {
                     {

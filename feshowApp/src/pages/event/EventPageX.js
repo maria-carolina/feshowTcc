@@ -38,6 +38,7 @@ const EventPage = (props) => {
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
+            console.log(lineup);
             loadEvent();
         })
             
@@ -57,7 +58,6 @@ const EventPage = (props) => {
 
             if(!result.data.error){
                 setEvent(result.data);
-                
             }else{
                 Alert.alert('Ops', result.data.error);
             }
@@ -310,14 +310,23 @@ const EventPage = (props) => {
                             {event.name}
                         </Text>
 
-                        <View style = {styles.row}>
+                        <TouchableOpacity 
+                            style = {styles.row}
+                            onPress = {() => 
+                                navigation.navigate(
+                                    'profilePage', 
+                                    {id: event.venue.user_id}
+                                )}
+                        >
                             <FontAwesome
                                 name = {'home'}
                                 size = {15}
                                 color = {'#3f2058'} 
                             />
-                            <Text> {event.venue.name}</Text>
-                        </View>
+                            <Text> 
+                                {` ${event.venue.name}`}
+                            </Text>
+                        </TouchableOpacity>
 
                         <View style = {styles.row}>
                             <FontAwesome

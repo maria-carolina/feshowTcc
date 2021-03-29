@@ -90,24 +90,27 @@ const FeedProfileItem = (props) => {
                     )}
 
                 </View>
-
-                <TouchableOpacity
-                    style = {{
-                        ...styles.outlineButton,
-                        width: '90%',
-                        marginTop: 10
-                    }}
-                    onPress = {handleButtonClick}
-                >
-                    <Text
+                
+                {props.type !== 2 &&
+                    <TouchableOpacity
                         style = {{
-                            ...styles.outlineButtonLabel,
-                            fontSize: 14
+                            ...styles.outlineButton,
+                            width: '90%',
+                            marginTop: 10
                         }}
+                        onPress = {handleButtonClick}
                     >
-                       {buttonLabel}
-                    </Text>
-                </TouchableOpacity>
+
+                        <Text
+                            style = {{
+                                ...styles.outlineButtonLabel,
+                                fontSize: 14
+                            }}
+                        >
+                            {buttonLabel}
+                        </Text>
+                    </TouchableOpacity>
+                }
 
             </View>
         </TouchableOpacity>

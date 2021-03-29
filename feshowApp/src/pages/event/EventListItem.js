@@ -12,7 +12,7 @@ const ListItem = (props) => {
 
     const openVenuePage = () => {
         console.log(props.item);
-        navigation.navigate('profilePage', {id: 5 /* tem que vir user Id*/})
+        navigation.navigate('profilePage', {id: props.item.venue.user_id /* tem que vir user Id*/})
     }
 
     let splitted = props.item.start_date.split('-');
@@ -23,7 +23,6 @@ const ListItem = (props) => {
                 ...styles.listItem,
                 alignItems: 'center',
                 flexDirection: 'row',
-                height: 60,
                 position: 'relative',
             }}
             key = {props.item.id.toString()}
@@ -35,35 +34,47 @@ const ListItem = (props) => {
             >
                 {formattedDate}
             </Text>
-
-            <TouchableOpacity
-                onPress = {() => openEventPage()}
+            <View
+                style = {{
+                    width: '100%',
+                    padding: 5
+                }}
             >
-                <Text
+                <TouchableOpacity
+                    onPress = {() => openEventPage()}
+                    style = {{width: '70%'}}
+                >
+                    <Text
+                        style = {{
+                            marginLeft: 5,
+                            fontSize: 18,
+                            color: '#3F2058',
+                        }}
+                    >
+                        {props.item.name}
+                    </Text>
+                </TouchableOpacity>
+                <View
                     style = {{
-                        marginLeft: 20,
-                        fontSize: 16,
-                        color: '#3F2058',
+                        flexDirection: 'row'
                     }}
                 >
-                    {props.item.name}
-                </Text>
-            </TouchableOpacity>
+                    <Text> @ </Text>
 
-            <Text> @ </Text>
-
-            <TouchableOpacity
-                onPress = {() => openVenuePage()}
-            >
-                <Text
-                    style = {{
-                        fontSize: 16,
-                        color: '#3F2058',
-                    }}
-                >
-                    {props.item.venue.name}
-                </Text>
-            </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress = {() => openVenuePage()}
+                    >
+                        <Text
+                            style = {{
+                                fontSize: 14,
+                                color: '#3F2058',
+                            }}
+                        >
+                            {props.item.venue.name}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
 
             {props.showStatus &&
             <Text 

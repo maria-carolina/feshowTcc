@@ -32,7 +32,7 @@ const Form = (props) => {
             }:
             {
                 name: props.event.name,
-                start_date: props.event.start_date,
+                start_date: Format.formatDatetoDMY(props.event.start_date),
                 start_time: props.event.start_time,
                 end_time: props.event.end_time,
                 description: props.event.description

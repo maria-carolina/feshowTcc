@@ -44,7 +44,7 @@ const Form = (props) => {
                         <FontAwesome 
                             name = {'eye'} 
                             size = {30}
-                            style = {{position: 'absolute', right: 10, bottom: 5}}
+                            style = {{position: 'absolute', right: 10, top: '30%'}}
                             color = {props.passwordVisible ? '#DDD': '#000'}
                             onPress = {props.setPasswordVisible}
                         />

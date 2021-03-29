@@ -58,7 +58,7 @@ const InvitationModal = (props) => {
                     <FontAwesome
                         style = {{
                             position: 'absolute',
-                            top: '42%',
+                            top: '30%',
                             right: 25
                         }}
                         name = {'search'}
@@ -92,10 +92,12 @@ const InvitationModal = (props) => {
                                 {item.city}
                             </Text>
                             <View style = {styles.row}>
-                                {item.genres.map((item) => 
-                                <Text key={item.id}>
-                                    {item.name}
-                                </Text>)}
+                                {item.genres.map((item, index) => 
+                                    <Text key={item.id}>
+                                        {index === 0 ? item.name: ` | ${item.name}`}
+                                    </Text>
+                                )}
+                                
                             </View>
                             <TouchableOpacity
                                 style = {styles.cardButton}
