@@ -39,11 +39,13 @@ const Form = (props) => {
             }
 
             }
-            onSubmit = {(values) => {
-                props.save(values);
-                let keys = Object.keys(values);
-                for (let key in keys){
-                    values[keys[key]] = ''
+            onSubmit = {async (values) => {
+                const hasSaved = await props.save(values);
+                if(hasSaved){
+                    let keys = Object.keys(values);
+                    for (let key in keys){
+                        values[keys[key]] = ''
+                    }
                 }
             }}
             validationSchema = {FormSchema}
@@ -257,7 +259,11 @@ class NewEventPage extends Component{
                         isAEdition: undefined
                     });
                     this.props.navigation.navigate('eventPage', {id: isANewEvent ? result.data.id : this.props.route.params.event.id});
-                    Alert.alert('Pronto!', `Evento ${isANewEvent ? 'cadastrado':'editado'} com sucesso!`)
+                    Alert.alert('Pronto!', `Evento ${isANewEvent ? 'cadastrado':'editado'} com sucesso!`);
+                    return true;
+                }else{
+                    Alert.alert('Ops', result.data.error);
+                    return false;
                 }
             }catch(e){
                 console.log(e);

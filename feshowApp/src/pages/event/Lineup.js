@@ -125,7 +125,7 @@ const Lineup = (props) => {
                 )
             })}
 
-            {props.isOrganizer &&
+            {props.isOrganizer && props.event.status === 1 &&
             <TouchableOpacity
                 style = {{
                     ...styles.button, 

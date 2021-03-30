@@ -53,6 +53,24 @@ class LineUpEditPage extends Component{
         
     }
 
+    loadExclusionConfirmation = (artistId) => {
+        Alert.alert(
+            'Opa',
+            'Realmente quer remover esse artista do lineup?',
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => this.excludeFromLineup(artistId)
+                },
+                {
+                    text: 'Não',
+                    style: 'cancel'
+                }
+            ],
+            
+        )
+    }
+
     excludeFromLineup = async (artistId) => {
 
         try{
@@ -201,7 +219,7 @@ class LineUpEditPage extends Component{
                                     position: 'absolute',
                                     right: 20
                                 }}
-                                onPress = {() => this.excludeFromLineup(item.artists.id)}
+                                onPress = {() => this.loadExclusionConfirmation(item.artists.id)}
                             />
                             
                         </View>

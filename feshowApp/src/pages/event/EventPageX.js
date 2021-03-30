@@ -58,6 +58,7 @@ const EventPage = (props) => {
 
             if(!result.data.error){
                 setEvent(result.data);
+                setSelectedTab(0);
             }else{
                 Alert.alert('Ops', result.data.error);
             }
@@ -309,6 +310,24 @@ const EventPage = (props) => {
                         >
                             {event.name}
                         </Text>
+
+                        <View style = {styles.row}>
+                            <Text>
+                                Por:
+                            </Text>
+                           
+                            <TouchableOpacity
+                                onPress = {() => 
+                                    navigation.navigate(
+                                        'profilePage',
+                                        {id: event.organizer.id} 
+                                    )}
+                            >
+                                <Text>
+                                    {` ${event.organizer.name}`}
+                                </Text>
+                            </TouchableOpacity> 
+                        </View>
 
                         <TouchableOpacity 
                             style = {styles.row}

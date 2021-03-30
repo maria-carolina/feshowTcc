@@ -18,6 +18,23 @@ const Posts = (props) => {
         setPostToEdit(post);
     }
 
+    const loadDeleteConfirmation = (postId) => {
+        Alert.alert(
+            'Opa',
+            'Realmente deseja excluir essa postagem?',
+            [
+                {
+                    text: 'Sim',
+                    onPress: () => deletePost(postId)
+                },
+                {
+                    text: 'Não',
+                    style: 'cancel'
+                }
+            ]
+        )
+    }
+
     const deletePost = async (postId) => {
         try{
             let result = await api.delete(
@@ -117,7 +134,7 @@ const Posts = (props) => {
                                 </TouchableOpacity>
 
                                 <TouchableOpacity 
-                                    onPress = {() => deletePost(item.postId)}
+                                    onPress = {() => loadDeleteConfirmation(item.postId)}
                                 >
                                     <FontAwesome
                                         name = {'trash-o'}
