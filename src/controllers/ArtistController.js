@@ -1,5 +1,6 @@
 const ArtistEvent = require('../models/ArtistEvent');
 const Artist = require('../models/Artist');
+const Notification = require('../models/Notification');
 
 const { Op } = require('sequelize');
 
@@ -43,6 +44,14 @@ module.exports = {
                 date,
                 start_time: time,
                 status: 2
+            });
+
+            const event = await Event.findByPk(eventId);
+
+            await Notification.create({
+                user_id: event.organizer_id,
+                message: `${artist.name} solicitou particitar do ${event.name}`,
+                status: 1
             });
 
             return res.status(200).send('ok');

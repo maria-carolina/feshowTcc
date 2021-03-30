@@ -248,10 +248,15 @@ module.exports = {
             const { id } = req.params;
 
             let event = await Event.findByPk(id, {
-                include: {
-                    association: 'venue',
-                    attributes: ['id', 'name', 'user_id']
-                }
+                include: [
+                    {
+                        association: 'venue',
+                        attributes: ['id', 'name', 'user_id']
+                    },
+                    {
+                        association: 'organizer',
+                        attributes: ['id']
+                    }]
             });
 
             const eventImage = await EventImage.findOne({ where: { event_id: id } });
@@ -285,6 +290,26 @@ module.exports = {
                 event.dataValues.artistStatus = artistStatus;
             }
 
+            //pegar nome do organizador
+            let userOrganizer = await User.findByPk(event.organizer.id);
+            if (userOrganizer.type === 0) {
+                let artist = await Artist.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = artist.name;
+
+            } else if (userOrganizer.type === 1) {
+                let venue = await Venue.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = venue.name;
+
+            } else {
+                let producer = await Producer.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = producer.name;
+            }
 
             return res.send(event);
         } catch (err) {

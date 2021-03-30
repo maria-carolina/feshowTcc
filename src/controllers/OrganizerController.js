@@ -269,7 +269,11 @@ module.exports = {
 
             } else if ((user.type == 0 && artistEvent.status == 2) && req.userId != event.organizer_id) {
                 //artista cancelou solicitação
-
+                await Notification.create({
+                    user_id: event.organizer_id,
+                    message: `${artist.name} desfez convite para o ${event.name}`,
+                    status: 0
+                });
             } else if ((user.type == 0 && artistEvent.status == 3) && req.userId != event.organizer_id) {
 
                 //artista saiu do evento 
@@ -286,8 +290,12 @@ module.exports = {
 
 
             } else if ((user.type == 1 || req.userId == event.organizer_id) && artistEvent.status == 1) {
-                //organizador cancela convite
-
+                //organizador desfaz convite
+                await Notification.create({
+                    user_id: artist.user_id,
+                    message: `Seu convite para participar do ${event.name} foi desfeito`,
+                    status: 0
+                });
             } else if ((user.type == 1 || req.userId == event.organizer_id) && artistEvent.status == 2) {
 
                 //organizador recusa solicitação
