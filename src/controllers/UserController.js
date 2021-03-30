@@ -1293,5 +1293,17 @@ module.exports = {
         } catch (err) {
             return res.send({ error: 'Erro ao deletar imagem de usuário' })
         }
+    },
+
+    async verifyPassword(req, res) {
+        const { password } = req.body;
+        
+        const user = await User.findByPk(req.userId);
+        
+        if (!await bcrypt.compare(password, user.password)) {
+            return res.send({ error: 'Senha incorreta' })
+        }
+
+        return res.status(200).send('ok');
     }
 };

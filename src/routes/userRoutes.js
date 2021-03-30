@@ -36,6 +36,7 @@ userRoutes.put('/updateUser', UserController.update);
 
 userRoutes.post('/verifyEmailUpdate', UserController.verifyEmailUpdate);
 userRoutes.post('/verifyUsernameUpdate', UserController.verifyUsernameUpdate);
+userRoutes.post('/verifyPassword', UserController.verifyPassword);
 
 userRoutes.delete('/deleteUser', UserController.delete);
 userRoutes.delete('/deleteUserImage', UserController.deleteImage);
