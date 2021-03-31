@@ -1,50 +1,188 @@
 const ArtistEvent = require('../models/ArtistEvent');
 const Artist = require('../models/Artist');
 const Event = require('../models/Event');
-const Address = require('../models/Address');
-const GenreVenue = require('../models/GenreVenue');
 const User = require('../models/User');
 const EventImage = require('../models/EventImage');
 const Notification = require('../models/Notification');
+const Post = require('../models/Post');
 
 const { Op } = require('sequelize');
 const moment = require('moment');
 
-function verifyArtist(artistId, array) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i].artist_id === artistId) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function verifyGenre(id, array) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i].genre_id === id) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function isUnique(id, array) {
-    for (var i = 0; i < array.length; i++) {
-        if (array[i].id === id) {
-            return false;
-        }
-    }
-    return true;
-}
-
 module.exports = {
+    
+     async store(req, res) {
+        try {
+            const {
+                venue_id,
+                name,
+                description,
+                start_date,
+                start_time,
+                end_time
+            } = req.body;
 
-    /**
-     * status convites/line-up
-     *  1 - organizador convida artista
-     *  2 - artista solicita participação
-     *  3 - artista confirmado no line-up
-     */
+            let descript;
+
+            if (description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
+            //se tem evento na mesma data
+            const verifyEvent = await Event.findAll({
+                where: {
+                    start_date,
+                    venue_id
+                }
+            });
+
+            if (verifyEvent.length > 0) {
+                return res.send({ error: 'Já existe um evento nesta data' });
+            }
+
+            const event = await Event.create({
+                organizer_id: req.userId,
+                venue_id,
+                name,
+                description: descript,
+                start_date,
+                start_time,
+                end_time,
+                status: 1
+            });
+
+            if (!event) {
+                return res.send({ error: 'Erro ao gravar evento no sistema' });
+            }
+
+            return res.send(event);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao gravar evento' })
+        }
+    },
+
+     async update(req, res) {
+        try {
+            const { id } = req.params;
+
+            const {
+                venue_id,
+                name,
+                description,
+                start_date,
+                start_time,
+                end_time
+            } = req.body;
+
+            let descript;
+
+            if (description !== "") {
+                descript = description;
+            } else {
+                descript = null;
+            }
+
+            //se tem evento na mesma data
+            const verifyEvent = await Event.findAll({
+                where: {
+                    start_date,
+                    venue_id,
+                    id: {
+                        [Op.ne]: id
+                    }
+                }
+            });
+
+            if (verifyEvent.length > 0) {
+                return res.send({ error: 'Já existe um evento nesta data' });
+            }
+
+            const event = await Event.update({
+                organizer_id: req.userId,
+                venue_id,
+                name,
+                description: descript,
+                start_date,
+                start_time,
+                end_time,
+                status: 1
+            }, {
+                where: { id }
+            });
+
+            if (!event) {
+                return res.send({ error: 'Erro ao editar evento no sistema' });
+            }
+
+            return res.send(event);
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao editar evento' })
+        }
+    },
+
+    async delete(req, res) {
+        try {
+            const { id } = req.params;
+
+            const event = await Event.findByPk(id);
+
+            //verificar se não tem convites em aberto
+            const verify = await ArtistEvent.findAll({
+                where: {
+                    event_id: id,
+                    status: { [Op.ne]: 3 }
+                }
+            });
+
+            if (verify.length > 0) {
+                return res.send({ error: 'Há convites em aberto, para proseguir na exclusão é preciso recusar ou cancelar convites ligados a este evento.' })
+            }
+
+            // notificacoes
+            await Notification.destroy({
+                where: { auxiliary_id: event.id }
+            });
+
+            // artist_events
+            await ArtistEvent.destroy({
+                where: { event_id: event.id }
+            });
+
+            // posts
+            await Post.destroy({
+                where: { event_id: event.id }
+            });
+
+            //imagem
+            let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
+            if (eventImage) { //remover imagem do sistema
+                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
+                if (fs.existsSync(file)) {
+                    fs.unlink(file, function (err) {
+                        if (err) throw err;
+                        console.log('Arquivo deletado!');
+                    });
+                }
+                await EventImage.destroy({
+                    where: { event_id: event.id }
+                });
+            }
+
+            //evento
+            await Event.destroy({
+                where: { id: event.id }
+            })
+
+            return res.status(200).send('ok');
+
+        } catch (err) {
+            return res.send({ error: 'Erro ao deletar evento' })
+        }
+    },
 
     async updateLineup(req, res) {
         try {
