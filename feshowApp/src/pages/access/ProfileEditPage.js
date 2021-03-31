@@ -10,6 +10,7 @@ import ProfileUpdateContext from '../../contexts/profileUpdate';
 import {apiIbge} from '../../services/api';
 import { Formik } from 'formik';
 import * as yup from 'yup';
+import PasswordConfirmationModal from './PasswordConfirmation';
 
 
 
@@ -268,7 +269,6 @@ UpdateForm = (props) => {
     
                 {authContext.user.type !== 1 &&
                     <View style = {{ flexDirection: 'row' }}>
-    
     
                     <View 
                         style = {{
@@ -689,7 +689,7 @@ AddressEdit = (props) => {
 }
 
 const ProfileEditPage = ({ }) => {
-    //const [profile, setProfile] = useState(null);
+    const [isPasswordConfirmationVisible, setIsPasswordConfirmationVisible] = useState(false)
     const { profile, loadProfile, saveUpdate } = useContext(ProfileUpdateContext);
     const navigation = useNavigation();
     const authContext = useContext(AuthContext);
@@ -708,7 +708,7 @@ const ProfileEditPage = ({ }) => {
             [
                 {
                     text: 'Sim',
-                    onPress: () => deleteProfile(),
+                    onPress: () => showPasswordConfirmation(),
                 },
                 {
                     text: 'Cancelar',
@@ -716,6 +716,10 @@ const ProfileEditPage = ({ }) => {
                 }
             ]
         )
+    }
+
+    const showPasswordConfirmation = () => {
+        setIsPasswordConfirmationVisible(true);
     }
 
     const deleteProfile = async () => {
@@ -784,6 +788,12 @@ const ProfileEditPage = ({ }) => {
                     Deletar perfil
                 </Text>
             </TouchableOpacity>
+
+            <PasswordConfirmationModal
+                visible = {isPasswordConfirmationVisible}
+                closeModal = {() => setIsPasswordConfirmationVisible(false)}
+                deleteProfile = {deleteProfile} 
+            />
             
             </>
             ):(

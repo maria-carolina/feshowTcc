@@ -55,7 +55,7 @@ class LocalizationPick extends Component{
             let user = this.props.route.params.user;
             let nextPage = user.type === 2 ? 'imagePick' : 'genrePick';
             user.profile.city = this.state.choosenCityName;
-            console.log(user)
+            user.profile.state = this.state.ufs.filter(item => item.id === this.state.selectedUf)[0].sigla;
             this.props.navigation.navigate(nextPage, {user: user});
         }else{
             Alert.alert('','Escolha sua cidade.');
