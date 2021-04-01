@@ -16,10 +16,6 @@ class Producer extends Model {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            chat_permission: {
-                type: DataTypes.INTEGER,
-                defaultValue: 0
-            },
             state: {
                 type: DataTypes.STRING,
                 allowNull: true

@@ -2,7 +2,6 @@ const ArtistEvent = require('../models/ArtistEvent');
 const Artist = require('../models/Artist');
 const Event = require('../models/Event');
 const User = require('../models/User');
-const EventImage = require('../models/EventImage');
 const Notification = require('../models/Notification');
 const Post = require('../models/Post');
 
@@ -157,26 +156,6 @@ module.exports = {
                 where: { event_id: event.id }
             });
 
-            //imagem
-            let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-            if (eventImage) { //remover imagem do sistema
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                if (fs.existsSync(file)) {
-                    fs.unlink(file, function (err) {
-                        if (err) throw err;
-                        console.log('Arquivo deletado!');
-                    });
-                }
-                await EventImage.destroy({
-                    where: { event_id: event.id }
-                });
-            }
-
-            //evento
-            await Event.destroy({
-                where: { id: event.id }
-            })
-
             return res.status(200).send('ok');
 
         } catch (err) {
@@ -263,15 +242,11 @@ module.exports = {
             }
         });
 
-        const eventImage = await EventImage.findOne({ where: { event_id: id } });
-
-        const imageStatus = eventImage ? true : false;
 
         if (!event) {
             return res.send({ error: 'Erro ao exibir evento' });
         }
 
-        event.dataValues.image = imageStatus;
         event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
         event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 

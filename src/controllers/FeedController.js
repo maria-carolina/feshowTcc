@@ -453,54 +453,6 @@ module.exports = {
         }
     },
 
-    async feedProducer(req, res) {
-        try {
-            const user = await User.findByPk(req.userId);
-
-            let producerAuth, city;
-            let producersCity = [],
-                otherProducers = [],
-                producers = [];
-
-            if (user.type == 0) {
-                let artistAuth = await Artist.findOne({
-                    where: { user_id: user.id }
-                });
-                city = artistAuth.city;
-
-            } else if (user.type == 1) {
-                let venueAuth = await Venue.findOne({
-                    include: { association: 'address' },
-                    where: { user_id: user.id }
-                });
-                city = venueAuth.address.city;
-
-            } else {
-                producerAuth = await Producer.findOne({ where: { user_id: user.id } });
-                city = producerAuth.city;
-            }
-
-            let producersAll = await Producer.findAll();
-
-            for (let producer of producersAll) {
-
-                let image = await ImageUser.findOne({ where: { user_id: producer.user_id } });
-                let imageStatus = image ? true : false;
-                producer.dataValues.image = imageStatus;
-
-                if (producer.city === city) {
-                    producersCity.push(producer);
-                } else {
-                    otherProducers.push(producer);
-                }
-            };
-
-            producers = producersCity.concat(otherProducers);
-            return res.send(producers)
-        } catch (err) {
-            return res.send({ error: 'Erro ao exibir feed de produtores' })
-        }
-    },
     async search(req, res) {
         try {
             const { name } = req.body;
@@ -1200,55 +1152,6 @@ module.exports = {
             return res.send(events);
         } catch (err) {
             return res.send({ error: 'Erro ao exibir filtro de evento por cidade' })
-        }
-    },
-
-    async filterProducerCity(req, res) {
-        try {
-            const user = await User.findByPk(req.userId);
-
-            let producerAuth, city;
-            let producers = [];
-
-            if (user.type == 0) {
-                let artistAuth = await Artist.findOne({
-                    where: { user_id: user.id }
-                });
-                city = artistAuth.city;
-
-            } else if (user.type == 1) {
-                let venueAuth = await Venue.findOne({
-                    include: { association: 'address' },
-                    where: { user_id: user.id }
-                });
-                city = venueAuth.address.city;
-
-            } else {
-                producerAuth = await Producer.findOne({ where: { user_id: user.id } });
-                city = producerAuth.city;
-            }
-
-            let producersAll = await Producer.findAll();
-
-            for (let producer of producersAll) {
-
-                let image = await ImageUser.findOne({ where: { user_id: producer.user_id } });
-                let imageStatus = image ? true : false;
-                producer.dataValues.image = imageStatus;
-
-                if (user.type === 2) {
-                    if (producerAuth.id !== producer.id) {
-                        if (producer.city === city)
-                            producers.push(producer);
-                    }
-                } else {
-                    if (producer.city === city)
-                        producers.push(producer);
-                }
-            };
-            return res.send(producers)
-        } catch (err) {
-            return res.send({ error: 'Erro ao exibir filtro de produtor por cidade' })
         }
     },
 

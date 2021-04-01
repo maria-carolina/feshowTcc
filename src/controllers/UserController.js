@@ -13,7 +13,6 @@ const ImageUser = require('../models/ImageUser');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
-const Rider = require('../models/Rider');
 const Genre = require('../models/Genre');
 const Instrument = require('../models/Instrument');
 const Equipment = require('../models/Equipment');
@@ -27,7 +26,6 @@ const Notification = require('../models/Notification');
 const GenreVenue = require('../models/GenreVenue');
 const ArtistGenre = require('../models/ArtistGenre');
 const Post = require('../models/Post');
-const EventImage = require('../models/EventImage');
 const Solicitation = require('../models/Solicitation');
 
 function generateToken(params = {}) {
@@ -1116,21 +1114,6 @@ module.exports = {
                         where: { event_id: event.id }
                     });
 
-                    //imagem
-                    let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-                    if (eventImage) { //remover imagem do sistema
-                        const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                        if (fs.existsSync(file)) {
-                            fs.unlink(file, function (err) {
-                                if (err) throw err;
-                                console.log('Arquivo deletado!');
-                            });
-                        }
-                        await EventImage.destroy({
-                            where: { event_id: event.id }
-                        });
-                    }
-
                     //evento
                     await Event.destroy({
                         where: { id: event.id }
@@ -1214,26 +1197,6 @@ module.exports = {
                         await Post.destroy({
                             where: { event_id: event.id }
                         });
-
-                        //imagem
-                        let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-                        if (eventImage) { //remover imagem do sistema
-                            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                            if (fs.existsSync(file)) {
-                                fs.unlink(file, function (err) {
-                                    if (err) throw err;
-                                    console.log('Arquivo deletado!');
-                                });
-                            }
-                            await EventImage.destroy({
-                                where: { event_id: event.id }
-                            });
-                        }
-
-                        //evento
-                        await Event.destroy({
-                            where: { id: event.id }
-                        })
                     }
                 }
 
