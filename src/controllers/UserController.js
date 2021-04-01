@@ -169,7 +169,7 @@ module.exports = {
                 token: generateToken({ id: user.id })
             });
 
-       } catch (err) {
+        } catch (err) {
             return res.send({ error: 'Erro ao cadastrar usuário' })
         }
 
@@ -1104,6 +1104,25 @@ module.exports = {
                         where: { auxiliary_id: event.id }
                     });
 
+                    //notificar artistas presentes no evento
+                    let artistEvents = await ArtistEvent.findAll({
+                        where: {
+                            event_id: event.id,
+                            status: 3
+                        }
+                    });
+
+                    if (artistEvents.length > 0) {
+                        for (let artistEvent of artistEvents) {
+                            let artist = await Artist.findByPk(artistEvent.artist_id);
+                            await Notification.create({
+                                user_id: artist.user_id,
+                                message: `O ${event.name} foi apagado.`,
+                                status: 0
+                            });
+                        }
+                    }
+
                     // artist_events
                     await ArtistEvent.destroy({
                         where: { event_id: event.id }
@@ -1125,6 +1144,25 @@ module.exports = {
                 let artist = await Artist.findOne({
                     where: { user_id: user.id }
                 })
+
+                //notificar artistas presentes no evento
+                let artistEvents = await ArtistEvent.findAll({
+                    where: {
+                        event_id: event.id,
+                        status: 3
+                    }
+                });
+
+                if (artistEvents.length > 0) {
+                    for (let artistEvent of artistEvents) {
+                        let artist = await Artist.findByPk(artistEvent.artist_id);
+                        await Notification.create({
+                            user_id: artist.user_id,
+                            message: `O ${event.name} foi apagado.`,
+                            status: 0
+                        });
+                    }
+                }
 
                 //remover artist_events
                 await ArtistEvent.destroy({
@@ -1187,6 +1225,25 @@ module.exports = {
                         await Notification.destroy({
                             where: { auxiliary_id: event.id }
                         });
+
+                        //notificar artistas presentes no evento
+                        let artistEvents = await ArtistEvent.findAll({
+                            where: {
+                                event_id: event.id,
+                                status: 3
+                            }
+                        });
+
+                        if (artistEvents.length > 0) {
+                            for (let artistEvent of artistEvents) {
+                                let artist = await Artist.findByPk(artistEvent.artist_id);
+                                await Notification.create({
+                                    user_id: artist.user_id,
+                                    message: `O ${event.name} foi apagado.`,
+                                    status: 0
+                                });
+                            }
+                        }
 
                         // artist_events
                         await ArtistEvent.destroy({
@@ -1260,9 +1317,9 @@ module.exports = {
 
     async verifyPassword(req, res) {
         const { password } = req.body;
-        
+
         const user = await User.findByPk(req.userId);
-        
+
         if (!await bcrypt.compare(password, user.password)) {
             return res.send({ error: 'Senha incorreta' })
         }

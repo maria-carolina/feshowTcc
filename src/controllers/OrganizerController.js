@@ -9,8 +9,8 @@ const { Op } = require('sequelize');
 const moment = require('moment');
 
 module.exports = {
-    
-     async store(req, res) {
+
+    async store(req, res) {
         try {
             const {
                 venue_id,
@@ -63,7 +63,7 @@ module.exports = {
         }
     },
 
-     async update(req, res) {
+    async update(req, res) {
         try {
             const { id } = req.params;
 
@@ -145,6 +145,25 @@ module.exports = {
             await Notification.destroy({
                 where: { auxiliary_id: event.id }
             });
+
+            //notificar artistas presentes no evento
+            let artistEvents = await ArtistEvent.findAll({
+                where: {
+                    event_id: event.id,
+                    status: 3
+                }
+            });
+        
+            if (artistEvents.length > 0) {
+                for (let artistEvent of artistEvents) {
+                    let artist = await Artist.findByPk(artistEvent.artist_id);
+                    await Notification.create({
+                        user_id: artist.user_id,
+                        message: `O ${event.name} foi apagado.`,
+                        status: 0
+                    });
+                }
+            }
 
             // artist_events
             await ArtistEvent.destroy({
