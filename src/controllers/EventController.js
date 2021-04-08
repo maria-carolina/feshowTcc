@@ -1,5 +1,4 @@
 const Event = require('../models/Event');
-const EventImage = require('../models/EventImage');
 const ArtistEvent = require('../models/ArtistEvent');
 const Post = require('../models/Post');
 const ArtistEquipment = require('../models/ArtistEquipment');
@@ -79,15 +78,11 @@ module.exports = {
                     }]
             });
 
-            const eventImage = await EventImage.findOne({ where: { event_id: id } });
-
-            const imageStatus = eventImage ? true : false;
 
             if (!event) {
                 return res.send({ error: 'Erro ao exibir evento' });
             }
 
-            event.dataValues.image = imageStatus;
             event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
             event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 

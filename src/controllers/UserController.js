@@ -13,7 +13,6 @@ const ImageUser = require('../models/ImageUser');
 const Artist = require('../models/Artist');
 const Producer = require('../models/Producer');
 const Venue = require('../models/Venue');
-const Rider = require('../models/Rider');
 const Genre = require('../models/Genre');
 const Instrument = require('../models/Instrument');
 const Equipment = require('../models/Equipment');
@@ -27,7 +26,6 @@ const Notification = require('../models/Notification');
 const GenreVenue = require('../models/GenreVenue');
 const ArtistGenre = require('../models/ArtistGenre');
 const Post = require('../models/Post');
-const EventImage = require('../models/EventImage');
 const Solicitation = require('../models/Solicitation');
 
 function generateToken(params = {}) {
@@ -171,7 +169,7 @@ module.exports = {
                 token: generateToken({ id: user.id })
             });
 
-       } catch (err) {
+        } catch (err) {
             return res.send({ error: 'Erro ao cadastrar usuário' })
         }
 
@@ -1106,6 +1104,25 @@ module.exports = {
                         where: { auxiliary_id: event.id }
                     });
 
+                    //notificar artistas presentes no evento
+                    let artistEvents = await ArtistEvent.findAll({
+                        where: {
+                            event_id: event.id,
+                            status: 3
+                        }
+                    });
+
+                    if (artistEvents.length > 0) {
+                        for (let artistEvent of artistEvents) {
+                            let artist = await Artist.findByPk(artistEvent.artist_id);
+                            await Notification.create({
+                                user_id: artist.user_id,
+                                message: `O ${event.name} foi apagado.`,
+                                status: 0
+                            });
+                        }
+                    }
+
                     // artist_events
                     await ArtistEvent.destroy({
                         where: { event_id: event.id }
@@ -1115,21 +1132,6 @@ module.exports = {
                     await Post.destroy({
                         where: { event_id: event.id }
                     });
-
-                    //imagem
-                    let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-                    if (eventImage) { //remover imagem do sistema
-                        const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                        if (fs.existsSync(file)) {
-                            fs.unlink(file, function (err) {
-                                if (err) throw err;
-                                console.log('Arquivo deletado!');
-                            });
-                        }
-                        await EventImage.destroy({
-                            where: { event_id: event.id }
-                        });
-                    }
 
                     //evento
                     await Event.destroy({
@@ -1142,6 +1144,25 @@ module.exports = {
                 let artist = await Artist.findOne({
                     where: { user_id: user.id }
                 })
+
+                //notificar artistas presentes no evento
+                let artistEvents = await ArtistEvent.findAll({
+                    where: {
+                        event_id: event.id,
+                        status: 3
+                    }
+                });
+
+                if (artistEvents.length > 0) {
+                    for (let artistEvent of artistEvents) {
+                        let artist = await Artist.findByPk(artistEvent.artist_id);
+                        await Notification.create({
+                            user_id: artist.user_id,
+                            message: `O ${event.name} foi apagado.`,
+                            status: 0
+                        });
+                    }
+                }
 
                 //remover artist_events
                 await ArtistEvent.destroy({
@@ -1205,6 +1226,25 @@ module.exports = {
                             where: { auxiliary_id: event.id }
                         });
 
+                        //notificar artistas presentes no evento
+                        let artistEvents = await ArtistEvent.findAll({
+                            where: {
+                                event_id: event.id,
+                                status: 3
+                            }
+                        });
+
+                        if (artistEvents.length > 0) {
+                            for (let artistEvent of artistEvents) {
+                                let artist = await Artist.findByPk(artistEvent.artist_id);
+                                await Notification.create({
+                                    user_id: artist.user_id,
+                                    message: `O ${event.name} foi apagado.`,
+                                    status: 0
+                                });
+                            }
+                        }
+
                         // artist_events
                         await ArtistEvent.destroy({
                             where: { event_id: event.id }
@@ -1214,26 +1254,6 @@ module.exports = {
                         await Post.destroy({
                             where: { event_id: event.id }
                         });
-
-                        //imagem
-                        let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-                        if (eventImage) { //remover imagem do sistema
-                            const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                            if (fs.existsSync(file)) {
-                                fs.unlink(file, function (err) {
-                                    if (err) throw err;
-                                    console.log('Arquivo deletado!');
-                                });
-                            }
-                            await EventImage.destroy({
-                                where: { event_id: event.id }
-                            });
-                        }
-
-                        //evento
-                        await Event.destroy({
-                            where: { id: event.id }
-                        })
                     }
                 }
 
@@ -1297,9 +1317,9 @@ module.exports = {
 
     async verifyPassword(req, res) {
         const { password } = req.body;
-        
+
         const user = await User.findByPk(req.userId);
-        
+
         if (!await bcrypt.compare(password, user.password)) {
             return res.send({ error: 'Senha incorreta' })
         }

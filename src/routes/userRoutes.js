@@ -2,7 +2,6 @@ const express = require('express');
 const userRoutes = express.Router();
 const multer = require('multer');
 const multerImage = require('../config/multer/multerImage');
-const multerRider = require('../config/multer/multerRider');
 const authMiddleware = require('../middlewares/auth');
 const UserController = require('../controllers/UserController');
 
@@ -21,7 +20,6 @@ userRoutes.put('/updatePassword', UserController.updatePassword)
 userRoutes.use(authMiddleware);
 
 userRoutes.post('/storeImage', multer(multerImage).single('file'), UserController.storeImage);
-userRoutes.post('/storeRider', multer(multerRider).single('file'), UserController.storeRider);
 
 userRoutes.get('/showUser/:id', UserController.show);
 userRoutes.get('/getUserImage/:id', UserController.getImage);

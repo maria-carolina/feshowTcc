@@ -4,7 +4,6 @@ const Event = require('../models/Event');
 const Address = require('../models/Address');
 const GenreVenue = require('../models/GenreVenue');
 const User = require('../models/User');
-const EventImage = require('../models/EventImage');
 const Notification = require('../models/Notification');
 
 const { Op } = require('sequelize');

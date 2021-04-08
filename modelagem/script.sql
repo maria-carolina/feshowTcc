@@ -339,7 +339,6 @@ CREATE TABLE IF NOT EXISTS `feshow`.`producers` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(60) NOT NULL,
   `description` VARCHAR(255) NULL,
-  `chat_permission` TINYINT(1) NOT NULL DEFAULT 0,
   `state` VARCHAR(9) NULL,
   `city` VARCHAR(50) NULL,
   `user_id` INT(11) NOT NULL,
@@ -386,67 +385,6 @@ DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
--- Table `feshow`.`chat`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `feshow`.`chat` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `sender` INT(11) NOT NULL,
-  `receiver` INT(11) NOT NULL,
-  `message` VARCHAR(255) NOT NULL,
-  `createdAt` DATETIME NOT NULL,
-  `updatedAt` DATETIME NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_chat_users1_idx` (`sender` ASC),
-  INDEX `fk_chat_users2_idx` (`receiver` ASC),
-  CONSTRAINT `fk_chat_users1`
-    FOREIGN KEY (`sender`)
-    REFERENCES `feshow`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_chat_users2`
-    FOREIGN KEY (`receiver`)
-    REFERENCES `feshow`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `feshow`.`notices`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `feshow`.`notices` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `text` VARCHAR(255) NOT NULL,
-  `createdAt` DATETIME NOT NULL,
-  `updatedAt` DATETIME NOT NULL,
-  `venue_id` INT(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_posts_venues1_idx` (`venue_id` ASC),
-  CONSTRAINT `fk_posts_venues1`
-    FOREIGN KEY (`venue_id`)
-    REFERENCES `feshow`.`venues` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `feshow`.`riders`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `feshow`.`riders` (
-  `artist_id` INT(11) NOT NULL,
-  `name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`artist_id`),
-  CONSTRAINT `fk_riders_artists1`
-    FOREIGN KEY (`artist_id`)
-    REFERENCES `feshow`.`artists` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `feshow`.`posts`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `feshow`.`posts` (
@@ -467,22 +405,6 @@ CREATE TABLE IF NOT EXISTS `feshow`.`posts` (
   CONSTRAINT `fk_table1_users1`
     FOREIGN KEY (`user_id`)
     REFERENCES `feshow`.`users` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `feshow`.`event_images`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `feshow`.`event_images` (
-  `event_id` INT(11) NOT NULL,
-  `name` VARCHAR(60) NOT NULL,
-  INDEX `fk_event_images_events1_idx` (`event_id` ASC),
-  PRIMARY KEY (`event_id`),
-  CONSTRAINT `fk_event_images_events1`
-    FOREIGN KEY (`event_id`)
-    REFERENCES `feshow`.`events` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

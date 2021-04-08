@@ -2,7 +2,6 @@ const ArtistEvent = require('../models/ArtistEvent');
 const Artist = require('../models/Artist');
 const Event = require('../models/Event');
 const User = require('../models/User');
-const EventImage = require('../models/EventImage');
 const Notification = require('../models/Notification');
 const Post = require('../models/Post');
 
@@ -10,8 +9,8 @@ const { Op } = require('sequelize');
 const moment = require('moment');
 
 module.exports = {
-    
-     async store(req, res) {
+
+    async store(req, res) {
         try {
             const {
                 venue_id,
@@ -64,7 +63,7 @@ module.exports = {
         }
     },
 
-     async update(req, res) {
+    async update(req, res) {
         try {
             const { id } = req.params;
 
@@ -147,6 +146,25 @@ module.exports = {
                 where: { auxiliary_id: event.id }
             });
 
+            //notificar artistas presentes no evento
+            let artistEvents = await ArtistEvent.findAll({
+                where: {
+                    event_id: event.id,
+                    status: 3
+                }
+            });
+        
+            if (artistEvents.length > 0) {
+                for (let artistEvent of artistEvents) {
+                    let artist = await Artist.findByPk(artistEvent.artist_id);
+                    await Notification.create({
+                        user_id: artist.user_id,
+                        message: `O ${event.name} foi apagado.`,
+                        status: 0
+                    });
+                }
+            }
+
             // artist_events
             await ArtistEvent.destroy({
                 where: { event_id: event.id }
@@ -156,26 +174,6 @@ module.exports = {
             await Post.destroy({
                 where: { event_id: event.id }
             });
-
-            //imagem
-            let eventImage = await EventImage.findOne({ where: { event_id: event.id } });
-            if (eventImage) { //remover imagem do sistema
-                const file = path.resolve(__dirname, '..', '..', 'uploads', 'events', eventImage.name);
-                if (fs.existsSync(file)) {
-                    fs.unlink(file, function (err) {
-                        if (err) throw err;
-                        console.log('Arquivo deletado!');
-                    });
-                }
-                await EventImage.destroy({
-                    where: { event_id: event.id }
-                });
-            }
-
-            //evento
-            await Event.destroy({
-                where: { id: event.id }
-            })
 
             return res.status(200).send('ok');
 
@@ -263,15 +261,11 @@ module.exports = {
             }
         });
 
-        const eventImage = await EventImage.findOne({ where: { event_id: id } });
-
-        const imageStatus = eventImage ? true : false;
 
         if (!event) {
             return res.send({ error: 'Erro ao exibir evento' });
         }
 
-        event.dataValues.image = imageStatus;
         event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
         event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 
