@@ -153,7 +153,7 @@ module.exports = {
                     status: 3
                 }
             });
-        
+
             if (artistEvents.length > 0) {
                 for (let artistEvent of artistEvents) {
                     let artist = await Artist.findByPk(artistEvent.artist_id);
@@ -220,75 +220,105 @@ module.exports = {
     },
 
     async changeStatus(req, res) {
+        try {
+            const { id } = req.params;
 
-        const { id } = req.params;
+            let event = await Event.findByPk(id);
+            /**
+             * status = 0 fechado
+             * status = 1 aberto
+            **/
 
-        let event = await Event.findByPk(id);
-        /**
-         * status = 0 fechado
-         * status = 1 aberto
-        **/
+            if (event.status == 0) {
+                await Event.update({ status: 1 }, {
+                    where: { id }
+                });
+            } else {
+                //verificar se não tem convites em aberto
+                const verify = await ArtistEvent.findAll({
+                    where: {
+                        event_id: id,
+                        status: { [Op.ne]: 3 }
+                    }
+                });
 
-        if (event.status == 0) {
-            await Event.update({ status: 1 }, {
-                where: { id }
-            });
-        } else {
-            //verificar se não tem convites em aberto
-            const verify = await ArtistEvent.findAll({
-                where: {
-                    event_id: id,
-                    status: { [Op.ne]: 3 }
+                if (verify.length > 0) {
+                    return res.send({ error: 'Há convites em aberto, para proseguir no fechamendo do evento é preciso recusar ou cancelar convites ligados a este evento.' })
                 }
-            });
 
-            if (verify.length > 0) {
-                return res.send({ error: 'Há convites em aberto, para proseguir no fechamendo do evento é preciso recusar ou cancelar convites ligados a este evento.' })
+                await Event.update({ status: 0 }, {
+                    where: { id }
+                });
+
             }
 
-            await Event.update({ status: 0 }, {
-                where: { id }
+            //retornar evento igual eventController.show
+
+            event = await Event.findByPk(id, {
+                include: [
+                    {
+                        association: 'venue',
+                        attributes: ['id', 'name', 'user_id']
+                    },
+                    {
+                        association: 'organizer',
+                        attributes: ['id']
+                    }
+                ]
             });
 
-        }
 
-        //retornar evento igual eventController.show
-
-        event = await Event.findByPk(id, {
-            include: {
-                association: 'venue',
-                attributes: ['id', 'name']
+            if (!event) {
+                return res.send({ error: 'Erro ao exibir evento' });
             }
-        });
 
+            event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
+            event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
 
-        if (!event) {
-            return res.send({ error: 'Erro ao exibir evento' });
+            //pegar status do artista
+            const user = await User.findByPk(req.userId);
+            if (user.type === 0) {
+                const artist = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+
+                const artistEvents = await ArtistEvent.findOne({
+                    where: {
+                        artist_id: artist.id,
+                        event_id: id
+                    }
+                });
+
+                let artistStatus = artistEvents ? artistEvents.status : 0;
+
+                event.dataValues.artistStatus = artistStatus;
+            }
+
+            //pegar nome do organizador
+            let userOrganizer = await User.findByPk(event.organizer.id);
+            if (userOrganizer.type === 0) {
+                let artistOrg = await Artist.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = artistOrg.name;
+
+            } else if (userOrganizer.type === 1) {
+                let venueOrg = await Venue.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = venueOrg.name;
+
+            } else {
+                let producerOrg = await Producer.findOne({
+                    where: { user_id: userOrganizer.id }
+                });
+                event.organizer.dataValues.name = producerOrg.name;
+            }
+
+            return res.send(event);
+        } catch (err) {
+            return res.send({ error: 'Erro ao alterar status de evento' })
         }
-
-        event.dataValues.start_time = moment(event.start_time, 'HH:mm:ss').format("HH:mm");
-        event.dataValues.end_time = moment(event.end_time, 'HH:mm:ss').format("HH:mm");
-
-        //pegar status do artista
-        const user = await User.findByPk(req.userId);
-        if (user.type === 0) {
-            const artist = await Artist.findOne({
-                where: { user_id: user.id }
-            });
-
-            const artistEvents = await ArtistEvent.findOne({
-                where: {
-                    artist_id: artist.id,
-                    event_id: id
-                }
-            });
-
-            let artistStatus = artistEvents ? artistEvents.status : 0;
-
-            event.dataValues.artistStatus = artistStatus;
-        }
-
-        return res.send(event);
     },
 
     async getEventsOrganizer(req, res) {

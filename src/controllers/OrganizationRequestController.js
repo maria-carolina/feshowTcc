@@ -38,6 +38,34 @@ module.exports = {
                 note
             });
 
+            let venue = await Venue.findByPk(venue_id);
+            let user = await User.findByPk(req.userId);
+            let nameOrg; //user que quer ser organizador do evento
+            if (user.type === 0) {
+                let artistOrg = await Artist.findOne({
+                    where: { user_id: user.id }
+                });
+                nameOrg = artistOrg.name;
+
+            } else if (user.type === 1) {
+                let venueOrg = await Venue.findOne({
+                    where: { user_id: user.id }
+                });
+                nameOrg = venueOrg.name;
+
+            } else {
+                let producerOrg = await Producer.findOne({
+                    where: { user_id: user.id }
+                });
+                nameOrg = producerOrg.name;
+            }
+
+            await Notification.create({
+                user_id: venue.user_id,
+                message: `${nameOrg} solicitou a criação de um evento em seu espaço`,
+                status: 0
+            });
+    
             return res.status(200).send('ok');
 
         } catch (err) {

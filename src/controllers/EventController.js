@@ -75,7 +75,8 @@ module.exports = {
                     {
                         association: 'organizer',
                         attributes: ['id']
-                    }]
+                    }
+                ]
             });
 
 
