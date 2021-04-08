@@ -128,6 +128,7 @@ class LineUpEditPage extends Component{
 
             let twoDaysEvent =  parseInt(splittedEnd[0]) < parseInt(splittedStart[0]);
 
+
             let validTime = (!twoDaysEvent && (isTimeBiggerThanStart) && (!isTimeBiggerThanEnd))
                 ||(twoDaysEvent && (isTimeBiggerThanStart || !isTimeBiggerThanEnd));
             

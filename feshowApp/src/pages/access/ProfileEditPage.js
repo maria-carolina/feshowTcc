@@ -153,7 +153,7 @@ UpdateForm = (props) => {
     const FormSchema = yup.object().shape({
         username: yup.string().required('Campo obrigatório')
         .min(5, 'O nome deve conter pelo menos 5 caracteres')
-        .max(10, 'O nome deve conter no máximo 10 caracteres'),
+        .max(15, 'O nome deve conter no máximo 15 caracteres'),
         email: yup.string().required('Campo obrigatório').email('Digite um email'),
         name: yup.string().required('Campo obrigatório'),
         ...validationSchema

@@ -28,7 +28,7 @@ const Lineup = (props) => {
             )
             
             setInvitationSuggestions(suggestionsResult.data);
-            setTimeLimits(limitsResult.data);
+            setTimeLimits({start_time: props.event.start_time, end_time: props.event.end_time});
             setIsInvitationModalVisible(true);
 
         }catch(e){
@@ -55,7 +55,8 @@ const Lineup = (props) => {
             }
 
             if(!('error' in result.data)){
-                limits = result.data;
+                console.log(result.data)
+                limits = {start_time: props.event.start_time, end_time: props.event.end_time};
             }else{
                 Alert.alert('Ops', 'Ocorreu um erro, tente novamente.')
             }
