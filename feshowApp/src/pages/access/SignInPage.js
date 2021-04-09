@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import {View, Text, TouchableOpacity, TextInput, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, Alert, ActivityIndicator} from 'react-native';
 import styles from '../../styles';
 import Auth from '../../contexts/auth';
 import { Formik } from 'formik';
@@ -30,7 +30,9 @@ const Form = (props) => {
                         placeholder = 'Digite seu username...'
                         style = {styles.textInput}
                         value = {values.username}
-                        onChangeText = {handleChange('username')}
+                        onChangeText = {text => 
+                            handleChange('username')(text.replace(/\s/g, ''))
+                        }
                     />
                     
                     <View style = {{...styles.row, width: '70%'}}>
@@ -39,7 +41,9 @@ const Form = (props) => {
                             style = {{...styles.textInput, width: '100%'}}
                             secureTextEntry = {!props.passwordVisible}
                             value = {values.password}
-                            onChangeText = {handleChange('password')}
+                            onChangeText = {text => 
+                                handleChange('password')(text.replace(/\s/g, ''))
+                            }
                         />
                         <FontAwesome 
                             name = {'eye'} 
@@ -54,7 +58,12 @@ const Form = (props) => {
                         style = {{...styles.button, margin: 20}} 
                         onPress = {handleSubmit}
                     >
-                        <Text style = {styles.buttonLabel}>Entrar</Text>
+                        {props.loading ? 
+                        <ActivityIndicator
+                            size = 'small'
+                            color = '#FFF'
+                        />
+                        :<Text style = {styles.buttonLabel}>Entrar</Text>}
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -72,15 +81,21 @@ const Form = (props) => {
 const SignInPage = () => {
     const [passwordVisible, setPasswordVisible] = useState(false)
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const { signIn } = useContext(Auth);
     const navigation = useNavigation();
 
     const handleSignIn = async (values) => {
+        setLoading(true);
+        setError(null);
+
         let result = await signIn(values);
 
         if(result){
             setError(result.error);
-        }  
+        }
+        setLoading(false)
+          
     }
 
     const openRecovery = () => {
@@ -93,6 +108,7 @@ const SignInPage = () => {
             openRecovery = {openRecovery}
             passwordVisible = {passwordVisible}
             setPasswordVisible = {() => setPasswordVisible(!passwordVisible)}
+            loading = {loading}
             error = {error}
         />
     )

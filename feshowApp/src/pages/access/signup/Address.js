@@ -17,6 +17,12 @@ const FormSchema = yup.object().shape({
     uf: yup.string().required()
 })
 
+const formatCep = (value, isBackSpacing) => {
+    if(value.length === 6 && !isBackSpacing){
+        return `${value.slice(0, 5)}-${value.slice(5, value.length)}`
+    }
+    return value;
+}
 
 const Form = (props) => {
     let initialValues;
@@ -71,9 +77,12 @@ const Form = (props) => {
                             style = {{...styles.textInput, width: '50%', marginRight: '5%'}}
                             keyboardType = 'numeric'
                             value = {values.zipcode}
-                            onChangeText = {value => {
-                                handleChange('zipcode')(value);
-                                if(value.length > 7){
+                            maxLength = {9}
+                            onChangeText = {value => { 
+                                handleChange('zipcode')(
+                                    formatCep(value, values.zipcode.length > value.length)
+                                );
+                                if(value.length === 9){
                                     props.loadAddress(value);
                                 }
                             }}
@@ -140,7 +149,7 @@ function Address (props){
     const [preloadedAddress, setPreloadedAddress] = useState(null);
 
     const navigation = useNavigation();
-    const profileUpdateContext = props.route.params.list ? useContext(ProfileUpdateContext) : null;
+    const profileUpdateContext = useContext(ProfileUpdateContext);
 
 
     useEffect(() => {
@@ -153,8 +162,14 @@ function Address (props){
     const loadAddressByCep = async (cep) => {
         try{
             let result = await api.get(`http://viacep.com.br/ws/${cep}/json/`);   
-            console.log(result.status);    
-            setPreloadedAddress(result.data);
+            console.log(result.status);
+            if(!result.data.erro){
+                setPreloadedAddress(result.data);
+            }else{
+                Alert.alert('Ops', 'Erro ao encontrar CEP.')
+                setPreloadedAddress(null);
+
+            }    
         }catch(e){
             Alert.alert('Ops', 'Erro ao encontrar CEP.')
         }
