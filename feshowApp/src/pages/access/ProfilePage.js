@@ -281,7 +281,7 @@ const ProfilePage = (props) => {
             <TouchableOpacity
                 style = {{
                     width: '50%',
-                    height: '45%',
+                    height: 175,
                 }}
 
                 activeOpacity = { 
@@ -341,10 +341,6 @@ const ProfilePage = (props) => {
                 label: 'Marcar show',
                 handleClick: () => openRequestPage()
             }
-        }else if(profile.type === 2){
-            firstButton = {
-                label: 'Abrir chat'
-            }
         }
     }
 
@@ -363,7 +359,6 @@ const ProfilePage = (props) => {
                         style = {{
                             ...styles.center,
                             width: '100%',
-                            height: 375,
                         }}
                     >
                         {profileImage}
@@ -396,6 +391,7 @@ const ProfilePage = (props) => {
                         </Text>
 
                         
+                        {profile.type !== 2 && 
                         <TouchableOpacity
                             style = {{...styles.outlineButton, marginTop: 3}}
                             onPress = {firstButton.handleClick}
@@ -405,7 +401,7 @@ const ProfilePage = (props) => {
                             >
                                 {firstButton.label}
                             </Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity>}
 
                         <TouchableOpacity
                             style = {{

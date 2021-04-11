@@ -15,7 +15,9 @@ const FeedEventItem = (props) => {
                 width: '100%',
                 backgroundColor: 'white',
                 marginBottom: 15,
-                padding: 10
+                padding: 10,
+                elevation: 2,
+                borderRadius: 5
             }}
             onPress = {() => navigation.navigate('eventPage', {id: props.item.id})}
             activeOpacity = {0.9}

@@ -283,7 +283,7 @@ const EventPage = (props) => {
                 handleClick: () => loadRemoveConfirmation(false),
                 label: 'Desfazer convite'
             }
-        }else{
+        }else if (event.artistStatus === 3){
             mainButton = {
                 handleClick: () => loadRemoveConfirmation(true),
                 label: 'Sair do evento'
@@ -365,17 +365,19 @@ const EventPage = (props) => {
                             <Text> {event.start_time} às {event.end_time}</Text>
                         </View>
 
-                        <TouchableOpacity
-                            onPress = {mainButton.handleClick}
-                            style = {{
-                                ...styles.outlineButton,
-                                marginVertical: 15
-                            }}
-                        >
-                            <Text style = {styles.outlineButtonLabel}>
-                                {mainButton.label}
-                            </Text>
-                        </TouchableOpacity>
+                        {!!event.artistStatus &&
+                            <TouchableOpacity
+                                onPress = {mainButton.handleClick}
+                                style = {{
+                                    ...styles.outlineButton,
+                                    marginVertical: 15
+                                }}
+                            >
+                                <Text style = {styles.outlineButtonLabel}>
+                                    {mainButton.label}
+                                </Text>
+                            </TouchableOpacity>
+                        }
 
                         {authContext.user.id === event.organizer_id &&
                             <TouchableOpacity

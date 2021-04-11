@@ -93,8 +93,8 @@ const SignInPage = () => {
 
         if(result){
             setError(result.error);
+            setLoading(false);
         }
-        setLoading(false)
           
     }
 

@@ -22,11 +22,13 @@ const FeedProfileItem = (props) => {
         <TouchableOpacity
             style = {{
                 width: '100%',
-                height: 160,
                 backgroundColor: 'white',
                 marginBottom: 15,
+                paddingVertical: 10,
                 flexDirection: 'row',
-                alignItems: 'center'
+                alignItems: 'center',
+                elevation: 2,
+                borderRadius: 5,
             }}
             onPress = {() => navigation.navigate('profilePage', {id: props.item.user_id})}
             activeOpacity = {0.9}
@@ -34,7 +36,8 @@ const FeedProfileItem = (props) => {
             <View
                 style = {{
                     width: '45%',
-                    height: '90%',
+                    height: 150,
+
                     justifyContent: 'center',
                     alignItems: 'center'
                 }} 
@@ -55,8 +58,7 @@ const FeedProfileItem = (props) => {
             <View
                 style = {{
                     width: '55%',
-                    height: '100%',
-                    paddingTop: 15,
+                    height: 150,
                     justifyContent: 'center'
                 }}
             >
