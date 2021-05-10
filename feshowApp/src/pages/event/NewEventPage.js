@@ -29,10 +29,10 @@ const Form = (props) => {
                 start_time: '',
                 end_time: '',
                 description:  ''
-            }:
+            }: 
             {
                 name: props.event.name,
-                start_date: Format.formatDatetoDMY(props.event.start_date),
+                start_date: props.event.start_date,
                 start_time: props.event.start_time,
                 end_time: props.event.end_time,
                 description: props.event.description
@@ -81,7 +81,7 @@ const Form = (props) => {
                     >
                         {values.start_date != '' ? 
                         <Text style = {{ color: '#000' }}>
-                            {values.start_date}
+                            {Format.formatDatetoDMY(values.start_date)}
                         </Text> :
                         <Text style = {{
                             color: '#8E8E8E',
@@ -163,10 +163,9 @@ const Form = (props) => {
                         if(date){
                             let currentDate = new Date().getTime().toString().slice(0, 5) ;
                             if(currentDate < date.getTime().toString().slice(0, 5)){
-                                console.log(date.getMonth())
                                 let formattedDate = 
-                                `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString()}/`+
-                                `${date.getFullYear().toString()}`;
+                                `${date.getFullYear().toString()}-${(date.getMonth()+1).toString()}-`+
+                                `${date.getDate().toString().padStart(2, '0')}`;
                                 handleChange(selectedPicker)(formattedDate);
                             }else{
                                 Alert.alert('Data inválida', 
@@ -231,9 +230,6 @@ class NewEventPage extends Component{
             Alert.alert('Data inválida', 'A data final deve ser posterior a inicial');
         }else{
             const isANewEvent = this.props.route.params ? false : true;
-            
-            let splitted = values.start_date.split('/');
-            values.start_date = `${splitted[2]}-${splitted[1]}-${splitted[0]}`;
 
 
             values.venue_id = isANewEvent ? 
