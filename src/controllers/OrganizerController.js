@@ -175,6 +175,10 @@ module.exports = {
                 where: { event_id: event.id }
             });
 
+            await Event.destroy({
+                where: { id: event.id }
+            });
+
             return res.status(200).send('ok');
 
         } catch (err) {
