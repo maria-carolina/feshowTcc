@@ -1046,26 +1046,7 @@ module.exports = {
             if (user.type == 0) {
                 let artist = await Artist.findOne({
                     where: { user_id: user.id }
-                })
-
-                //notificar artistas presentes no evento
-                let artistEvents = await ArtistEvent.findAll({
-                    where: {
-                        event_id: event.id,
-                        status: 3
-                    }
                 });
-
-                if (artistEvents.length > 0) {
-                    for (let artistEvent of artistEvents) {
-                        let artist = await Artist.findByPk(artistEvent.artist_id);
-                        await Notification.create({
-                            user_id: artist.user_id,
-                            message: `O ${event.name} foi apagado.`,
-                            status: 0
-                        });
-                    }
-                }
 
                 //remover artist_events
                 await ArtistEvent.destroy({
