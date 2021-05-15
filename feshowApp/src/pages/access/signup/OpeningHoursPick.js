@@ -108,6 +108,9 @@ function OpeningHoursPick(props){
     });
     const navigation = useNavigation();
 
+    const profileUpdateContext = props.route.params.period ? useContext(ProfileUpdateContext) : null;
+
+
     useEffect(() => {
         if(props.route.params.period){
             const {initialDay, finalDay, initialHour, finalHour} = props.route.params.period;
@@ -132,8 +135,7 @@ function OpeningHoursPick(props){
     }
 
     const finishUpdate = () => {
-        const { alterProfile } = useContext(ProfileUpdateContext);
-        alterProfile('openinghours', selected);
+        profileUpdateContext.alterProfile('openinghours', selected);
         navigation.navigate('profileEditPage');
     }
 

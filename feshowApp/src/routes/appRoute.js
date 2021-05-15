@@ -423,7 +423,9 @@ const AppRoute = () => {
             tabBarOptions = {{
                 activeTintColor: 'black',
                 style: {elevation: 0, backgroundColor: '#F2F2F2'}
+            
             }}
+            
         >
             
             <Tabs.Screen 
@@ -492,6 +494,7 @@ const AppRoute = () => {
             <Tabs.Screen 
                 name = 'ownProfile' 
                 component = {NavDrawer}
+                
                 options = {{
                     tabBarIcon: ({color, size}) => {
                         return <Ionicon 
@@ -500,7 +503,8 @@ const AppRoute = () => {
                             size = {size}
                         />
                     },
-                    tabBarLabel: 'Perfil'
+                    tabBarLabel: 'Perfil',
+            
                 }}
             />
         </Tabs.Navigator>

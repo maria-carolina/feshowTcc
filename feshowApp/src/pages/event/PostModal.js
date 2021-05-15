@@ -53,7 +53,7 @@ const PostModal = (props) => {
             try{
                 let result = await api.put(
                     '/updatePost',
-                    {
+                    { 
                         postId,
                         post: postInputValue
                     },

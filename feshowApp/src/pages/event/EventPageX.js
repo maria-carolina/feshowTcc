@@ -365,7 +365,7 @@ const EventPage = (props) => {
                             <Text> {event.start_time} às {event.end_time}</Text>
                         </View>
 
-                        {!!event.artistStatus &&
+                        {(authContext.user.type === 0 || authContext.user.id === event.organizer_id) &&
                             <TouchableOpacity
                                 onPress = {mainButton.handleClick}
                                 style = {{
@@ -378,6 +378,7 @@ const EventPage = (props) => {
                                 </Text>
                             </TouchableOpacity>
                         }
+                            
 
                         {authContext.user.id === event.organizer_id &&
                             <TouchableOpacity

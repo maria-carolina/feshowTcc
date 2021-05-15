@@ -27,6 +27,12 @@ class Format{
         return formatted;
     }
 
+    static unformatTime(time){
+        const splitted = time.split('h');
+        const formatted = `${splitted[0]}:${splitted[1]}`
+        return formatted;
+    }
+
     static getWeekDay(number){
         const weekDays = [
             'Domingo', 'Segunda-Feira', 'Terça-Feira',

@@ -325,7 +325,6 @@ const ProfilePage = (props) => {
         }
 
         var firstButton;
-
         if(authContext.user.id === profile.id){
             firstButton = {
                 label: 'Editar perfil',
@@ -391,7 +390,7 @@ const ProfilePage = (props) => {
                         </Text>
 
                         
-                        {profile.type !== 2 && 
+                        {(profile.type !== 2 || authContext.user.id === profile.id) && 
                         <TouchableOpacity
                             style = {{...styles.outlineButton, marginTop: 3}}
                             onPress = {firstButton.handleClick}

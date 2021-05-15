@@ -625,7 +625,16 @@ OpeningPeriodEdit = (props) => {
             </View>
 
             <TouchableOpacity
-                onPress = {() => navigation.navigate('openingHoursPick', { period: props.period})}
+                onPress = {() => 
+                    navigation.navigate(
+                        'openingHoursPick', 
+                        { period: {
+                            ...props.period, 
+                            initialHour: Format.unformatTime(props.period.initialHour),
+                            finalHour: Format.unformatTime(props.period.finalHour)
+                        }}
+                    )
+                }
             >
                 <Text style = {{ color: '#3F2058' }} >
                     Alterar funcionamento

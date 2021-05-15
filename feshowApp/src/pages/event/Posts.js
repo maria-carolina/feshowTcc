@@ -152,7 +152,10 @@ const Posts = (props) => {
                 token = {authContext.token}
                 post = {postToEdit}
                 reload = {props.reload}
-                closeModal = {() => setIsPostModalVisible(false)} 
+                closeModal = {() => {
+                    setPostToEdit(null);
+                    setIsPostModalVisible(false);
+                }} 
             />    
         </View>
     )

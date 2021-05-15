@@ -8,6 +8,7 @@ import { Formik } from 'formik';
 import * as yup from 'yup';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Format from '../utils/Format';
+import { StackActions } from '@react-navigation/native';
 
 const FormSchema = yup.object().shape({
     name: yup.string().required('Campo obrigatório'),
@@ -294,10 +295,9 @@ class NewEventPage extends Component{
                     }
                 }
             );
-
             if(!result.data.error){
                 Alert.alert('Pronto!', 'O evento foi cancelado.');
-                this.props.navigation.navigate('feed');
+                this.props.navigation.dispatch(StackActions.popToTop());
             }else{
                 Alert.alert('Ops', result.data.error)
             }
